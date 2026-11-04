@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>BTC Padel Ladder – inschrijving</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{--bg:#f5f7f9;--surface:#fff;--ink:#15202b;--muted:#5d6b78;--line:#d9e0e6;--court:#1d5c96;--court-soft:#e3edf6;--ok:#1d7a46;--warn:#b86a00;--err:#b42318;
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;--body:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root{--bg:#0f161d;--surface:#17212b;--ink:#e6edf3;--muted:#93a3b2;--line:#2a3846;--court:#7db4e6;--court-soft:#1c3247;--ok:#5fcf8f;--warn:#f0a640;--err:#ff8a80}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--body);padding:20px 16px 48px}
+.wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1,h2{font-family:var(--display);margin:0;letter-spacing:.01em}
+h1{font-size:2rem;line-height:1.1}
+h2{font-size:1.25rem;text-transform:uppercase;letter-spacing:.06em}
+.eyebrow{font-size:.78rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600}
+.meta{color:var(--muted);font-size:.95rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.card.off{opacity:.55;pointer-events:none}
+.stap{display:flex;gap:10px;align-items:baseline}
+.nr{font:700 1rem var(--display);background:var(--court);color:var(--surface);border-radius:50%;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.ladders{display:grid;gap:8px}
+.ladder{border:1px solid var(--line);border-radius:8px;padding:10px 12px;cursor:pointer;background:var(--surface);color:var(--ink);text-align:left;font:inherit;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.ladder[aria-pressed="true"]{border-color:var(--court);background:var(--court-soft)}
+.ladder small{color:var(--muted)}
+input[type=text],input[type=email]{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+input:focus,button:focus-visible{outline:2px solid var(--court);outline-offset:1px}
+.res{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.res button{width:100%;text-align:left;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);cursor:pointer;display:flex;justify-content:space-between;gap:8px}
+.res button[disabled]{cursor:not-allowed;color:var(--muted)}
+.res .kl{font-size:.85rem;color:var(--muted)}
+.res .nee{font-size:.85rem;color:var(--warn)}
+.gekozen{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:var(--court-soft)}
+.link{background:none;border:0;color:var(--court);cursor:pointer;font:inherit;text-decoration:underline;padding:0}
+.knop{font:700 1.05rem var(--display);letter-spacing:.06em;text-transform:uppercase;background:var(--court);color:var(--surface);border:0;border-radius:8px;padding:12px 16px;cursor:pointer}
+.knop[disabled]{opacity:.5;cursor:not-allowed}
+.hint{font-size:.88rem;color:var(--muted)}
+.fout{color:var(--err);font-weight:600}
+.ok{color:var(--ok);font-weight:700}
+.sim{border-left:3px solid var(--warn);padding:6px 10px;font-size:.9rem;background:var(--surface)}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+footer{font-size:.8rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">BTC Wemmel · Padel</div>
+    <h1>Inschrijving padelladder</h1>
+    <div class="meta" id="meta">Laden…</div>
+  </header>
+  <div class="sim" id="sim" hidden>Simulatie: er wordt niets opgeslagen.</div>
+  <div id="gesloten" class="card" hidden><p>De inschrijvingen zijn momenteel gesloten.</p></div>
+
+  <section class="card" id="s1">
+    <div class="stap"><span class="nr">1</span><h2>Kies een ladder</h2></div>
+    <div class="ladders" id="ladders"></div>
+    <div class="hint">Je mag in maximaal 2 ladders deelnemen. Gemengd: één speler en één speelster.</div>
+  </section>
+
+  <section class="card off" id="s2">
+    <div class="stap"><span class="nr">2</span><h2>Wie ben jij?</h2></div>
+    <div id="ik"></div>
+  </section>
+
+  <section class="card off" id="s3">
+    <div class="stap"><span class="nr">3</span><h2>Je partner</h2></div>
+    <div id="partner"></div>
+  </section>
+
+  <section class="card off" id="s4">
+    <div class="stap"><span class="nr">4</span><h2>Je e-mailadres</h2></div>
+    <label for="email" class="hint">Hierop ontvang je je persoonlijke inlogcode voor de ladder (agenda, uitslagen, stand).</label>
+    <input type="email" id="email" autocomplete="email" placeholder="naam@voorbeeld.be">
+    <div class="hp" aria-hidden="true"><label>Website <input type="text" id="website" tabindex="-1" autocomplete="off"></label></div>
+    <button class="knop" id="verstuur" disabled>Inschrijven</button>
+    <div id="melding" role="status"></div>
+  </section>
+
+  <section class="card" id="klaar" hidden></section>
+
+  <footer>Je naam wordt enkel gebruikt voor de laddercompetitie van BTC Wemmel. Enkel leden van de club kunnen ingeschreven worden.
+    Reglement en vragen: wedstrijdleider padelladder.</footer>
+</div>
+
+<script>
+const SUPABASE_URL = "https://povgjkvmzfrhhaxfanwn.supabase.co";
+const SUPABASE_KEY = "sb_publishable_LfcbY6X1DgOBFW1rH3Umnw__RdObpur";   // publieke sleutel: enkel de 3 ladderfuncties zijn toegankelijk
+const SIM = new URLSearchParams(location.search).has("simulatie");
+
+async function rpc(fn, args) {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+    method: "POST",
+    headers: {"Content-Type": "application/json", apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`},
+    body: JSON.stringify(args || {})
+  });
+  const tekst = await r.text();
+  const data = tekst ? JSON.parse(tekst) : null;
+  if (!r.ok) throw new Error((data && (data.message || data.hint)) || `fout ${r.status}`);
+  return data;
+}
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const MND = ["januari","februari","maart","april","mei","juni","juli","augustus","september","oktober","november","december"];
+const datum = s => { const d = new Date(s + "T12:00:00"); return `${d.getDate()} ${MND[d.getMonth()]} ${d.getFullYear()}`; };
+const $ = id => document.getElementById(id);
+
+const st = {ladder: null, ik: null, partner: null, config: null};
+
+function zet(stap, aan) { $(stap).classList.toggle("off", !aan); }
+
+function zoeker(host, label, partnerVan, kies) {
+  host.innerHTML = `<input type="text" placeholder="${esc(label)}" autocomplete="off" aria-label="${esc(label)}">
+    <div class="hint">Typ minstens 3 letters van je naam of familienaam.</div><ul class="res"></ul>`;
+  const inp = host.querySelector("input"), ul = host.querySelector("ul");
+  let t, laatste = "";
+  inp.addEventListener("input", () => {
+    clearTimeout(t);
+    t = setTimeout(async () => {
+      const q = inp.value.trim();
+      if (q.replace(/\s/g, "").length < 3) { ul.innerHTML = ""; return; }
+      laatste = q;
+      try {
+        const rijen = await rpc("ladder_zoek_lid", {p_ladder: st.ladder.id, p_zoek: q, p_partner_van: partnerVan});
+        if (q !== laatste) return;
+        ul.innerHTML = rijen.length ? rijen.map((r, i) => `<li><button data-i="${i}" ${r.ok ? "" : "disabled"}>
+            <span>${esc(r.naam)} <span class="kl">${esc(r.klassement || "")}</span></span>
+            ${r.ok ? "" : `<span class="nee">${esc(r.reden)}</span>`}</button></li>`).join("")
+          : `<li class="hint">Niet gevonden in de ledenlijst ${esc(st.config.leden_jaar)}.</li>`;
+        ul.querySelectorAll("button[data-i]").forEach(b => b.addEventListener("click", () => kies(rijen[+b.dataset.i])));
+      } catch (e) { ul.innerHTML = `<li class="fout">${esc(e.message)}</li>`; }
+    }, 250);
+  });
+  inp.focus();
+}
+
+function toonGekozen(host, persoon, wis) {
+  host.innerHTML = `<div class="gekozen"><span><strong>${esc(persoon.naam)}</strong> <span class="hint">${esc(persoon.klassement || "")}</span></span>
+    <button class="link">wijzigen</button></div>`;
+  host.querySelector("button").addEventListener("click", wis);
+}
+
+function kiesLadder(l) {
+  st.ladder = l; st.ik = null; st.partner = null;
+  document.querySelectorAll(".ladder").forEach(b => b.setAttribute("aria-pressed", b.dataset.id === l.id));
+  zet("s2", true); zet("s3", false); zet("s4", false);
+  $("partner").innerHTML = "";
+  zoekIk();
+}
+function zoekIk() {
+  st.ik = null; st.partner = null; zet("s3", false); zet("s4", false); $("partner").innerHTML = "";
+  zoeker($("ik"), "Zoek jezelf", null, p => { st.ik = p; toonGekozen($("ik"), p, zoekIk); zet("s3", true); zoekPartner(); });
+}
+function zoekPartner() {
+  st.partner = null; zet("s4", false);
+  zoeker($("partner"), "Zoek je partner", st.ik.speler_id, p => {
+    st.partner = p; toonGekozen($("partner"), p, zoekPartner); zet("s4", true); controleer(); $("email").focus();
+  });
+}
+function controleer() {
+  $("verstuur").disabled = !(st.ladder && st.ik && st.partner && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test($("email").value.trim()));
+}
+
+async function verstuur() {
+  $("melding").innerHTML = ""; $("verstuur").disabled = true;
+  if (SIM) {
+    $("melding").innerHTML = `<span class="ok">Simulatie: inschrijving zou geslaagd zijn.</span>`;
+    $("verstuur").disabled = false; return;
+  }
+  try {
+    const r = await rpc("ladder_inschrijven", {p_ladder: st.ladder.id, p_inschrijver: st.ik.speler_id,
+      p_partner: st.partner.speler_id, p_email: $("email").value.trim(), p_website: $("website").value});
+    ["s1","s2","s3","s4"].forEach(id => $(id).hidden = true);
+    $("klaar").hidden = false;
+    $("klaar").innerHTML = `<h2>Ingeschreven</h2>
+      <p class="ok">${esc(st.ik.naam)} en ${esc(st.partner.naam)} – ${esc(r.ladder)}</p>
+      <p>Referentie: <strong>${esc(r.referentie)}</strong></p>
+      <p>${r.email_bestaand
+        ? "Je inlogcode wordt gestuurd naar het e-mailadres dat we al van je kenden."
+        : "Je persoonlijke inlogcode volgt op " + esc($("email").value.trim()) + "."}
+      Je partner kan later zelf een inlogcode aanvragen.</p>
+      <p class="hint">De eerste ronde start op ${esc(datum(st.config.start))}. Wie ingeschreven is vóór de start, krijgt een plaats volgens de speelsterkte.</p>
+      <button class="link" onclick="location.reload()">Nog een ploeg inschrijven</button>`;
+  } catch (e) {
+    $("melding").innerHTML = `<span class="fout">${esc(e.message)}</span>`;
+    $("verstuur").disabled = false;
+  }
+}
+
+(async function start() {
+  $("sim").hidden = !SIM;
+  try {
+    const c = await rpc("ladder_config");
+    st.config = c;
+    if (!c || !c.inschrijving_open || !c.ladders) { $("gesloten").hidden = false; ["s1","s2","s3","s4"].forEach(id => $(id).hidden = true); $("meta").textContent = ""; return; }
+    $("meta").textContent = `Seizoen ${c.seizoen} · ${datum(c.start)} – ${datum(c.einde)} · rondes van 2 weken`;
+    $("ladders").innerHTML = c.ladders.map(l => `<button class="ladder" data-id="${esc(l.id)}" aria-pressed="false">
+        <span><strong>${esc(l.naam)}</strong><br><small>${l.code === "gemengd" ? "één speler en één speelster" : l.code === "dames" ? "enkel speelsters" : "alle spelers"}</small></span>
+        <small>${l.ploegen} ${l.ploegen === 1 ? "ploeg" : "ploegen"}${!l.actief && l.min_ploegen ? ` · start vanaf ${l.min_ploegen}` : ""}</small></button>`).join("");
+    document.querySelectorAll(".ladder").forEach(b => b.addEventListener("click", () => kiesLadder(c.ladders.find(l => l.id === b.dataset.id))));
+    $("email").addEventListener("input", controleer);
+    $("verstuur").addEventListener("click", verstuur);
+  } catch (e) { $("meta").innerHTML = `<span class="fout">Kan de gegevens niet laden: ${esc(e.message)}</span>`; }
+})();
+</script>
+</body>
+</html>
