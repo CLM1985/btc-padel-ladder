@@ -237,7 +237,8 @@ async function toonAanvraag() {
 
 async function afmelden(stil) {
   if (!stil && TOKEN) { try { await rpc("ladder_logout", {p_token: TOKEN}); } catch {} }
-  TOKEN = null; opslag.set("ladder_token", null); DATA = null; toonLogin();
+  TOKEN = null; opslag.set("ladder_token", null); DATA = null;
+  TAB = "ploegen"; STAND_LADDER = null; WED_LADDER = ""; VERGELIJK = null; toonLogin();
 }
 
 /* ---------------------------------------------------------------- hoofdscherm */
@@ -250,7 +251,10 @@ async function laad() {
 
 function teken() {
   const ploegen = DATA.ploegen || [];
-  if (!STAND_LADDER && ploegen.length) STAND_LADDER = ploegen[0].ladder_id;
+  // Ladderkeuze moet bij de ingelogde speler horen (na afmelden en inloggen als iemand anders)
+  const eigen = new Set(ploegen.map(p => p.ladder_id));
+  if (!eigen.has(STAND_LADDER)) { STAND_LADDER = ploegen.length ? ploegen[0].ladder_id : null; VERGELIJK = null; }
+  if (WED_LADDER && !eigen.has(WED_LADDER)) WED_LADDER = "";
   $("#main").innerHTML = `<nav class="tabs" role="tablist">
       <button data-t="ploegen" aria-selected="${TAB === "ploegen"}">Mijn ploegen</button>
       <button data-t="agenda" aria-selected="${TAB === "agenda"}">Agenda</button>
