@@ -83,6 +83,7 @@ footer{font-size:.8rem;color:var(--muted)}
 
   <section class="card" id="klaar" hidden></section>
 
+  <div class="card"><span>Al ingeschreven? <a href="app.html"><strong>Naar Mijn ladder</strong></a> (agenda, uitslagen, stand).</span></div>
   <footer>Je naam wordt enkel gebruikt voor de laddercompetitie van BTC Wemmel. Enkel leden van de club kunnen ingeschreven worden.
     Reglement en vragen: wedstrijdleider padelladder.</footer>
 </div>
@@ -183,7 +184,7 @@ async function verstuur() {
         : "Je persoonlijke inlogcode volgt op " + esc($("email").value.trim()) + "."}
       Je partner kan later zelf een inlogcode aanvragen.</p>
       <p class="hint">De eerste ronde start op ${esc(datum(st.config.start))}. Wie ingeschreven is vóór de start, krijgt een plaats volgens de speelsterkte.</p>
-      <button class="link" onclick="location.reload()">Nog een ploeg inschrijven</button>`;
+      <p><a href="app.html">Naar Mijn ladder</a> · <button class="link" onclick="location.reload()">Nog een ploeg inschrijven</button></p>`;
   } catch (e) {
     $("melding").innerHTML = `<span class="fout">${esc(e.message)}</span>`;
     $("verstuur").disabled = false;

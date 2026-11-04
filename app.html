@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Mijn padelladder – BTC Wemmel</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{--bg:#f5f7f9;--surface:#fff;--ink:#15202b;--muted:#5d6b78;--line:#d9e0e6;--court:#1d5c96;--court-soft:#e3edf6;--ok:#1d7a46;--warn:#b86a00;--warn-soft:#fff1dc;--err:#b42318;
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;--body:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root{--bg:#0f161d;--surface:#17212b;--ink:#e6edf3;--muted:#93a3b2;--line:#2a3846;--court:#7db4e6;--court-soft:#1c3247;--ok:#5fcf8f;--warn:#f0a640;--warn-soft:#3a2a12;--err:#ff8a80}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--body);padding:16px 16px 48px}
+.wrap{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+h1,h2,h3{font-family:var(--display);margin:0;letter-spacing:.01em}
+h1{font-size:1.9rem;line-height:1.1}
+h2{font-size:1.2rem;text-transform:uppercase;letter-spacing:.06em}
+h3{font-size:1.05rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.eyebrow{font-size:.78rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600}
+header{display:flex;justify-content:space-between;align-items:end;gap:10px;flex-wrap:wrap}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tabs button{font:600 .95rem var(--display);letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:6px 12px;border-radius:6px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--court);border-color:var(--court);color:var(--surface)}
+input[type=text],input[type=email],input[type=number],input[type=datetime-local],select{font:inherit;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);width:100%}
+input:focus,button:focus-visible,select:focus{outline:2px solid var(--court);outline-offset:1px}
+.knop{font:700 1rem var(--display);letter-spacing:.06em;text-transform:uppercase;background:var(--court);color:var(--surface);border:0;border-radius:8px;padding:10px 14px;cursor:pointer}
+.knop.licht{background:var(--court-soft);color:var(--court)}
+.knop.gevaar{background:var(--err);color:#fff}
+.knop[disabled]{opacity:.5;cursor:not-allowed}
+.link{background:none;border:0;color:var(--court);cursor:pointer;font:inherit;text-decoration:underline;padding:0}
+.rij{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.rij > *{flex:1 1 auto}
+.res{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.res button{width:100%;text-align:left;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);cursor:pointer;display:flex;justify-content:space-between;gap:8px}
+.res button[disabled]{cursor:not-allowed;color:var(--muted)}
+.hint{font-size:.88rem;color:var(--muted)}
+.fout{color:var(--err);font-weight:600}
+.ok{color:var(--ok);font-weight:700}
+.ploeg-kop{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
+.kpis{display:flex;gap:18px;flex-wrap:wrap}
+.kpi b{display:block;font:700 1.6rem var(--display);line-height:1}
+.kpi span{font-size:.8rem;color:var(--muted)}
+.wedstrijd{border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.wedstrijd .status{font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--court)}
+.wedstrijd .status.warn{color:var(--warn)}
+.agenda{display:flex;flex-direction:column;gap:4px}
+.agenda .r{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:4px 0;border-top:1px solid var(--line)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.seg button{font:600 .95rem var(--body);border:0;background:var(--surface);color:var(--ink);padding:5px 12px;cursor:pointer;border-left:1px solid var(--line)}
+.seg button:first-child{border-left:0}
+.seg button[aria-pressed="true"]{background:var(--court);color:var(--surface)}
+.seg button[disabled]{cursor:not-allowed;opacity:.6}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:right;padding:5px 6px}
+td{padding:6px;border-top:1px solid var(--line);text-align:right}
+th:nth-child(2),td:nth-child(2){text-align:left}
+tr.mijn td{background:var(--court-soft);font-weight:700}
+.bevestig{background:var(--warn-soft);border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:6px}
+footer{font-size:.8rem;color:var(--muted)}
+details summary{cursor:pointer;color:var(--court);font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div><div class="eyebrow">BTC Wemmel · Padel</div><h1>Mijn padelladder</h1></div>
+    <div id="wie" class="hint"></div>
+  </header>
+  <main id="main"><div class="card">Laden…</div></main>
+  <footer>Reglement en vragen: wedstrijdleider padelladder. Nog niet ingeschreven? <a href="./">Inschrijven</a>.</footer>
+</div>
+
+<script>
+const SUPABASE_URL = "https://povgjkvmzfrhhaxfanwn.supabase.co";
+const SUPABASE_KEY = "sb_publishable_LfcbY6X1DgOBFW1rH3Umnw__RdObpur";   // publieke sleutel: enkel de ladderfuncties
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const MND = ["jan","feb","mrt","apr","mei","jun","jul","aug","sep","okt","nov","dec"];
+const DAG = ["zo","ma","di","wo","do","vr","za"];
+const dKort = s => { const d = new Date(s + "T12:00:00"); return `${d.getDate()} ${MND[d.getMonth()]}`; };
+const moment = s => { const d = new Date(s); return `${DAG[d.getDay()]} ${d.getDate()} ${MND[d.getMonth()]} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`; };
+
+const opslag = {
+  get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v) { try { v === null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch {} }
+};
+let TOKEN = opslag.get("ladder_token");
+let DATA = null, TAB = "ploegen", STAND_LADDER = null;
+
+async function rpc(fn, args) {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+    method: "POST",
+    headers: {"Content-Type": "application/json", apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`},
+    body: JSON.stringify(args || {})
+  });
+  const t = await r.text(); const d = t ? JSON.parse(t) : null;
+  if (!r.ok) {
+    const msg = (d && (d.message || d.hint)) || `fout ${r.status}`;
+    if (/niet aangemeld|sessie verlopen/.test(msg)) { afmelden(true); }
+    throw new Error(msg);
+  }
+  return d;
+}
+const metToken = (fn, args) => rpc(fn, {p_token: TOKEN, ...args});
+
+/* ---------------------------------------------------------------- aanmelden */
+function zoeklijst(host, placeholder, zoekFn, rijHTML, kies) {
+  host.innerHTML = `<input type="text" placeholder="${esc(placeholder)}" autocomplete="off" aria-label="${esc(placeholder)}">
+    <ul class="res"></ul>`;
+  const inp = host.querySelector("input"), ul = host.querySelector("ul");
+  let t, laatste = "";
+  inp.addEventListener("input", () => {
+    clearTimeout(t);
+    t = setTimeout(async () => {
+      const q = inp.value.trim();
+      if (q.replace(/\s/g, "").length < 3) { ul.innerHTML = ""; return; }
+      laatste = q;
+      try {
+        const rijen = await zoekFn(q);
+        if (q !== laatste) return;
+        ul.innerHTML = rijen.length ? rijen.map((r, i) => `<li>${rijHTML(r, i)}</li>`).join("") : `<li class="hint">Niet gevonden.</li>`;
+        ul.querySelectorAll("button[data-i]").forEach(b => b.addEventListener("click", () => kies(rijen[+b.dataset.i])));
+      } catch (e) { ul.innerHTML = `<li class="fout">${esc(e.message)}</li>`; }
+    }, 250);
+  });
+  inp.focus();
+}
+
+function toonLogin() {
+  $("#wie").innerHTML = "";
+  $("#main").innerHTML = `<section class="card"><h2>Aanmelden</h2>
+    <div id="lzoek"></div><div id="lcode" hidden></div><div id="lmelding" role="status"></div>
+    <p class="hint">Je vindt je naam als je ingeschreven bent en een e-mailadres opgaf.
+      <button class="link" id="naarAanvraag">Nog geen code? Vraag er een aan.</button></p></section>`;
+  $("#naarAanvraag").addEventListener("click", toonAanvraag);
+  zoeklijst($("#lzoek"), "Zoek je naam (min. 3 letters)", q => rpc("ladder_zoek_deelnemer", {p_zoek: q}),
+    (r, i) => `<button data-i="${i}" ${r.heeft_code ? "" : "disabled"}><span>${esc(r.naam)}</span>${r.heeft_code ? "" : `<span class="hint">code nog niet verstuurd</span>`}</button>`,
+    p => {
+      $("#lzoek").innerHTML = `<div class="rij"><strong>${esc(p.naam)}</strong><button class="link" style="flex:0 0 auto">wijzigen</button></div>`;
+      $("#lzoek button").addEventListener("click", toonLogin);
+      $("#lcode").hidden = false;
+      $("#lcode").innerHTML = `<label class="hint" for="code">Je persoonlijke code (6 tekens)</label>
+        <div class="rij"><input type="text" id="code" maxlength="6" autocomplete="one-time-code" style="text-transform:uppercase;letter-spacing:.2em">
+        <button class="knop" id="login" style="flex:0 0 auto">Aanmelden</button></div>`;
+      const go = async () => {
+        $("#lmelding").innerHTML = "";
+        try {
+          const r = await rpc("ladder_login", {p_speler: p.speler_id, p_code: $("#code").value});
+          if (r.fout) { $("#lmelding").innerHTML = `<span class="fout">${esc(r.fout)}</span>`; return; }
+          TOKEN = r.token; opslag.set("ladder_token", TOKEN); laad();
+        } catch (e) { $("#lmelding").innerHTML = `<span class="fout">${esc(e.message)}</span>`; }
+      };
+      $("#login").addEventListener("click", go);
+      $("#code").addEventListener("keydown", e => { if (e.key === "Enter") go(); });
+      $("#code").focus();
+    });
+}
+
+async function toonAanvraag() {
+  let ladder = null;
+  try { const c = await rpc("ladder_config"); ladder = c && c.ladders && c.ladders[0] && c.ladders[0].id; } catch {}
+  $("#main").innerHTML = `<section class="card"><h2>Code aanvragen</h2>
+    <p class="hint">Voor spelers die door hun partner ingeschreven werden. De code wordt naar je e-mailadres gestuurd.
+      Is er al een adres van je gekend, dan gaat de code enkel naar dat adres.</p>
+    <div id="azoek"></div><div id="amail" hidden></div><div id="amelding" role="status"></div>
+    <button class="link" id="terug">Terug naar aanmelden</button></section>`;
+  $("#terug").addEventListener("click", toonLogin);
+  if (!ladder) { $("#azoek").innerHTML = `<span class="hint">Aanvragen is momenteel niet mogelijk.</span>`; return; }
+  zoeklijst($("#azoek"), "Zoek je naam (min. 3 letters)", q => rpc("ladder_zoek_lid", {p_ladder: ladder, p_zoek: q}),
+    (r, i) => `<button data-i="${i}"><span>${esc(r.naam)}</span></button>`,
+    p => {
+      $("#azoek").innerHTML = `<strong>${esc(p.naam)}</strong>`;
+      $("#amail").hidden = false;
+      $("#amail").innerHTML = `<div class="rij"><input type="email" id="aemail" placeholder="naam@voorbeeld.be" autocomplete="email">
+        <button class="knop" id="avraag" style="flex:0 0 auto">Aanvragen</button></div>
+        <div style="position:absolute;left:-9999px" aria-hidden="true"><input type="text" id="aweb" tabindex="-1"></div>`;
+      $("#avraag").addEventListener("click", async () => {
+        try {
+          await rpc("ladder_code_aanvragen", {p_speler: p.speler_id, p_email: $("#aemail").value, p_website: $("#aweb").value});
+          $("#amail").innerHTML = ""; $("#amelding").innerHTML = `<span class="ok">Aanvraag ontvangen. Je code volgt per e-mail.</span>`;
+        } catch (e) { $("#amelding").innerHTML = `<span class="fout">${esc(e.message)}</span>`; }
+      });
+    });
+}
+
+async function afmelden(stil) {
+  if (!stil && TOKEN) { try { await rpc("ladder_logout", {p_token: TOKEN}); } catch {} }
+  TOKEN = null; opslag.set("ladder_token", null); DATA = null; toonLogin();
+}
+
+/* ---------------------------------------------------------------- hoofdscherm */
+async function laad() {
+  try { DATA = await metToken("ladder_mijn"); } catch (e) { if (TOKEN) $("#main").innerHTML = `<div class="card fout">${esc(e.message)}</div>`; return; }
+  $("#wie").innerHTML = `${esc(DATA.speler.naam)} · <button class="link" id="uit">afmelden</button>`;
+  $("#uit").addEventListener("click", () => afmelden(false));
+  teken();
+}
+
+function teken() {
+  const ploegen = DATA.ploegen || [];
+  if (!STAND_LADDER && ploegen.length) STAND_LADDER = ploegen[0].ladder_id;
+  $("#main").innerHTML = `<nav class="tabs" role="tablist">
+      <button data-t="ploegen" aria-selected="${TAB === "ploegen"}">Mijn ploegen</button>
+      <button data-t="agenda" aria-selected="${TAB === "agenda"}">Agenda</button>
+      <button data-t="stand" aria-selected="${TAB === "stand"}">Stand</button></nav>
+    <div id="inhoud" style="display:flex;flex-direction:column;gap:14px;margin-top:14px"></div>`;
+  document.querySelectorAll(".tabs button").forEach(b => b.addEventListener("click", () => { TAB = b.dataset.t; teken(); }));
+  if (!ploegen.length) { $("#inhoud").innerHTML = `<div class="card">Je staat in geen enkele ladder. <a href="./">Inschrijven</a></div>`; return; }
+  if (TAB === "ploegen") ploegen.forEach(p => $("#inhoud").appendChild(ploegKaart(p)));
+  if (TAB === "agenda") ploegen.filter(p => p.status !== "vervangen").forEach(p => $("#inhoud").appendChild(agendaKaart(p)));
+  if (TAB === "stand") standKaart(ploegen);
+}
+
+function el(html) { const d = document.createElement("div"); d.innerHTML = html.trim(); return d.firstElementChild; }
+async function actie(knop, fn, melding) {
+  knop.disabled = true;
+  try { await fn(); await laad(); }
+  catch (e) { (melding || knop.parentElement).insertAdjacentHTML("beforeend", `<div class="fout">${esc(e.message)}</div>`); knop.disabled = false; }
+}
+
+function ploegKaart(p) {
+  const statusTekst = {aangemeld: "Aangemeld – plaats in de stand bij de volgende verwerking", inactief: "Inactief (2 forfaits) – meld je opnieuw beschikbaar in de agenda"}[p.status] || "";
+  const kaart = el(`<section class="card">
+    <div class="ploeg-kop"><div><h2>${esc(p.ladder)}</h2><div>met <strong>${esc(p.partner)}</strong></div></div>
+      <span class="hint">${esc(p.referentie || "")}</span></div>
+    ${statusTekst ? `<div class="hint">${esc(statusTekst)}</div>` : ""}
+    <div class="kpis">
+      <div class="kpi"><b>${p.positie ?? "–"}</b><span>plaats</span></div>
+      <div class="kpi"><b>${p.matchen}</b><span>gespeeld</span></div>
+      <div class="kpi"><b>${p.rating ?? "–"}</b><span>rating</span></div>
+    </div>
+    <div class="wedstrijden"></div>
+    <details><summary>Partner wijzigen</summary><div class="pw" style="margin-top:8px"></div></details>
+  </section>`);
+  const host = kaart.querySelector(".wedstrijden");
+  const ws = p.wedstrijden || [];
+  if (!ws.length) host.innerHTML = `<div class="hint">Geen lopende wedstrijd. Nieuwe tegenstanders volgen op maandag bij de start van een ronde.</div>`;
+  ws.forEach(w => host.appendChild(wedstrijdKaart(p, w)));
+  partnerWissel(kaart.querySelector(".pw"), p);
+  return kaart;
+}
+
+function wedstrijdKaart(p, w) {
+  const ronde = (DATA.rondes || []).find(r => r.id === w.ronde_id);
+  const kop = `<div class="ploeg-kop"><strong>Ronde ${ronde ? ronde.nr : ""}: tegen ${esc(w.tegenstander)}</strong>
+     <span class="hint">${ronde ? `${dKort(ronde.van)} – ${dKort(ronde.tot)}` : ""}</span></div>`;
+  let status = "", inhoud = "";
+  const kan = ["gekoppeld","voorgesteld","gepland","uitgesteld_weer"].includes(w.status);
+  if (w.status === "gekoppeld" || w.status === "uitgesteld_weer") {
+    status = w.status === "uitgesteld_weer" ? "Uitgesteld (weer) – spelen tegen het einde van de volgende ronde" :
+      (w.plant_ik ? "Jullie plannen deze wedstrijd (hoger gerangschikt)" : "De tegenpartij plant; jullie mogen ook een voorstel doen");
+    inhoud = planHTML();
+  } else if (w.status === "voorgesteld") {
+    status = w.voorgesteld_door_mij ? `Voorstel verstuurd: ${moment(w.gepland_op)} – wacht op bevestiging` : `Voorstel van de tegenpartij: ${moment(w.gepland_op)}`;
+    inhoud = (w.voorgesteld_door_mij ? "" : `<div class="rij"><button class="knop" data-a="bevestigplan" style="flex:0 0 auto">Bevestigen</button></div>`)
+      + `<details><summary>Ander moment voorstellen</summary>${planHTML()}</details>`;
+  } else if (w.status === "gepland") {
+    status = `Gepland: ${moment(w.gepland_op)}`;
+  } else if (w.status === "gespeeld") {
+    const b = w.bevestiging;
+    status = `Uitslag ${w.games_eigen}-${w.games_tegen}` + (b === "wacht" ? (w.ingevoerd_door_mij ? " – wacht op bevestiging" : "") : b === "betwist" ? " – betwist, de wedstrijdleider beslist" : " – bevestigd");
+    if (b === "wacht" && !w.ingevoerd_door_mij) inhoud = `<div class="bevestig"><span>De tegenpartij voerde <strong>${w.games_eigen}-${w.games_tegen}</strong> in (jullie games eerst). Klopt dat?</span>
+      <div class="rij"><button class="knop" data-a="akkoord" style="flex:0 0 auto">Akkoord</button><button class="knop licht" data-a="nietakkoord" style="flex:0 0 auto">Niet akkoord</button></div></div>`;
+  } else if (w.status === "forfait") {
+    status = w.forfait_door_mij ? "Afgezegd door jullie (forfait)" : "Afgezegd door de tegenpartij (forfait)";
+  }
+  const uitslagNodig = ["gekoppeld","voorgesteld","gepland","uitgesteld_weer"].includes(w.status) || (w.status === "gespeeld" && w.bevestiging === "wacht" && w.ingevoerd_door_mij);
+  const kaart = el(`<div class="wedstrijd">${kop}<div class="status ${w.status === "gespeeld" && w.bevestiging === "betwist" ? "warn" : ""}">${esc(status)}</div>
+    ${inhoud}
+    ${uitslagNodig ? `<details ${w.status === "gepland" ? "open" : ""}><summary>${w.status === "gespeeld" ? "Uitslag aanpassen" : "Uitslag invoeren"}</summary>
+      <div class="rij" style="margin-top:8px"><label class="hint" style="flex:0 0 auto">Games jullie</label><input type="number" min="0" max="60" class="ge" style="max-width:90px">
+      <label class="hint" style="flex:0 0 auto">tegenpartij</label><input type="number" min="0" max="60" class="gt" style="max-width:90px">
+      <button class="knop" data-a="uitslag" style="flex:0 0 auto">Opslaan</button></div>
+      <div class="hint">Alle gespeelde games tellen, ook bij een stopgezette wedstrijd. Gelijkspel kan.</div></details>` : ""}
+    ${kan ? `<div class="rij" style="justify-content:flex-start"><button class="link" data-a="weer" style="flex:0 0 auto" ${w.status === "uitgesteld_weer" ? "hidden" : ""}>Uitstel wegens weer</button>
+      <button class="link" data-a="forfait" style="flex:0 0 auto;color:var(--err)">Afzeggen (forfait)</button></div>` : ""}
+    <div class="melding"></div></div>`);
+  const m = kaart.querySelector(".melding");
+  const k = a => kaart.querySelector(`[data-a="${a}"]`);
+  k("bevestigplan")?.addEventListener("click", e => actie(e.target, () => metToken("ladder_plan_bevestig", {p_wedstrijd: w.id}), m));
+  kaart.querySelectorAll('[data-a="plan"]').forEach(b => b.addEventListener("click", e => {
+    const v = e.target.closest(".rij").querySelector("input").value;
+    if (!v) return;
+    actie(e.target, () => metToken("ladder_plan", {p_wedstrijd: w.id, p_moment: new Date(v).toISOString()}), m);
+  }));
+  k("uitslag")?.addEventListener("click", e => {
+    const ge = kaart.querySelector(".ge").value, gt = kaart.querySelector(".gt").value;
+    if (ge === "" || gt === "") return;
+    actie(e.target, () => metToken("ladder_uitslag", {p_wedstrijd: w.id, p_games_eigen: +ge, p_games_tegen: +gt}), m);
+  });
+  k("akkoord")?.addEventListener("click", e => actie(e.target, () => metToken("ladder_bevestig", {p_wedstrijd: w.id, p_akkoord: true}), m));
+  k("nietakkoord")?.addEventListener("click", e => actie(e.target, () => metToken("ladder_bevestig", {p_wedstrijd: w.id, p_akkoord: false}), m));
+  k("weer")?.addEventListener("click", e => actie(e.target, () => metToken("ladder_weer", {p_wedstrijd: w.id}), m));
+  k("forfait")?.addEventListener("click", e => {
+    const b = e.target;
+    if (!b.dataset.zeker) { b.dataset.zeker = "1"; b.textContent = "Zeker? Forfait telt als 0-6 verlies – klik opnieuw"; return; }
+    actie(b, () => metToken("ladder_forfait", {p_wedstrijd: w.id}), m);
+  });
+  return kaart;
+  function planHTML() {
+    return `<div class="rij"><input type="datetime-local" aria-label="Datum en uur">
+      <button class="knop licht" data-a="plan" style="flex:0 0 auto">Voorstellen</button></div>
+      <div class="hint">Minstens 3 dagen vooruit; de tegenpartij bevestigt binnen 72 uur. Boek zelf het terrein.</div>`;
+  }
+}
+
+function agendaKaart(p) {
+  const kaart = el(`<section class="card"><h2>${esc(p.ladder)} – met ${esc(p.partner)}</h2>
+    <div class="hint">Aantal wedstrijden per ronde. Standaard 1. Wijzigen kan tot zondag 20:00 vóór de ronde.</div>
+    <div class="agenda"></div><div class="melding"></div></section>`);
+  const host = kaart.querySelector(".agenda");
+  (DATA.rondes || []).forEach(r => {
+    const n = (p.agenda || {})[r.id] ?? 1;
+    const rij = el(`<div class="r"><span><strong>Ronde ${r.nr}</strong> <span class="hint">${dKort(r.van)} – ${dKort(r.tot)}</span></span>
+      <span class="seg" role="group" aria-label="Wedstrijden in ronde ${r.nr}">${[0,1,2].map(a =>
+        `<button data-a="${a}" aria-pressed="${n === a}" ${r.wijzigbaar ? "" : "disabled"}>${a === 0 ? "afwezig" : a}</button>`).join("")}</span></div>`);
+    rij.querySelectorAll("button").forEach(b => b.addEventListener("click", () =>
+      actie(b, () => metToken("ladder_agenda", {p_ploeg: p.id, p_ronde: r.id, p_aantal: +b.dataset.a}), kaart.querySelector(".melding"))));
+    host.appendChild(rij);
+  });
+  return kaart;
+}
+
+async function standKaart(ploegen) {
+  const ladders = [...new Map(ploegen.map(p => [p.ladder_id, p.ladder])).entries()];
+  const kaart = el(`<section class="card"><div class="ploeg-kop"><h2>Stand</h2>
+    ${ladders.length > 1 ? `<select aria-label="Ladder">${ladders.map(([id, n]) => `<option value="${esc(id)}" ${id === STAND_LADDER ? "selected" : ""}>${esc(n)}</option>`).join("")}</select>` : ""}</div>
+    <div class="tabel">Laden…</div></section>`);
+  $("#inhoud").appendChild(kaart);
+  kaart.querySelector("select")?.addEventListener("change", e => { STAND_LADDER = e.target.value; teken(); });
+  try {
+    const rijen = await metToken("ladder_stand", {p_ladder: STAND_LADDER}) || [];
+    kaart.querySelector(".tabel").innerHTML = rijen.length ? `<table><thead><tr><th>#</th><th>Ploeg</th><th>Gespeeld</th><th>Rating</th></tr></thead><tbody>
+      ${rijen.map(r => `<tr class="${r.mijn ? "mijn" : ""}"><td>${r.positie}</td><td>${esc(r.ploeg)}${r.status === "inactief" ? ' <span class="hint">(inactief)</span>' : ""}</td><td>${r.matchen}</td><td>${r.rating}</td></tr>`).join("")}
+      </tbody></table><div class="hint">De plaats volgt de standwaarde (rating + standcorrectie uit wissels en sancties).</div>`
+      : `<div class="hint">De stand verschijnt na de eerste verwerking.</div>`;
+  } catch (e) { kaart.querySelector(".tabel").innerHTML = `<span class="fout">${esc(e.message)}</span>`; }
+}
+
+function partnerWissel(host, p) {
+  host.innerHTML = `<div class="hint">Je vervangt ${esc(p.partner)}. Verandert de ploegsterkte meer dan 15%, dan start je als nieuwe ploeg.</div><div class="z"></div><div class="v"></div>`;
+  zoeklijst(host.querySelector(".z"), "Zoek je nieuwe partner", q => metToken("ladder_zoek_partner", {p_ploeg: p.id, p_zoek: q}),
+    (r, i) => `<button data-i="${i}" ${r.ok ? "" : "disabled"}><span>${esc(r.naam)} <span class="hint">${esc(r.klassement || "")}</span></span>${r.ok ? "" : `<span class="hint">${esc(r.reden)}</span>`}</button>`,
+    async n => {
+      const v = host.querySelector(".v");
+      try {
+        const r = await metToken("ladder_partner", {p_ploeg: p.id, p_nieuw: n.speler_id, p_uitvoeren: false});
+        v.innerHTML = `<div class="bevestig"><span>Nieuwe partner <strong>${esc(n.naam)}</strong>: verschil in ploegsterkte ${r.verschil_pct}%.
+          ${r.besluit === "behoud" ? "Jullie behouden je plaats in de stand." : "Jullie starten als nieuwe ploeg (plaats volgens de nieuwe ploegsterkte, nooit hoger dan 4)."}</span>
+          <div class="rij"><button class="knop" style="flex:0 0 auto">Bevestigen</button></div></div>`;
+        v.querySelector("button").addEventListener("click", e => actie(e.target, () => metToken("ladder_partner", {p_ploeg: p.id, p_nieuw: n.speler_id, p_uitvoeren: true}), v));
+      } catch (e) { v.innerHTML = `<span class="fout">${esc(e.message)}</span>`; }
+    });
+  host.querySelector(".z input").blur();
+}
+
+TOKEN ? laad() : toonLogin();
+</script>
+</body>
+</html>
