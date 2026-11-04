@@ -12,6 +12,7 @@
 @media (prefers-color-scheme:dark){:root{--bg:#0f161d;--surface:#17212b;--ink:#e6edf3;--muted:#93a3b2;--line:#2a3846;--court:#7db4e6;--court-soft:#1c3247;--ok:#5fcf8f;--warn:#f0a640;--warn-soft:#3a2a12;--err:#ff8a80}}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
+a{color:var(--court)}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--body);padding:16px 16px 48px}
 .wrap{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
 h1,h2,h3{font-family:var(--display);margin:0;letter-spacing:.01em}
@@ -61,6 +62,33 @@ tr.mijn td{background:var(--court-soft);font-weight:700}
 .bevestig{background:var(--warn-soft);border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:6px}
 footer{font-size:.8rem;color:var(--muted)}
 details summary{cursor:pointer;color:var(--court);font-weight:600}
+:root{--serie-1:#2a78d6;--serie-2:#eb6834}
+@media (prefers-color-scheme:dark){:root{--serie-1:#3987e5;--serie-2:#d95926}}
+.ronde-kop{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:3px;margin-top:4px}
+.ladder-kop{font:700 .85rem var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.wlijst{display:flex;flex-direction:column}
+.wrij{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;padding:7px 6px;border-top:1px solid var(--line);font-size:.92rem}
+.wrij.mijn{background:var(--court-soft);border-radius:6px}
+.wrij .b{text-align:right}
+.wrij .pos{font-size:.75rem;color:var(--muted);font-weight:700;margin-right:4px;font-variant-numeric:tabular-nums}
+.wrij .b .pos{margin:0 0 0 4px}
+.wrij .w{font-weight:700}
+.wrij .mid{text-align:center;font-variant-numeric:tabular-nums;min-width:74px}
+.wrij .sc{font-weight:700;font-size:1rem}
+.wrij .sub{display:block;font-size:.72rem;color:var(--muted)}
+.wrij .delta{display:block;font-size:.72rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.grafiek{position:relative}
+.grafiek svg{width:100%;height:auto;display:block;overflow:visible}
+.grafiek .as text{font:12px var(--body);fill:var(--muted)}
+.grafiek .as line{stroke:var(--line);stroke-width:1}
+.grafiek .lijn{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.grafiek .lijn.ander{stroke:var(--muted);stroke-width:1.5;opacity:.35}
+.grafiek .lijn.ander.dicht{opacity:.9;stroke-width:2}
+.grafiek .label{font:600 12px var(--body);fill:var(--ink)}
+.grafiek .tip{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:.82rem;box-shadow:0 4px 14px rgba(0,0,0,.12);min-width:160px;z-index:2}
+.grafiek .tip .k{display:inline-block;width:10px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.legenda{display:flex;gap:14px;flex-wrap:wrap;font-size:.85rem;color:var(--muted)}
+.legenda i{display:inline-block;width:16px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}
 </style>
 </head>
 <body>
@@ -88,7 +116,7 @@ const opslag = {
   set(k, v) { try { v === null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch {} }
 };
 let TOKEN = opslag.get("ladder_token");
-let DATA = null, TAB = "ploegen", STAND_LADDER = null;
+let DATA = null, TAB = "ploegen", STAND_LADDER = null, WED_LADDER = "", VERGELIJK = null;
 
 async function rpc(fn, args) {
   const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
@@ -205,6 +233,7 @@ function teken() {
   $("#main").innerHTML = `<nav class="tabs" role="tablist">
       <button data-t="ploegen" aria-selected="${TAB === "ploegen"}">Mijn ploegen</button>
       <button data-t="agenda" aria-selected="${TAB === "agenda"}">Agenda</button>
+      <button data-t="wedstrijden" aria-selected="${TAB === "wedstrijden"}">Wedstrijden</button>
       <button data-t="stand" aria-selected="${TAB === "stand"}">Stand</button></nav>
     <div id="inhoud" style="display:flex;flex-direction:column;gap:14px;margin-top:14px"></div>`;
   document.querySelectorAll(".tabs button").forEach(b => b.addEventListener("click", () => { TAB = b.dataset.t; teken(); }));
@@ -212,6 +241,7 @@ function teken() {
   if (TAB === "ploegen") ploegen.forEach(p => $("#inhoud").appendChild(ploegKaart(p)));
   if (TAB === "agenda") ploegen.filter(p => p.status !== "vervangen").forEach(p => $("#inhoud").appendChild(agendaKaart(p)));
   if (TAB === "stand") standKaart(ploegen);
+  if (TAB === "wedstrijden") wedstrijdenKaart();
 }
 
 function el(html) { const d = document.createElement("div"); d.innerHTML = html.trim(); return d.firstElementChild; }
@@ -342,6 +372,130 @@ async function standKaart(ploegen) {
       </tbody></table><div class="hint">De plaats volgt de standwaarde (rating + standcorrectie uit wissels en sancties).</div>`
       : `<div class="hint">De stand verschijnt na de eerste verwerking.</div>`;
   } catch (e) { kaart.querySelector(".tabel").innerHTML = `<span class="fout">${esc(e.message)}</span>`; }
+  const gkaart = el(`<section class="card"><div class="ploeg-kop"><h2>Ratingverloop</h2><span class="kies"></span></div>
+    <div class="legenda"></div><div class="grafiek">Laden…</div>
+    <div class="hint">Rating per ploeg na elke verwerkte ronde (start = rating bij inschrijving). De plaats in de stand kan afwijken door de standcorrectie.</div></section>`);
+  $("#inhoud").appendChild(gkaart);
+  try {
+    const d = await metToken("ladder_ratingverloop", {p_ladder: STAND_LADDER});
+    ratingGrafiek(gkaart, d);
+  } catch (e) { gkaart.querySelector(".grafiek").innerHTML = `<span class="fout">${esc(e.message)}</span>`; }
+}
+
+function ratingGrafiek(kaart, d) {
+  const host = kaart.querySelector(".grafiek");
+  const ploegen = (d.ploegen || []).filter(p => (p.punten || []).length);
+  const rondes = [0, ...(d.rondes || []).map(r => r.nr)];
+  if (rondes.length < 2 || !ploegen.length) { host.innerHTML = `<div class="hint">De grafiek verschijnt na de eerste verwerkte ronde.</div>`; return; }
+  const mijn = ploegen.filter(p => p.mijn).map(p => p.id);
+  if (VERGELIJK && !ploegen.some(p => p.id === VERGELIJK)) VERGELIJK = null;
+  const kies = kaart.querySelector(".kies");
+  kies.innerHTML = `<select aria-label="Vergelijk met"><option value="">Vergelijk met…</option>${ploegen.filter(p => !p.mijn)
+    .map(p => `<option value="${p.id}" ${p.id === VERGELIJK ? "selected" : ""}>${esc(p.naam)}</option>`).join("")}</select>`;
+  kies.querySelector("select").addEventListener("change", e => { VERGELIJK = e.target.value ? +e.target.value : null; ratingGrafiek(kaart, d); });
+  kaart.querySelector(".legenda").innerHTML = `<span><i style="background:var(--serie-1)"></i>Jouw ploeg</span>`
+    + (VERGELIJK ? `<span><i style="background:var(--serie-2)"></i>${esc(ploegen.find(p => p.id === VERGELIJK).naam)}</span>` : "")
+    + `<span><i style="background:var(--muted);opacity:.5"></i>Andere ploegen</span>`;
+
+  const W = Math.max(300, Math.round(host.clientWidth || 640)), H = Math.round(Math.min(340, Math.max(240, W * 0.62)));
+  const L = 40, R = W < 480 ? 92 : 140, T = 12, B = 26, MAXN = W < 480 ? 12 : 20;
+  if (!host.dataset.resize) {
+    host.dataset.resize = "1";
+    let t, breedte = host.clientWidth;
+    new ResizeObserver(() => {
+      if (Math.abs(host.clientWidth - breedte) < 2) return;           // enkel bij een andere breedte opnieuw tekenen
+      breedte = host.clientWidth; clearTimeout(t);
+      t = setTimeout(() => { if (document.body.contains(host)) ratingGrafiek(kaart, d); }, 150);
+    }).observe(host);
+  }
+  const alle = ploegen.flatMap(p => p.punten.map(x => +x.rating));
+  let lo = Math.min(...alle), hi = Math.max(...alle);
+  const stap = [10, 20, 25, 50, 100, 200, 250, 500].find(s => (hi - lo) / s <= 6) || 1000;
+  lo = Math.floor(lo / stap) * stap; hi = Math.ceil(hi / stap) * stap; if (hi === lo) hi = lo + stap;
+  const xi = i => L + (W - L - R) * (rondes.length === 1 ? 0 : i / (rondes.length - 1));
+  const y = v => T + (H - T - B) * (1 - (v - lo) / (hi - lo));
+  const pad = p => p.punten.map(pt => [xi(rondes.indexOf(+pt.ronde)), y(+pt.rating), pt]).filter(q => q[0] >= 0 && !isNaN(q[0]));
+  const lijnD = p => pad(p).map((q, i) => `${i ? "L" : "M"}${q[0].toFixed(1)} ${q[1].toFixed(1)}`).join("");
+  const rol = p => p.mijn ? "mijn" : p.id === VERGELIJK ? "verg" : "ander";
+  const kleur = {mijn: "var(--serie-1)", verg: "var(--serie-2)"};
+  const volg = [...ploegen.filter(p => rol(p) === "ander"), ...ploegen.filter(p => rol(p) === "verg"), ...ploegen.filter(p => rol(p) === "mijn")];
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Ratingverloop per ploeg"><g class="as">`;
+  for (let v = lo; v <= hi + 1e-9; v += stap) svg += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
+  rondes.forEach((r, i) => svg += `<text x="${xi(i)}" y="${H - 8}" text-anchor="middle">${r === 0 ? "start" : "R" + r}</text>`);
+  svg += `</g>`;
+  const labels = [];
+  volg.forEach(p => {
+    const r = rol(p);
+    svg += `<path class="lijn ${r === "ander" ? "ander" : ""}" data-id="${p.id}" d="${lijnD(p)}" ${r !== "ander" ? `style="stroke:${kleur[r]}"` : ""}/>`;
+    if (r !== "ander") {
+      pad(p).forEach(q => svg += `<circle cx="${q[0]}" cy="${q[1]}" r="4" fill="${kleur[r]}" stroke="var(--surface)" stroke-width="2"/>`);
+      const lp = pad(p).at(-1);
+      if (lp) labels.push({x: lp[0] + 8, y: lp[1] + 4, t: p.naam.length > MAXN ? p.naam.slice(0, MAXN - 1) + "…" : p.naam});
+    }
+  });
+  labels.sort((a, b) => a.y - b.y);
+  for (let i = 1; i < labels.length; i++) if (labels[i].y - labels[i - 1].y < 15) labels[i].y = labels[i - 1].y + 15;
+  labels.forEach(l => svg += `<text class="label" x="${l.x}" y="${l.y}">${esc(l.t)}</text>`);
+  svg += `<line class="kruis" x1="0" x2="0" y1="${T}" y2="${H - B}" stroke="var(--muted)" stroke-dasharray="3 3" visibility="hidden"/>
+    <rect x="${L}" y="${T}" width="${W - L - R}" height="${H - T - B}" fill="transparent" class="vang"/></svg><div class="tip" hidden></div>`;
+  host.innerHTML = svg;
+
+  const s = host.querySelector("svg"), tip = host.querySelector(".tip"), kruis = host.querySelector(".kruis");
+  const toon = ev => {
+    const bb = s.getBoundingClientRect(), sx = W / (bb.width || W);
+    const mx = (ev.clientX - bb.left) * sx, my = (ev.clientY - bb.top) * sx;
+    const i = Math.max(0, Math.min(rondes.length - 1, Math.round((mx - L) / ((W - L - R) / (rondes.length - 1)))));
+    const r = rondes[i];
+    const opR = ploegen.map(p => ({p, pt: p.punten.find(x => +x.ronde === r)})).filter(o => o.pt);
+    const dichtst = opR.reduce((a, o) => Math.abs(y(+o.pt.rating) - my) < Math.abs(y(+a.pt.rating) - my) ? o : a, opR[0]);
+    host.querySelectorAll(".lijn.ander").forEach(l => l.classList.toggle("dicht", dichtst && +l.dataset.id === dichtst.p.id));
+    kruis.setAttribute("x1", xi(i)); kruis.setAttribute("x2", xi(i)); kruis.setAttribute("visibility", "visible");
+    const regels = [...new Set([...opR.filter(o => rol(o.p) !== "ander"), dichtst])].filter(Boolean);
+    tip.innerHTML = `<strong>${r === 0 ? "Start" : "Na ronde " + r}</strong>` + regels.map(o =>
+      `<div><span class="k" style="background:${kleur[rol(o.p)] || "var(--muted)"}"></span>${esc(o.p.naam)}: <strong>${o.pt.rating}</strong>${o.pt.positie ? ` · plaats ${o.pt.positie}` : ""}</div>`).join("");
+    tip.hidden = false;
+    const px = xi(i) / sx, links = px > bb.width / 2;
+    tip.style.left = links ? "" : `${px + 12}px`; tip.style.right = links ? `${bb.width - px + 12}px` : "";
+    tip.style.top = `${Math.max(0, my / sx - 20)}px`;
+  };
+  const verberg = () => { tip.hidden = true; kruis.setAttribute("visibility", "hidden"); host.querySelectorAll(".lijn.dicht").forEach(l => l.classList.remove("dicht")); };
+  const vang = host.querySelector(".vang");
+  vang.addEventListener("pointermove", toon); vang.addEventListener("pointerdown", toon); vang.addEventListener("pointerleave", verberg);
+}
+
+async function wedstrijdenKaart() {
+  const kaart = el(`<section class="card"><div class="ploeg-kop"><h2>Wedstrijden</h2><span class="kies"></span></div><div class="lijst">Laden…</div></section>`);
+  $("#inhoud").appendChild(kaart);
+  let rijen;
+  try { rijen = await metToken("ladder_wedstrijden", {p_ladder: null}) || []; }
+  catch (e) { kaart.querySelector(".lijst").innerHTML = `<span class="fout">${esc(e.message)}</span>`; return; }
+  const ladders = [...new Map(rijen.map(w => [w.ladder_id, w.ladder])).entries()];
+  kaart.querySelector(".kies").innerHTML = ladders.length > 1 ? `<select aria-label="Ladder"><option value="">Alle ladders</option>
+    ${ladders.map(([id, n]) => `<option value="${esc(id)}" ${id === WED_LADDER ? "selected" : ""}>${esc(n)}</option>`).join("")}</select>` : "";
+  kaart.querySelector("select")?.addEventListener("change", e => { WED_LADDER = e.target.value; teken(); });
+  const lijst = rijen.filter(w => !WED_LADDER || w.ladder_id === WED_LADDER);
+  if (!lijst.length) { kaart.querySelector(".lijst").innerHTML = `<div class="hint">Nog geen wedstrijden. Die verschijnen na de koppeling van de eerste ronde.</div>`; return; }
+  const perRonde = [...new Set(lijst.map(w => w.ronde))];
+  const tekstStatus = w => ({gekoppeld: "nog te plannen", voorgesteld: "voorstel " + (w.gepland_op ? moment(w.gepland_op) : ""),
+    gepland: w.gepland_op ? moment(w.gepland_op) : "gepland", uitgesteld_weer: "uitgesteld (weer)", vervallen: "vervallen",
+    niet_gespeeld: "niet gespeeld", forfait: "forfait"}[w.status] || "");
+  kaart.querySelector(".lijst").innerHTML = perRonde.map(r => {
+    const ws = lijst.filter(w => w.ronde === r);
+    const ladInR = [...new Set(ws.map(w => w.ladder))];
+    return `<div class="ronde-kop"><h3>Ronde ${r}</h3><span class="hint">${dKort(ws[0].van)} – ${dKort(ws[0].tot)}</span></div>` +
+      ladInR.map(ln => `${ladInR.length > 1 || !WED_LADDER ? `<div class="ladder-kop">${esc(ln)}</div>` : ""}<div class="wlijst">${ws.filter(w => w.ladder === ln).map(w => {
+        const gesp = w.status === "gespeeld", winA = gesp && w.games_a > w.games_b, winB = gesp && w.games_b > w.games_a;
+        const fA = w.status === "forfait" && w.forfait_a, fB = w.status === "forfait" && w.forfait_b;
+        const mid = gesp ? `<span class="sc">${w.games_a}-${w.games_b}</span>${w.bevestiging === "betwist" ? '<span class="sub">betwist</span>' : w.verwerkt ? "" : w.bevestiging === "wacht" ? '<span class="sub">te bevestigen</span>' : ""}`
+          : `<span class="sub">${esc(tekstStatus(w))}</span>`;
+        const delta = v => v === null || v === undefined ? "" : `<span class="delta">${v > 0 ? "+" : ""}${String(v).replace(".", ",")}${""}</span>`;
+        return `<div class="wrij ${w.mijn ? "mijn" : ""}">
+          <span class="${winA || fB ? "w" : ""}"><span class="pos">${w.positie_a ?? ""}</span>${esc(w.ploeg_a)}${w.verwerkt ? delta(w.delta_a) : ""}</span>
+          <span class="mid">${mid}${w.wissel ? '<span class="sub">wissel ↑</span>' : ""}</span>
+          <span class="b ${winB || fA ? "w" : ""}">${esc(w.ploeg_b)}<span class="pos">${w.positie_b ?? ""}</span>${w.verwerkt ? delta(w.delta_b) : ""}</span></div>`;
+      }).join("")}</div>`).join("");
+  }).join("");
 }
 
 function partnerWissel(host, p) {

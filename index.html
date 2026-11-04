@@ -178,10 +178,11 @@ async function verstuur() {
     $("klaar").hidden = false;
     $("klaar").innerHTML = `<h2>Ingeschreven</h2>
       <p class="ok">${esc(st.ik.naam)} en ${esc(st.partner.naam)} – ${esc(r.ladder)}</p>
-      <p>Referentie: <strong>${esc(r.referentie)}</strong></p>
+      <p>Referentie van je inschrijving: <strong>${esc(r.referentie)}</strong><br>
+      <span class="hint">Dit is <strong>geen</strong> inlogcode.</span></p>
       <p>${r.email_bestaand
         ? "Je inlogcode wordt gestuurd naar het e-mailadres dat we al van je kenden."
-        : "Je persoonlijke inlogcode volgt op " + esc($("email").value.trim()) + "."}
+        : "Je persoonlijke inlogcode (6 tekens) volgt apart op " + esc($("email").value.trim()) + "."}
       Je partner kan later zelf een inlogcode aanvragen.</p>
       <p class="hint">De eerste ronde start op ${esc(datum(st.config.start))}. Wie ingeschreven is vóór de start, krijgt een plaats volgens de speelsterkte.</p>
       <p><a href="app.html">Naar Mijn ladder</a> · <button class="link" onclick="location.reload()">Nog een ploeg inschrijven</button></p>`;

@@ -26,5 +26,6 @@ Sessie van 60 dagen, enkel als willekeurig token in de browser (de database bewa
 | Aanmelden / code aanvragen | `ladder_zoek_deelnemer`, `ladder_login`, `ladder_logout`, `ladder_code_aanvragen` |
 | Mijn ploegen: wedstrijd plannen, bevestigen, uitslag, bevestigen/betwisten, weer, forfait | `ladder_mijn`, `ladder_plan`, `ladder_plan_bevestig`, `ladder_uitslag`, `ladder_bevestig`, `ladder_weer`, `ladder_forfait` |
 | Agenda 0/1/2 per ronde | `ladder_agenda` |
-| Stand | `ladder_stand` |
+| Stand + ratingverloop (lijngrafiek per ploeg over de rondes, eigen ploeg + vergelijking gemarkeerd) | `ladder_stand`, `ladder_ratingverloop` |
+| Wedstrijden: alle ladders of één ladder, per ronde, met uitslag, ratingwijziging en wissel | `ladder_wedstrijden` |
 | Partner wijzigen (15 %-regel) | `ladder_zoek_partner`, `ladder_partner` |
