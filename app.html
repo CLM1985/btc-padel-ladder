@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex">
 <title>Mijn padelladder – BTC Wemmel</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@600;700&family=Montserrat:wght@400;600;700&display=swap">
 <style>
-:root{--bg:#f5f7f9;--surface:#fff;--ink:#15202b;--muted:#5d6b78;--line:#d9e0e6;--court:#1d5c96;--court-soft:#e3edf6;--ok:#1d7a46;--warn:#b86a00;--warn-soft:#fff1dc;--err:#b42318;
-  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;--body:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
-@media (prefers-color-scheme:dark){:root{--bg:#0f161d;--surface:#17212b;--ink:#e6edf3;--muted:#93a3b2;--line:#2a3846;--court:#7db4e6;--court-soft:#1c3247;--ok:#5fcf8f;--warn:#f0a640;--warn-soft:#3a2a12;--err:#ff8a80}}
+:root{--bg:#F3F1E9;--surface:#FFFFFF;--ink:#152B46;--muted:#55657A;--line:#E2DCCD;--court:#435B28;--court-soft:#DCE4D2;--accent:#C5E75A;--ok:#3B6E1F;--warn:#9A6200;--warn-soft:#F6ECD6;--err:#B65A3A;
+  --display:"League Spartan","Arial Narrow",system-ui,sans-serif;--body:"Montserrat",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root{--bg:#0E1D30;--surface:#152B46;--ink:#F3F1E9;--muted:#AEB9C6;--line:#2B4466;--court:#C5E75A;--court-soft:#24402B;--accent:#C5E75A;--ok:#C5E75A;--warn:#F0B860;--warn-soft:#3A2E14;--err:#F0957A}}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 a{color:var(--court)}
@@ -29,7 +29,7 @@ input[type=text],input[type=email],input[type=number],input[type=datetime-local]
 input:focus,button:focus-visible,select:focus{outline:2px solid var(--court);outline-offset:1px}
 .knop{font:700 1rem var(--display);letter-spacing:.06em;text-transform:uppercase;background:var(--court);color:var(--surface);border:0;border-radius:8px;padding:10px 14px;cursor:pointer}
 .knop.licht{background:var(--court-soft);color:var(--court)}
-.knop.gevaar{background:var(--err);color:#fff}
+.knop.gevaar{background:var(--err);color:var(--surface)}
 .knop[disabled]{opacity:.5;cursor:not-allowed}
 .link{background:none;border:0;color:var(--court);cursor:pointer;font:inherit;text-decoration:underline;padding:0}
 .rij{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -59,6 +59,7 @@ th{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mu
 td{padding:6px;border-top:1px solid var(--line);text-align:right}
 th:nth-child(2),td:nth-child(2){text-align:left}
 tr.mijn td{background:var(--court-soft);font-weight:700}
+table.stand{font-size:.92rem}
 table.stand td.pos{text-align:left;white-space:nowrap;font-weight:700}
 table.stand th:first-child{text-align:left}
 .bew{display:inline-block;min-width:2.2em;font-size:.75rem;font-weight:700;margin-left:2px}
@@ -70,8 +71,8 @@ table.stand th:first-child{text-align:left}
 .bevestig{background:var(--warn-soft);border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:6px}
 footer{font-size:.8rem;color:var(--muted)}
 details summary{cursor:pointer;color:var(--court);font-weight:600}
-:root{--serie-1:#2a78d6;--serie-2:#eb6834}
-@media (prefers-color-scheme:dark){:root{--serie-1:#3987e5;--serie-2:#d95926}}
+:root{--serie-1:#5A8C2A;--serie-2:#2E5E9C}
+@media (prefers-color-scheme:dark){:root{--serie-1:#729D25;--serie-2:#5689D2}}
 .ronde-kop{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:3px;margin-top:4px}
 .ladder-kop{font:700 .85rem var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:6px}
 .wlijst{display:flex;flex-direction:column}
@@ -97,6 +98,12 @@ details summary{cursor:pointer;color:var(--court);font-weight:600}
 .grafiek .tip .k{display:inline-block;width:10px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}
 .legenda{display:flex;gap:14px;flex-wrap:wrap;font-size:.85rem;color:var(--muted)}
 .legenda i{display:inline-block;width:16px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}
+
+/* BTC-huisstijl (communicatievoorstel bestuur): clubgroen, navy, lime, crème, salie, gravel · League Spartan + Montserrat */
+body{border-top:6px solid var(--court);box-shadow:inset 0 6px 0 -3px var(--accent)}
+.eyebrow{color:var(--court);letter-spacing:.32em}
+h1{color:var(--ink)}
+h2{font-size:1.15rem}
 </style>
 </head>
 <body>
