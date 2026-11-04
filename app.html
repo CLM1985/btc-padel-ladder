@@ -59,6 +59,14 @@ th{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mu
 td{padding:6px;border-top:1px solid var(--line);text-align:right}
 th:nth-child(2),td:nth-child(2){text-align:left}
 tr.mijn td{background:var(--court-soft);font-weight:700}
+table.stand td.pos{text-align:left;white-space:nowrap;font-weight:700}
+table.stand th:first-child{text-align:left}
+.bew{display:inline-block;min-width:2.2em;font-size:.75rem;font-weight:700;margin-left:2px}
+.bew.op{color:var(--ok)}.bew.neer{color:var(--err)}.bew.gelijk{color:var(--muted)}
+.bew.nieuw{color:var(--court);font-size:.68rem;text-transform:uppercase;letter-spacing:.04em}
+.icoon{white-space:nowrap;cursor:help}.icoon small{font-size:.7rem;font-weight:700;margin-left:1px}
+.legenda.stand-leg{font-size:.78rem;margin-top:8px;gap:10px}
+.stand-leg .bew{min-width:0;margin:0}
 .bevestig{background:var(--warn-soft);border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:6px}
 footer{font-size:.8rem;color:var(--muted)}
 details summary{cursor:pointer;color:var(--court);font-weight:600}
@@ -358,6 +366,15 @@ function agendaKaart(p) {
   return kaart;
 }
 
+function beweging(b) {
+  if (b == null) return "";
+  if (b === "nieuw") return ` <span class="bew nieuw" title="Nieuw in de stand">nieuw</span>`;
+  const n = +b;
+  if (n > 0) return ` <span class="bew op" title="${n} ${n === 1 ? "plaats" : "plaatsen"} gestegen" aria-label="${n} gestegen">▲${n}</span>`;
+  if (n < 0) return ` <span class="bew neer" title="${-n} ${n === -1 ? "plaats" : "plaatsen"} gedaald" aria-label="${-n} gedaald">▼${-n}</span>`;
+  return ` <span class="bew gelijk" title="Zelfde plaats" aria-label="zelfde plaats">–</span>`;
+}
+
 async function standKaart(ploegen) {
   const ladders = [...new Map(ploegen.map(p => [p.ladder_id, p.ladder])).entries()];
   const kaart = el(`<section class="card"><div class="ploeg-kop"><h2>Stand</h2>
@@ -367,9 +384,13 @@ async function standKaart(ploegen) {
   kaart.querySelector("select")?.addEventListener("change", e => { STAND_LADDER = e.target.value; teken(); });
   try {
     const rijen = await metToken("ladder_stand", {p_ladder: STAND_LADDER}) || [];
-    kaart.querySelector(".tabel").innerHTML = rijen.length ? `<table><thead><tr><th>#</th><th>Ploeg</th><th>Gespeeld</th><th>Rating</th></tr></thead><tbody>
-      ${rijen.map(r => `<tr class="${r.mijn ? "mijn" : ""}"><td>${r.positie}</td><td>${esc(r.ploeg)}${r.status === "inactief" ? ' <span class="hint">(inactief)</span>' : ""}</td><td>${r.matchen}</td><td>${r.rating}</td></tr>`).join("")}
-      </tbody></table><div class="hint">De plaats volgt de standwaarde (rating + standcorrectie uit wissels en sancties).</div>`
+    kaart.querySelector(".tabel").innerHTML = rijen.length ? `<table class="stand"><thead><tr><th>#</th><th>Ploeg</th><th title="Gespeelde wedstrijden">G</th><th title="Gewonnen wedstrijden">W</th><th>Rating</th></tr></thead><tbody>
+      ${rijen.map(r => `<tr class="${r.mijn ? "mijn" : ""}"><td class="pos">${r.positie}${beweging(r.beweging)}</td>
+        <td>${esc(r.ploeg)}${r.winstreeks >= 3 ? ` <span class="icoon" title="${r.winstreeks} overwinningen op rij" aria-label="${r.winstreeks} overwinningen op rij">🔥${r.winstreeks > 3 ? `<small>${r.winstreeks}</small>` : ""}</span>` : ""}${r.meest_actief ? ' <span class="icoon" title="Meeste wedstrijden in deze ladder (bij gelijkstand: meeste overwinningen)" aria-label="Meeste wedstrijden">💪</span>' : ""}${r.status === "inactief" ? ' <span class="hint">(inactief)</span>' : ""}</td>
+        <td>${r.matchen}</td><td>${r.gewonnen ?? 0}</td><td>${Number(r.rating).toFixed(1)}</td></tr>`).join("")}
+      </tbody></table>
+      <div class="legenda stand-leg"><span><b class="bew op">▲</b>/<b class="bew neer">▼</b> plaatsen gestegen/gedaald sinds de vorige ronde</span><span>🔥 3 of meer overwinningen op rij</span><span>💪 meeste wedstrijden (bij gelijkstand: meeste overwinningen)</span><span>G gespeeld · W gewonnen</span></div>
+      <div class="hint">De plaats volgt de standwaarde (rating + standcorrectie uit wissels en sancties).</div>`
       : `<div class="hint">De stand verschijnt na de eerste verwerking.</div>`;
   } catch (e) { kaart.querySelector(".tabel").innerHTML = `<span class="fout">${esc(e.message)}</span>`; }
   const gkaart = el(`<section class="card"><div class="ploeg-kop"><h2>Ratingverloop</h2><span class="kies"></span></div>
