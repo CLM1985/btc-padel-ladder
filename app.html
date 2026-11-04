@@ -24,7 +24,7 @@ header{display:flex;justify-content:space-between;align-items:end;gap:10px;flex-
 .tabs{display:flex;gap:6px;flex-wrap:wrap}
 .tabs button{font:600 .95rem var(--display);letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:6px 12px;border-radius:6px;cursor:pointer}
 .tabs button[aria-selected="true"]{background:var(--court);border-color:var(--court);color:var(--surface)}
-input[type=text],input[type=email],input[type=number],input[type=datetime-local],select{font:inherit;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);width:100%}
+input[type=text],input[type=email],input[type=number],input[type=datetime-local],input[type=date],select{font:inherit;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);width:100%}
 input:focus,button:focus-visible,select:focus{outline:2px solid var(--court);outline-offset:1px}
 .knop{font:700 1rem var(--display);letter-spacing:.06em;text-transform:uppercase;background:var(--court);color:var(--surface);border:0;border-radius:8px;padding:10px 14px;cursor:pointer}
 .knop.licht{background:var(--court-soft);color:var(--court)}
@@ -137,12 +137,12 @@ function toonLogin() {
       <button class="link" id="naarAanvraag">Nog geen code? Vraag er een aan.</button></p></section>`;
   $("#naarAanvraag").addEventListener("click", toonAanvraag);
   zoeklijst($("#lzoek"), "Zoek je naam (min. 3 letters)", q => rpc("ladder_zoek_deelnemer", {p_zoek: q}),
-    (r, i) => `<button data-i="${i}" ${r.heeft_code ? "" : "disabled"}><span>${esc(r.naam)}</span>${r.heeft_code ? "" : `<span class="hint">code nog niet verstuurd</span>`}</button>`,
+    (r, i) => `<button data-i="${i}" ${r.heeft_code ? "" : "disabled"}><span>${esc(r.naam)}</span>${r.heeft_code ? "" : `<span class="hint">nog geen inlogcode – volgt per mail of via de wedstrijdleider</span>`}</button>`,
     p => {
       $("#lzoek").innerHTML = `<div class="rij"><strong>${esc(p.naam)}</strong><button class="link" style="flex:0 0 auto">wijzigen</button></div>`;
       $("#lzoek button").addEventListener("click", toonLogin);
       $("#lcode").hidden = false;
-      $("#lcode").innerHTML = `<label class="hint" for="code">Je persoonlijke code (6 tekens)</label>
+      $("#lcode").innerHTML = `<label class="hint" for="code">Je persoonlijke inlogcode (6 tekens) – niet de referentie van je inschrijving (LAD27-…)</label>
         <div class="rij"><input type="text" id="code" maxlength="6" autocomplete="one-time-code" style="text-transform:uppercase;letter-spacing:.2em">
         <button class="knop" id="login" style="flex:0 0 auto">Aanmelden</button></div>`;
       const go = async () => {
@@ -282,9 +282,10 @@ function wedstrijdKaart(p, w) {
   const k = a => kaart.querySelector(`[data-a="${a}"]`);
   k("bevestigplan")?.addEventListener("click", e => actie(e.target, () => metToken("ladder_plan_bevestig", {p_wedstrijd: w.id}), m));
   kaart.querySelectorAll('[data-a="plan"]').forEach(b => b.addEventListener("click", e => {
-    const v = e.target.closest(".rij").querySelector("input").value;
-    if (!v) return;
-    actie(e.target, () => metToken("ladder_plan", {p_wedstrijd: w.id, p_moment: new Date(v).toISOString()}), m);
+    const rij = e.target.closest(".rij");
+    const d = rij.querySelector(".pdatum").value, u = rij.querySelector(".puur").value;
+    if (!d) return;
+    actie(e.target, () => metToken("ladder_plan", {p_wedstrijd: w.id, p_moment: new Date(`${d}T${u}`).toISOString()}), m);
   }));
   k("uitslag")?.addEventListener("click", e => {
     const ge = kaart.querySelector(".ge").value, gt = kaart.querySelector(".gt").value;
@@ -301,7 +302,10 @@ function wedstrijdKaart(p, w) {
   });
   return kaart;
   function planHTML() {
-    return `<div class="rij"><input type="datetime-local" aria-label="Datum en uur">
+    const uren = [];
+    for (let h = 7; h <= 22; h++) for (const m of ["00", "30"]) uren.push(`${String(h).padStart(2, "0")}:${m}`);
+    return `<div class="rij"><input type="date" class="pdatum" aria-label="Datum">
+      <select class="puur" aria-label="Uur">${uren.map(u => `<option ${u === "19:00" ? "selected" : ""}>${u}</option>`).join("")}</select>
       <button class="knop licht" data-a="plan" style="flex:0 0 auto">Voorstellen</button></div>
       <div class="hint">Minstens 3 dagen vooruit; de tegenpartij bevestigt binnen 72 uur. Boek zelf het terrein.</div>`;
   }
