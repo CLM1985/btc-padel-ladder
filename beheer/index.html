@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>BTC Padel Beheer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@600;700;800&family=Montserrat:wght@400;500;600&display=swap">
+<style>
+/* Layout: padelrubriek-kop; na aanmelden drie tabbladen: leden & codes, kapiteins, logboek */
+:root{
+  --bg:#F3F1E9; --surface:#FFFFFF; --band:#DFE7EE; --fg:#152B46; --muted:#55657A; --line:#DED7C8;
+  --title:#152B46; --title2:#435B28; --accent:#435B28; --accent-ink:#FFFFFF; --soft:#DCE4D2;
+  --lime:#C5E75A; --warn:#9A6F12; --warn-soft:#F5ECD4; --bad:#A5432A; --bad-soft:#F3DED6;
+  --display:"League Spartan","Arial Narrow",Arial,sans-serif;
+  --body:"Montserrat",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0E1A2A; --surface:#152B46; --band:#1B3554; --fg:#F3F1E9; --muted:#A3B1C1; --line:#2A4566;
+  --title:#FFFFFF; --title2:#C5E75A; --accent:#C5E75A; --accent-ink:#152B46; --soft:#26341F;
+  --warn:#E7C46E; --warn-soft:#3A3424; --bad:#E58B6C; --bad-soft:#3D2620; color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5}
+[hidden]{display:none!important}
+.wrap{max-width:960px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{background:var(--band)}
+header .wrap{display:flex;gap:16px;align-items:center;padding-block:20px 22px}
+header img{width:50px;height:auto;background:#fff;border-radius:4px;padding:4px}
+.eyebrow{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--title2);margin:0 0 6px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,5vw,40px);line-height:.95;margin:0;text-transform:uppercase;color:var(--title)}
+h1 span{color:var(--title2)}
+h1::after{content:"";display:block;width:28px;height:3px;background:var(--lime);border-radius:2px;margin-top:8px}
+.who{margin-left:auto;text-align:right;font-size:14px;display:grid;gap:4px;justify-items:end}
+main .wrap{padding-block:24px 48px;display:grid;gap:20px}
+h2{font-family:var(--display);font-weight:700;font-size:21px;text-transform:uppercase;margin:0;color:var(--title)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:grid;gap:12px;min-width:0}
+label{display:grid;gap:4px;font-weight:600;font-size:14px}
+input{font:400 15px var(--body);padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);width:100%}
+.btn{font:600 14px var(--body);padding:8px 14px;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn:disabled{opacity:.5;cursor:default}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.hits{display:grid;gap:4px}
+.hit{text-align:left;font:500 15px var(--body);padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);cursor:pointer}
+.hit[aria-pressed=true]{border-color:var(--accent);background:var(--soft)}
+.msg{font-size:14px;color:var(--muted);margin:0}
+.err{color:var(--bad);font-size:14px;margin:0}
+.ok{color:var(--accent);font-size:14px;margin:0;font-weight:600}
+.tabs{display:flex;flex-wrap:wrap;gap:6px}
+.tab{font:600 14px var(--body);padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+.tab[aria-selected=true]{background:var(--title);border-color:var(--title);color:var(--surface)}
+.chip{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--soft);color:var(--accent)}
+.chip.warn{background:var(--warn-soft);color:var(--warn)}
+.chip.bad{background:var(--bad-soft);color:var(--bad)}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.roles{display:flex;flex-wrap:wrap;gap:6px}
+.roles label{display:inline-flex;gap:6px;align-items:center;font-weight:500;font-size:13px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;cursor:pointer}
+.roles input{width:auto;margin:0}
+.codebox{background:var(--warn-soft);border:1px solid var(--warn);border-radius:10px;padding:14px;display:grid;gap:8px}
+.codebox .code{font:700 32px/1 var(--display);letter-spacing:.2em;color:var(--fg);font-variant-numeric:tabular-nums;user-select:all}
+.confirm{display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap;background:var(--warn-soft);border-radius:6px;padding:4px 8px;font-size:13px}
+@media (max-width:560px){header .wrap{flex-wrap:wrap}.who{margin-left:0;text-align:left;justify-items:start}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <img src="data:image/jpeg;base64,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" alt="BTC Wemmel">
+  <div><p class="eyebrow">BTC Wemmel · padel</p><h1>Toegang <span>beheer</span></h1></div>
+  <div class="who" id="who" hidden><span id="whoName"></span><button class="btn ghost" id="logout" type="button">Afmelden</button></div>
+</div></header>
+
+<main><div class="wrap">
+  <section id="login" class="card" aria-labelledby="lt">
+    <h2 id="lt">Aanmelden als beheerder</h2>
+    <label for="zoek">Je naam<input id="zoek" autocomplete="off" placeholder="Typ minstens 3 letters"></label>
+    <div class="hits" id="hits" role="group" aria-label="Gevonden leden"></div>
+    <label for="code">Persoonlijke code<input id="code" autocomplete="one-time-code" maxlength="6" placeholder="6 tekens" style="text-transform:uppercase"></label>
+    <button class="btn" id="doLogin" type="button" disabled style="justify-self:start">Aanmelden</button>
+    <p class="err" id="loginErr" role="alert"></p>
+  </section>
+
+  <section id="app" hidden style="display:grid;gap:16px">
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" data-k="leden" aria-selected="true">Leden &amp; codes</button>
+      <button class="tab" role="tab" data-k="kapiteins" aria-selected="false">Kapiteins</button>
+      <button class="tab" role="tab" data-k="logboek" aria-selected="false">Logboek</button>
+    </div>
+
+    <div id="v-leden" class="card">
+      <h2>Leden &amp; codes</h2>
+      <label for="lzoek">Zoek een lid op naam of lidnummer<input id="lzoek" autocomplete="off" placeholder="Minstens 2 tekens"></label>
+      <div id="codebox"></div>
+      <div id="ltabel"><p class="msg">Zoek een lid om een code aan te maken of een rol toe te kennen. Kapitein is automatisch: dat volgt uit de interclubploegen.</p></div>
+    </div>
+
+    <div id="v-kapiteins" class="card" hidden>
+      <h2>Kapiteins</h2>
+      <p class="msg">Kapiteins worden automatisch gekoppeld op naam. Lukt dat niet, vul dan het lidnummer in.</p>
+      <div id="ktabel"></div>
+    </div>
+
+    <div id="v-logboek" class="card" hidden>
+      <h2>Logboek</h2>
+      <div id="logtabel"></div>
+    </div>
+  </section>
+</div></main>
+
+<script>
+const URL_ = "https://povgjkvmzfrhhaxfanwn.supabase.co/rest/v1/rpc/";
+const KEY = "sb_publishable_LfcbY6X1DgOBFW1rH3Umnw__RdObpur";
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const ROLLEN = [["commissie","Commissie"],["bestuur","Bestuur"],["wedstrijdleider","Wedstrijdleider"],["beheerder","Beheerder"]];
+let token = null, gekozen = null, mij = null, leden = [], bevestig = null;
+try { token = localStorage.getItem("btc-club-token"); } catch (e) {}
+
+async function rpc(fn, args) {
+  const r = await fetch(URL_ + fn, { method: "POST", headers: { "apikey": KEY, "Authorization": "Bearer " + KEY, "Content-Type": "application/json" }, body: JSON.stringify(args || {}) });
+  if (r.status === 401 || r.status === 403 || r.status === 404) throw new Error("De clublogin is nog niet vrijgegeven.");
+  if (!r.ok) throw new Error("Server antwoordt niet (" + r.status + ").");
+  return r.json();
+}
+
+// ---- aanmelden ----
+let zt;
+$("zoek").addEventListener("input", () => {
+  gekozen = null; $("doLogin").disabled = true; clearTimeout(zt);
+  const t = $("zoek").value.trim();
+  if (t.length < 3) { $("hits").innerHTML = ""; return; }
+  zt = setTimeout(async () => {
+    try {
+      const res = await rpc("club_zoek", { p_term: t });
+      $("hits").innerHTML = res.length ? res.map(h => `<button class="hit" type="button" data-id="${h.id}" aria-pressed="false">${esc(h.naam)}</button>`).join("") : `<p class="msg">Geen lid met een code gevonden.</p>`;
+    } catch (err) { $("hits").innerHTML = `<p class="err">${esc(err.message)}</p>`; }
+  }, 250);
+});
+$("hits").addEventListener("click", e => {
+  const b = e.target.closest(".hit"); if (!b) return;
+  gekozen = +b.dataset.id;
+  $("hits").querySelectorAll(".hit").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  $("doLogin").disabled = false; $("code").focus();
+});
+$("doLogin").addEventListener("click", login);
+$("code").addEventListener("keydown", e => { if (e.key === "Enter" && gekozen) login(); });
+async function login() {
+  $("loginErr").textContent = "";
+  try {
+    const r = await rpc("club_login", { p_speler: gekozen, p_code: $("code").value });
+    if (r.fout) { $("loginErr").textContent = "Aanmelden lukte niet: " + r.fout + "."; return; }
+    token = r.token; try { localStorage.setItem("btc-club-token", token); } catch (e) {}
+    $("code").value = ""; await start();
+  } catch (err) { $("loginErr").textContent = err.message; }
+}
+$("logout").addEventListener("click", async () => {
+  try { await rpc("club_logout", { p_token: token }); } catch (e) {}
+  token = null; try { localStorage.removeItem("btc-club-token"); } catch (e) {}
+  $("app").hidden = true; $("who").hidden = true; $("login").hidden = false;
+});
+
+async function start() {
+  if (!token) return;
+  const r = await rpc("club_mij", { p_token: token });
+  if (r.fout) { token = null; try { localStorage.removeItem("btc-club-token"); } catch (e) {} return; }
+  mij = r;
+  if (!mij.onderdelen.beheer) {
+    $("loginErr").textContent = "Je bent aangemeld als " + mij.naam + ", maar je bent geen beheerder.";
+    $("login").hidden = false; $("app").hidden = true; return;
+  }
+  $("whoName").textContent = mij.naam; $("who").hidden = false; $("login").hidden = true; $("app").hidden = false;
+}
+
+// ---- tabbladen ----
+document.querySelector(".tabs").addEventListener("click", e => {
+  const b = e.target.closest(".tab"); if (!b) return;
+  document.querySelectorAll(".tab").forEach(x => x.setAttribute("aria-selected", String(x === b)));
+  ["leden","kapiteins","logboek"].forEach(k => $("v-" + k).hidden = k !== b.dataset.k);
+  if (b.dataset.k === "kapiteins") kapiteins();
+  if (b.dataset.k === "logboek") logboek();
+});
+
+// ---- leden & codes ----
+let lt;
+$("lzoek").addEventListener("input", () => { clearTimeout(lt); lt = setTimeout(zoekLeden, 300); });
+async function zoekLeden() {
+  const t = $("lzoek").value.trim();
+  if (t.length < 2) { $("ltabel").innerHTML = ""; return; }
+  const r = await rpc("club_beheer_zoek", { p_token: token, p_term: t });
+  if (r.fout) { $("ltabel").innerHTML = `<p class="err">${esc(r.fout)}</p>`; return; }
+  leden = r.leden; tekenLeden();
+}
+function tekenLeden() {
+  if (!leden.length) { $("ltabel").innerHTML = `<p class="msg">Geen lid gevonden in de laatste twee ledenjaren.</p>`; return; }
+  $("ltabel").innerHTML = `<div class="tbl"><table><thead><tr><th>Lid</th><th>Code</th><th>Rollen</th><th></th></tr></thead><tbody>${leden.map(l => `
+    <tr><td><b>${esc(l.naam)}</b><br><span class="msg">#${l.id}${l.jaar < new Date().getFullYear() ? " · lid " + l.jaar : ""}${l.kapitein ? ' · <span class="chip">kapitein</span>' : ""}</span></td>
+      <td>${l.code ? `<span class="chip">actief</span>${l.geblokkeerd ? ' <span class="chip bad">geblokkeerd</span>' : ""}<br><span class="msg">sinds ${new Date(l.code_sinds).toLocaleDateString("nl-BE")}</span>` : '<span class="chip warn">geen code</span>'}</td>
+      <td><div class="roles">${ROLLEN.map(([k, n]) => `<label><input type="checkbox" data-rol="${k}" data-id="${l.id}" ${l.rollen.includes(k) ? "checked" : ""}>${n}</label>`).join("")}</div></td>
+      <td>${bevestig === l.id
+        ? `<span class="confirm">${l.code ? "Oude code vervalt." : ""} Aanmaken? <button class="btn" data-maak="${l.id}" type="button">Ja</button><button class="btn ghost" data-annuleer type="button">Nee</button></span>`
+        : `<button class="btn ghost" data-vraag="${l.id}" type="button">${l.code ? "Nieuwe code" : "Code aanmaken"}</button>`}</td></tr>`).join("")}</tbody></table></div>`;
+}
+$("ltabel").addEventListener("click", async e => {
+  const v = e.target.closest("[data-vraag]"), m = e.target.closest("[data-maak]");
+  if (v) { bevestig = +v.dataset.vraag; tekenLeden(); return; }
+  if (e.target.closest("[data-annuleer]")) { bevestig = null; tekenLeden(); return; }
+  if (m) {
+    bevestig = null;
+    const r = await rpc("club_beheer_code", { p_token: token, p_speler: +m.dataset.maak });
+    if (r.fout) { $("codebox").innerHTML = `<p class="err">${esc(r.fout)}</p>`; return; }
+    $("codebox").innerHTML = `<div class="codebox" role="status"><span>Nieuwe code voor <b>${esc(r.naam)}</b>. Deze code is maar één keer zichtbaar. Geef ze persoonlijk door.</span>
+      <span class="code" id="nieuweCode">${esc(r.code)}</span>
+      <span><button class="btn" id="kopieer" type="button">Kopieer</button> <button class="btn ghost" id="sluit" type="button">Ik heb ze genoteerd</button></span></div>`;
+    $("kopieer").onclick = async () => { try { await navigator.clipboard.writeText(r.code); $("kopieer").textContent = "Gekopieerd"; } catch (err) { const s = getSelection(); s.selectAllChildren($("nieuweCode")); } };
+    $("sluit").onclick = () => { $("codebox").innerHTML = ""; };
+    zoekLeden();
+  }
+});
+$("ltabel").addEventListener("change", async e => {
+  const c = e.target.closest("[data-rol]"); if (!c) return;
+  c.disabled = true;
+  const r = await rpc("club_beheer_rol", { p_token: token, p_speler: +c.dataset.id, p_rol: c.dataset.rol, p_aan: c.checked });
+  if (r.fout) { c.checked = !c.checked; $("codebox").innerHTML = `<p class="err">${esc(r.fout)}</p>`; }
+  else { $("codebox").innerHTML = `<p class="ok">Rol ${c.checked ? "toegekend" : "ingetrokken"}.</p>`; }
+  c.disabled = false;
+});
+
+// ---- kapiteins ----
+async function kapiteins() {
+  $("ktabel").innerHTML = `<p class="msg">Laden…</p>`;
+  const r = await rpc("club_beheer_kapiteins", { p_token: token });
+  if (r.fout) { $("ktabel").innerHTML = `<p class="err">${esc(r.fout)}</p>`; return; }
+  const k = r.kapiteins, nok = k.filter(x => x.koppeling === "niet gekoppeld").length, zonder = k.filter(x => x.speler_id && !x.code).length;
+  $("ktabel").innerHTML = `<p class="msg">${k.length} ploegen · ${nok ? `<span class="chip bad">${nok} niet gekoppeld</span>` : '<span class="chip">alle gekoppeld</span>'} · ${zonder} kapiteins nog zonder code</p>
+    <div class="tbl"><table><thead><tr><th>Ploeg</th><th>Kapitein</th><th>Koppeling</th><th>Code</th><th>Lidnummer</th></tr></thead><tbody>${k.map(x => `
+      <tr><td>${esc(x.ploeg)}<br><span class="msg">${esc(x.reeks)}</span></td><td>${esc(x.kapitein)}</td>
+      <td><span class="chip ${x.koppeling === "niet gekoppeld" ? "bad" : ""}">${esc(x.koppeling)}</span></td>
+      <td>${x.speler_id ? (x.code ? '<span class="chip">actief</span>' : '<span class="chip warn">geen</span>') : ""}</td>
+      <td><span style="display:inline-flex;gap:6px"><input id="k${x.ploeg_id}" inputmode="numeric" style="width:9em" value="${x.speler_id ?? ""}" aria-label="Lidnummer kapitein ${esc(x.ploeg)}"><button class="btn ghost" data-koppel="${x.ploeg_id}" type="button">Zet</button></span></td></tr>`).join("")}</tbody></table></div><p id="kmsg" class="msg"></p>`;
+}
+$("ktabel").addEventListener("click", async e => {
+  const b = e.target.closest("[data-koppel]"); if (!b) return;
+  const id = +b.dataset.koppel, v = $("k" + id).value.trim();
+  const r = await rpc("club_beheer_koppel", { p_token: token, p_ploeg: id, p_speler: v ? +v : null });
+  if (r.fout) { $("kmsg").className = "err"; $("kmsg").textContent = r.fout; return; }
+  kapiteins();
+});
+
+// ---- logboek ----
+async function logboek() {
+  const r = await rpc("club_beheer_logboek", { p_token: token });
+  if (r.fout) { $("logtabel").innerHTML = `<p class="err">${esc(r.fout)}</p>`; return; }
+  $("logtabel").innerHTML = r.regels.length ? `<div class="tbl"><table><thead><tr><th>Moment</th><th>Door</th><th>Actie</th><th>Lid</th><th>Detail</th></tr></thead><tbody>${r.regels.map(l => `
+    <tr><td class="num">${new Date(l.moment).toLocaleString("nl-BE", { dateStyle: "short", timeStyle: "short" })}</td><td>${esc(l.door || "systeem")}</td><td>${esc(l.actie)}</td><td>${esc(l.lid)}</td><td>${esc(l.detail)}</td></tr>`).join("")}</tbody></table></div>` : `<p class="msg">Nog geen acties.</p>`;
+}
+
+start().catch(err => { $("loginErr").textContent = err.message; });
+</script>
+</body>
+</html>
