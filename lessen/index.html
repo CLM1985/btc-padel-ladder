@@ -132,6 +132,20 @@ th{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mut
 .namen .r{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .namen select{font-size:.78rem;padding:2px 4px}
 .acties{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.domeinen{display:flex;flex-direction:column;gap:10px}
+.domeinen .groep{display:flex;flex-direction:column;gap:6px}
+.domeinen .opties{display:flex;flex-wrap:wrap;gap:6px}
+.dom{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:5px 11px;font-size:.85rem;cursor:pointer;background:var(--surface)}
+.dom{position:relative}.dom input{position:absolute;opacity:0;pointer-events:none}
+.dom:has(input:checked){background:var(--accent-soft);border-color:var(--accent);font-weight:600}
+.dom:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.dom:has(input:disabled:not(:checked)){opacity:.45;cursor:not-allowed}
+textarea{font:inherit;width:100%;min-height:72px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);resize:vertical}
+.aanvragen{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:12px}
+.aanvraag{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface);display:flex;flex-direction:column;gap:8px}
+.aanvraag.gekozen{border:2px solid var(--accent);padding:11px 13px}
+.aanvraag .wens{font-size:.88rem;background:var(--sunk);border-radius:8px;padding:8px 10px;white-space:pre-wrap}
+.aanvraagvak{background:var(--accent-soft);border-radius:8px;padding:10px 12px;font-size:.88rem;display:flex;flex-direction:column;gap:6px}
 </style>
 </head>
 <body>
@@ -145,7 +159,8 @@ th{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mut
   </header>
 
   <nav class="tabs" role="tablist" aria-label="Lessen">
-    <button class="tab" role="tab" data-tab="inschrijven" aria-selected="true">Inschrijven</button>
+    <button class="tab" role="tab" data-tab="inschrijven" aria-selected="true">Groepslessen</button>
+    <button class="tab" role="tab" data-tab="prive" aria-selected="false">Privéles</button>
     <button class="tab" role="tab" data-tab="mijn" aria-selected="false">Mijn lessen</button>
     <button class="tab" role="tab" data-tab="trainer" aria-selected="false" id="tabTrainer" hidden>Trainer</button>
   </nav>
@@ -160,18 +175,36 @@ th{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mut
           <div><div class="lbl">Speelsterkte</div><div style="font-family:var(--f-display);font-weight:700;font-size:1.5rem" id="kSterk">–</div></div>
           <div><div class="lbl">Je kunt lessen kiezen op</div><div class="chips" id="kNiv"></div></div>
         </div>
-        <div class="seg" role="group" aria-label="Pakket">
-          <button type="button" data-soort="groep" aria-pressed="true">Groepsles (3 spelers)</button>
-          <button type="button" data-soort="individueel" aria-pressed="false">Individuele les</button>
-        </div>
       </div>
       <div class="filters">
         <label class="veld"><span class="lbl">Dag</span><select id="fDag"><option value="">Alle dagen</option><option value="1">Maandag</option><option value="2">Dinsdag</option><option value="3">Woensdag</option><option value="4">Donderdag</option><option value="5">Vrijdag</option><option value="6">Zaterdag</option><option value="7">Zondag</option></select></label>
         <label class="veld"><span class="lbl">Trainer</span><select id="fTrainer"><option value="">Alle trainers</option></select></label>
       </div>
-      <div class="info">Bij inschrijving betaal je <b>50% voorschot</b>, de rest als de les volzet is en de trainer bevestigt. Gaat de les niet door (een groepsles zonder 3 spelers 48 uur vooraf), dan krijg je je voorschot terug. Betalen gebeurt voorlopig via de tennisschool; de betaalmanier volgt.</div>
+      <div class="info">Bij inschrijving betaal je <b>50% voorschot</b>, de rest als de les volzet is en de trainer bevestigt. Gaat de les niet door (geen 3 spelers 48 uur vooraf), dan krijg je je voorschot terug. Een privéles vraag je aan bij het tabblad <b>Privéles</b>. Betalen gebeurt voorlopig via de tennisschool; de betaalmanier volgt.</div>
     </div>
     <div id="momenten"></div>
+  </section>
+
+  <!-- ===================== Privéles ===================== -->
+  <section id="v-prive" hidden>
+    <div class="grid2">
+      <section class="panel" aria-labelledby="priveTitel">
+        <h2 id="priveTitel">Privéles aanvragen</h2>
+        <div class="info">Kies je coach en waar je aan wil werken. De coach neemt contact met je op om momenten af te spreken (dat mag ook mondeling) en plant de les(sen) in. Zodra dat gebeurd is, staan ze bij <b>Mijn lessen</b>. Enkel jij en je coach zien je privélessen.</div>
+        <label class="veld"><span class="lbl">Coach</span><select id="pCoach"></select></label>
+        <div class="veld"><span class="lbl">Domein (kies 1 tot 3)</span><div class="domeinen" id="pDomeinen"></div></div>
+        <label class="veld"><span class="lbl">Wensen (optioneel)</span><textarea id="pBericht" maxlength="500" placeholder="Bv. wanneer je kan, hoeveel lessen je ongeveer wil, wat je wil verbeteren"></textarea></label>
+        <div class="akkoord">
+          <label><input type="checkbox" id="pAkkoord"> Ik betaal 50% voorschot per ingeplande les. De rest betaal ik zodra de coach de les bevestigt.</label>
+          <span class="muted" style="font-size:.82rem">Afzeggen na bevestiging: het voorschot blijft bij de club.</span>
+          <button type="button" class="primary" id="pVerstuur">Aanvraag versturen</button>
+        </div>
+      </section>
+      <section class="panel" aria-labelledby="mijnAanvrTitel" style="min-width:0">
+        <h2 id="mijnAanvrTitel">Mijn aanvragen</h2>
+        <div id="pLijst"></div>
+      </section>
+    </div>
   </section>
 
   <!-- ===================== Mijn lessen ===================== -->
@@ -180,27 +213,35 @@ th{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mut
   </section>
 
   <!-- ===================== Trainer ===================== -->
-  <section id="v-trainer" hidden>
+  <section id="v-trainer" hidden style="display:flex;flex-direction:column;gap:14px">
+    <section class="panel" aria-labelledby="aanvrTitel">
+      <div class="lijn" style="justify-content:space-between"><h2 id="aanvrTitel">Aanvragen privéles</h2><span class="muted" style="font-size:.82rem">Spreek momenten af met de lesnemer en klik dan op Inplannen.</span></div>
+      <div id="tAanvragen"></div>
+    </section>
     <div class="grid2">
       <section class="panel" id="nieuwPaneel" aria-labelledby="nieuwTitel">
         <h2 id="nieuwTitel">Nieuwe lesmomenten</h2>
         <div class="seg" role="group" aria-label="Pakket" id="tSoort">
           <button type="button" data-soort="groep" aria-pressed="true">Groepsles (3)</button>
-          <button type="button" data-soort="individueel" aria-pressed="false">Individueel (1)</button>
+          <button type="button" data-soort="individueel" aria-pressed="false">Privéles (1)</button>
+        </div>
+        <div class="aanvraagvak" id="tAanvraagVak" hidden>
+          <label class="veld"><span class="lbl">Voor aanvraag</span><select id="tAanvraag"></select></label>
+          <span id="tAanvraagInfo"></span>
         </div>
         <div class="form2">
           <label class="veld"><span class="lbl">Eerste datum</span><input type="date" id="tDatum"></label>
           <label class="veld"><span class="lbl">Uur</span><input type="time" id="tUur" value="19:00" step="900"></label>
           <label class="veld"><span class="lbl">Duur</span><select id="tDuur"><option value="60">60 min</option><option value="90">90 min</option></select></label>
           <label class="veld"><span class="lbl">Terrein</span><select id="tTerrein"><option>1</option><option>2</option><option>3</option><option selected>4</option></select></label>
-          <label class="veld"><span class="lbl">Niveau van</span><select id="tMin"></select></label>
-          <label class="veld"><span class="lbl">tot</span><select id="tMax"></select></label>
+          <label class="veld" data-niv><span class="lbl">Niveau van</span><select id="tMin"></select></label>
+          <label class="veld" data-niv><span class="lbl">tot</span><select id="tMax"></select></label>
           <label class="veld"><span class="lbl">Aantal weken</span><select id="tWeken"><option value="1">1 (enkel deze datum)</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5" selected>5</option></select></label>
         </div>
         <div id="tPatroonVak" hidden><label class="veld"><span class="lbl">Vast patroon</span><select id="tPatroon"></select></label></div>
         <div id="tThemas" style="display:flex;flex-direction:column;gap:6px"></div>
         <div class="muted" style="font-size:.82rem" id="tGrens"></div>
-        <div class="muted" style="font-size:.82rem">Meerdere weken samen = één <b>reeks</b>: leden boeken de volledige reeks. Vanaf 72 uur vooraf kan iemand nog één les van een groepsreeks boeken als 2 van de 3 plaatsen bezet zijn.</div>
+        <div class="muted" style="font-size:.82rem" id="tReeksUitleg">Meerdere weken samen = één <b>reeks</b>: leden boeken de volledige reeks. Vanaf 72 uur vooraf kan iemand nog één les van een groepsreeks boeken als 2 van de 3 plaatsen bezet zijn.</div>
         <button type="button" id="tControle">Controleren</button>
         <div id="tUitslag"></div>
         <div class="muted" style="font-size:.8rem" id="tPiek"></div>
@@ -230,7 +271,7 @@ const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<
 const TOKEN = BTC.token;
 const LADDER = [50, 100, 200, 300, 400, 500, 700, 1000];
 const DAG = ["", "ma", "di", "wo", "do", "vr", "za", "zo"], MND = ["jan", "feb", "mrt", "apr", "mei", "jun", "jul", "aug", "sep", "okt", "nov", "dec"];
-let SEL = null, D = null, T = null, SOORT = "groep", TSOORT = "groep", OPEN = null, TAB = "inschrijven", VOORSTEL = null;
+let SEL = null, D = null, T = null, SOORT = "groep", TSOORT = "groep", OPEN = null, TAB = "inschrijven", VOORSTEL = null, PLAN = null;
 
 async function rpc(fn, args) {
   const r = await fetch(API + fn, { method: "POST", cache: "no-store", headers: { apikey: KEY, Authorization: "Bearer " + KEY, "Content-Type": "application/json" }, body: JSON.stringify({ p_token: TOKEN, ...(args || {}) }) });
@@ -243,8 +284,10 @@ const d = (s) => new Date(String(s).replace(" ", "T"));
 const isoDag = (x) => ((x.getDay() + 6) % 7) + 1;
 const fmt = (s) => { const x = d(s); return `${DAG[isoDag(x)]} ${x.getDate()} ${MND[x.getMonth()]} · ${String(x.getHours()).padStart(2, "0")}:${String(x.getMinutes()).padStart(2, "0")}`; };
 const eind = (s, duur) => { const x = new Date(d(s).getTime() + duur * 60000); return `${String(x.getHours()).padStart(2, "0")}:${String(x.getMinutes()).padStart(2, "0")}`; };
-const niv = (m) => m.niveau_min === m.niveau_max ? "P" + m.niveau_min : `P${m.niveau_min}–P${m.niveau_max}`;
-const pakket = (s) => s === "groep" ? "Groepsles" : "Individuele les";
+const niv = (m) => m.soort === "individueel" ? "privé" : m.niveau_min === m.niveau_max ? "P" + m.niveau_min : `P${m.niveau_min}–P${m.niveau_max}`;
+const pakket = (s) => s === "groep" ? "Groepsles" : "Privéles";
+const AST = { open: ["Wacht op de coach", "warn"], ingepland: ["Ingepland", "ok"], afgerond: ["Afgerond", ""], afgewezen: ["Niet mogelijk", "bad"], ingetrokken: ["Ingetrokken", ""] };
+const datumNL = (s) => { const x = new Date(s); return `${x.getDate()} ${MND[x.getMonth()]}`; };
 const weeknr = (x) => { const t = new Date(Date.UTC(x.getFullYear(), x.getMonth(), x.getDate())); const dn = t.getUTCDay() || 7; t.setUTCDate(t.getUTCDate() + 4 - dn); const y = new Date(Date.UTC(t.getUTCFullYear(), 0, 1)); return Math.ceil(((t - y) / 86400000 + 1) / 7); };
 function melding(t, soort) { const m = $("melding"); m.textContent = t || ""; m.className = "melding " + (soort || ""); }
 const STATUS = { open: ["Open", ""], bevestigd: ["Bevestigd", "ok"], vervallen: ["Vervallen", "bad"], gesloten: ["Gesloten", "bad"], voorbij: ["Voorbij", ""], voorgesteld: ["Wacht op terrein", "paars"] };
@@ -261,7 +304,7 @@ async function laad() {
   const huidig = $("fTrainer").value;
   $("fTrainer").innerHTML = `<option value="">Alle trainers</option>` + tr.map((t) => `<option ${t === huidig ? "selected" : ""}>${esc(t)}</option>`).join("");
   $("tabTrainer").hidden = !D.trainer;
-  tekenMomenten(); tekenMijn();
+  tekenMomenten(); tekenMijn(); tekenPrive();
   if (D.trainer) await laadTrainer();
 }
 
@@ -276,7 +319,7 @@ function tekenMomenten() {
   Object.values(reeksen).forEach((ms) => { if (!dag || ms.some(pas)) items.push({ reeks: true, start: ms[0].start, ms }); });
   los.forEach((m) => items.push({ reeks: false, start: m.start, ms: [m] }));
   items.sort((a, b) => d(a.start) - d(b.start));
-  if (!items.length) { $("momenten").innerHTML = `<div class="leeg">Geen ${SOORT === "groep" ? "groepslessen" : "individuele lessen"} op jouw niveau in de komende 5 weken${dag || tr ? " met deze filter" : ""}.</div>`; return; }
+  if (!items.length) { $("momenten").innerHTML = `<div class="leeg">Geen groepslessen op jouw niveau in de komende 5 weken${dag || tr ? " met deze filter" : ""}. Een privéles kun je aanvragen bij het tabblad Privéles.</div>`; return; }
   const weken = {};
   items.forEach((it) => { const w = weeknr(d(it.start)); (weken[w] = weken[w] || []).push(it); });
   $("momenten").innerHTML = Object.entries(weken).map(([w, its]) => `<div class="week">Start in week ${w}</div><div class="kaarten">${its.map((it) => it.reeks ? reeksKaart(it.ms) : kaart(it.ms[0], false)).join("")}</div>`).join("");
@@ -339,29 +382,68 @@ function kaart(m, losInReeks) {
     ${knop}${akk}</article>`;
 }
 
+/* ---------------------------------------------------------------- privéles */
+function domeinKeuze() { return [...document.querySelectorAll("#pDomeinen input:checked")].map((i) => i.value); }
+function tekenPrive() {
+  const oudC = $("pCoach").value, oudD = domeinKeuze();
+  $("pCoach").innerHTML = `<option value="">Kies een coach</option>` + (D.coaches || []).map((c) => `<option value="${c.id}" ${String(c.id) === oudC ? "selected" : ""}>${esc(c.naam)}</option>`).join("");
+  const groepen = (D.themas || []).reduce((g, t) => ((g[t.groep] = g[t.groep] || []).push(t), g), {});
+  $("pDomeinen").innerHTML = Object.entries(groepen).map(([g, ts]) => `<div class="groep"><span class="muted" style="font-size:.78rem">${esc(g)}</span><div class="opties">${ts.map((t) =>
+    `<label class="dom"><input type="checkbox" value="${t.code}" ${oudD.includes(t.code) ? "checked" : ""}>${esc(t.naam)}</label>`).join("")}</div></div>`).join("");
+  domeinGrens();
+  const L = D.aanvragen || [];
+  $("pLijst").innerHTML = L.length ? `<div class="aanvragen">${L.map((a) => {
+    const st = AST[a.status] || [a.status, ""];
+    return `<article class="aanvraag"><div class="lijn" style="justify-content:space-between"><b>${esc(a.coach)}</b><span class="pill ${st[1]}">${st[0]}</span></div>
+      <div class="chips">${(a.themas || []).map((t) => `<span class="chip">${esc(t)}</span>`).join("")}</div>
+      ${a.bericht ? `<div class="wens">${esc(a.bericht)}</div>` : ""}
+      <div class="muted" style="font-size:.82rem">Aangevraagd op ${datumNL(a.aangemaakt)}${a.lessen ? ` · ${a.lessen} ${a.lessen === 1 ? "les" : "lessen"} ingepland (zie Mijn lessen)` : ""}${a.reden ? ` · ${esc(a.reden)}` : ""}</div>
+      ${a.status === "open" ? `<button type="button" data-act="intrekken" data-id="${a.id}">Aanvraag intrekken</button>` : ""}</article>`; }).join("")}</div>`
+    : `<div class="leeg">Nog geen aanvragen.</div>`;
+}
+function domeinGrens() {
+  const n = domeinKeuze().length;
+  document.querySelectorAll("#pDomeinen input").forEach((i) => { i.disabled = !i.checked && n >= 3; });
+}
+async function verstuurAanvraag() {
+  const coach = +$("pCoach").value, dom = domeinKeuze();
+  if (!coach) { melding("Kies een coach.", "fout"); return; }
+  if (!dom.length) { melding("Kies minstens één domein.", "fout"); return; }
+  if (!$("pAkkoord").checked) { melding("Vink eerst het akkoord over het voorschot aan.", "fout"); return; }
+  $("pVerstuur").disabled = true;
+  try {
+    const j = await rpc("club_les_aanvraag", { p_trainer: coach, p_themas: dom, p_bericht: $("pBericht").value, p_akkoord: true });
+    if (j.fout) { melding("Aanvraag lukte niet: " + j.fout + ".", "fout"); return; }
+    $("pBericht").value = ""; $("pAkkoord").checked = false; document.querySelectorAll("#pDomeinen input").forEach((i) => { i.checked = false; });
+    melding("Aanvraag verstuurd. Je coach neemt contact met je op.", "ok"); await laad();
+  } finally { $("pVerstuur").disabled = false; }
+}
+
 /* ---------------------------------------------------------------- mijn lessen */
 function tekenMijn() {
   const L = D.mijn || [];
-  if (!L.length) { $("mijnLijst").innerHTML = `<div class="leeg">Je hebt nog geen lessen. Kies een lesmoment bij Inschrijven.</div>`; return; }
+  if (!L.length) { $("mijnLijst").innerHTML = `<div class="leeg">Je hebt nog geen lessen. Kies een groepsles of vraag een privéles aan.</div>`; return; }
   const groep = (f) => L.filter(f);
   const blok = (titel, ms) => ms.length ? `<div class="week">${titel}</div><div class="kaarten">${ms.map(mijnKaart).join("")}</div>` : "";
   const actief = (x) => ["ingeschreven", "wachtlijst"].includes(x.inschrijving_status);
   $("mijnLijst").innerHTML =
     blok("Bevestigd", groep((x) => actief(x) && x.status === "bevestigd")) +
-    blok("Wacht op spelers", groep((x) => x.inschrijving_status === "ingeschreven" && x.status === "open")) +
+    blok("Privélessen ingepland door je coach", groep((x) => x.soort === "individueel" && x.inschrijving_status === "ingeschreven" && ["voorgesteld", "open"].includes(x.status))) +
+    blok("Wacht op spelers", groep((x) => x.soort === "groep" && x.inschrijving_status === "ingeschreven" && x.status === "open")) +
     blok("Wachtlijst", groep((x) => x.inschrijving_status === "wachtlijst" && ["open", "bevestigd"].includes(x.status))) +
     blok("Afgelopen of niet doorgegaan", groep((x) => !actief(x) || ["vervallen", "gesloten", "voorbij"].includes(x.status)));
 }
 const VOOR = { "te betalen": ["Voorschot te betalen", "warn"], betaald: ["Voorschot betaald ✓", "ok"], "terug te betalen": ["Voorschot wordt terugbetaald", ""], terugbetaald: ["Voorschot terugbetaald ✓", "ok"], behouden: ["Voorschot behouden door de club", "bad"] };
 function mijnKaart(x) {
   const v = VOOR[x.voorschot] || [x.voorschot, ""];
-  const actief = ["ingeschreven", "wachtlijst"].includes(x.inschrijving_status) && ["open", "bevestigd"].includes(x.status);
+  const actief = ["ingeschreven", "wachtlijst"].includes(x.inschrijving_status) && ["open", "bevestigd"].concat(x.soort === "individueel" ? ["voorgesteld"] : []).includes(x.status);
   const rest = x.restbedrag === "te betalen" ? `<span class="pill warn">Restbedrag te betalen</span>` : x.restbedrag === "betaald" ? `<span class="pill ok">Volledig betaald ✓</span>` : "";
   const uitleg = x.status === "open" && x.inschrijving_status === "ingeschreven" && x.soort === "groep"
-    ? `<div class="muted" style="font-size:.82rem">Nog ${x.plaatsen - x.bezet} speler(s) nodig. Is de groep 48 uur vooraf niet vol, dan gaat de les niet door en krijg je je voorschot terug.</div>` : "";
-  const st = x.inschrijving_status === "afgezegd" ? "Afgezegd" : x.inschrijving_status === "uitgeschreven" ? "Uitgeschreven" : (STATUS[x.status] || [x.status])[0];
+    ? `<div class="muted" style="font-size:.82rem">Nog ${x.plaatsen - x.bezet} speler(s) nodig. Is de groep 48 uur vooraf niet vol, dan gaat de les niet door en krijg je je voorschot terug.</div>`
+    : x.soort === "individueel" && ["voorgesteld", "open"].includes(x.status) && actief ? `<div class="muted" style="font-size:.82rem">${x.status === "voorgesteld" ? "Het terrein wordt gereserveerd. " : ""}Je coach bevestigt de les; daarna betaal je het restbedrag.</div>` : "";
+  const st = x.inschrijving_status === "afgezegd" ? "Afgezegd" : x.inschrijving_status === "uitgeschreven" ? "Uitgeschreven" : x.soort === "individueel" && ["voorgesteld", "open"].includes(x.status) ? "Ingepland" : (STATUS[x.status] || [x.status])[0];
   return `<article class="kaart ${actief ? "mijn" : ""}">
-    <div class="kop"><div><div class="wanneer">${fmt(x.start)}–${eind(x.start, x.duur)}</div><div class="muted" style="font-size:.85rem">${pakket(x.soort)} ${niv(x)} · ${esc(x.trainer)} · terrein ${x.terrein}${x.reeks ? " · reeks" : ""}</div>${x.thema ? `<div style="font-size:.88rem">Thema: <b>${esc(x.thema)}</b></div>` : ""}</div><span class="pill ${(STATUS[x.status] || [])[1] || ""}">${st}</span></div>
+    <div class="kop"><div><div class="wanneer">${fmt(x.start)}–${eind(x.start, x.duur)}</div><div class="muted" style="font-size:.85rem">${pakket(x.soort)}${x.soort === "groep" ? " " + niv(x) : ""} · ${esc(x.trainer)} · terrein ${x.terrein}${x.reeks && x.soort === "groep" ? " · reeks" : ""}</div>${x.thema ? `<div style="font-size:.88rem">Thema: <b>${esc(x.thema)}</b></div>` : ""}</div><span class="pill ${(STATUS[x.status] || [])[1] || ""}">${st}</span></div>
     <div class="lijn"><span class="pill ${v[1]}">${v[0]}</span>${rest}</div>${uitleg}
     ${actief ? `<button type="button" data-act="uit" data-id="${x.moment}">${x.status === "bevestigd" && x.inschrijving_status === "ingeschreven" ? "Afzeggen" : "Uitschrijven"}</button>` : ""}</article>`;
 }
@@ -375,8 +457,38 @@ async function laadTrainer() {
   $("tGrens").textContent = `Vroegst ${datumKort(T.vroegst)} (8 dagen vooraf: leden boeken 7 dagen vooraf), laatst ${datumKort(T.laatst)} (5 weken).`;
   $("tPiek").textContent = "Piekuren (max. 1 terrein voor lessen, enkel terrein 4): " + piekTekst(T.piekuren) + ". Geen lessen tijdens interclubthuiswedstrijden of tornooien op BTC.";
   $("agendaUitleg").textContent = "Jouw lesmomenten";
+  tekenAanvragen(); tekenAanvraagKeuze();
   tekenThemas();
   tekenAgenda();
+}
+function tekenAanvragen() {
+  const L = T.aanvragen || [], naam = (c) => ((T.themas || []).find((t) => t.code === c) || { naam: c }).naam;
+  $("tAanvragen").innerHTML = L.length ? `<div class="aanvragen">${L.map((a) => {
+    const st = AST[a.status] || [a.status, ""];
+    return `<article class="aanvraag ${PLAN === a.id ? "gekozen" : ""}"><div class="lijn" style="justify-content:space-between"><b>${esc(a.naam)}</b><span class="pill ${st[1]}">${a.status === "open" ? "Nieuw" : st[0]}</span></div>
+      <div class="muted" style="font-size:.82rem">Niveau ${(a.niveaus || []).map((n) => "P" + n).join(", ") || "–"} · aangevraagd op ${datumNL(a.aangemaakt)}${a.lessen ? ` · ${a.lessen} ${a.lessen === 1 ? "les" : "lessen"} ingepland` : ""}</div>
+      <div class="chips">${(a.themas || []).map((t) => `<span class="chip">${esc(naam(t))}</span>`).join("")}</div>
+      ${a.bericht ? `<div class="wens">${esc(a.bericht)}</div>` : ""}
+      <div class="lijn"><button type="button" class="primary" data-act="plan" data-id="${a.id}">${a.lessen ? "Nog een les inplannen" : "Inplannen"}</button>
+        ${a.status === "open" ? `<button type="button" data-act="afwijzen" data-id="${a.id}" style="color:var(--bad)">Niet mogelijk</button>` : `<button type="button" data-act="afsluiten" data-id="${a.id}">Afsluiten</button>`}</div></article>`; }).join("")}</div>`
+    : `<div class="leeg">Geen open aanvragen.</div>`;
+}
+function tekenAanvraagKeuze() {
+  const L = T.aanvragen || [];
+  if (PLAN && !L.some((a) => a.id === PLAN)) PLAN = null;
+  $("tAanvraag").innerHTML = `<option value="">Kies de aanvraag</option>` + L.map((a) => `<option value="${a.id}" ${a.id === PLAN ? "selected" : ""}>${esc(a.naam)}</option>`).join("");
+  const a = L.find((x) => x.id === PLAN), naam = (c) => ((T.themas || []).find((t) => t.code === c) || { naam: c }).naam;
+  $("tAanvraagInfo").innerHTML = a ? `Domein: <b>${(a.themas || []).map((c) => esc(naam(c))).join(", ")}</b>. De les verschijnt meteen bij ${esc(a.naam)} onder Mijn lessen.` : L.length ? "Een privéles plan je altijd in voor een aanvraag." : "Er zijn geen open aanvragen. Een privéles kan enkel op aanvraag van een lid.";
+  $("tAanvraagVak").hidden = TSOORT !== "individueel";
+  document.querySelectorAll("[data-niv]").forEach((el) => { el.hidden = TSOORT === "individueel"; });
+  $("tReeksUitleg").hidden = TSOORT === "individueel";
+}
+function zetSoort(soort) {
+  TSOORT = soort;
+  document.querySelectorAll("#tSoort button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.soort === soort)));
+  if (soort === "individueel" && +$("tWeken").value === 5) $("tWeken").value = "1";
+  VOORSTEL = null; $("tUitslag").innerHTML = "";
+  tekenAanvraagKeuze(); tekenThemas(true);
 }
 const datumKort = (s) => { const x = new Date(s + "T12:00"); return `${DAG[isoDag(x)]} ${x.getDate()}/${x.getMonth() + 1}`; };
 function piekTekst(p) {
@@ -384,29 +496,32 @@ function piekTekst(p) {
   return Object.entries(per).map(([w, u]) => `${DAG[w]} ${u.join(" en ")}`).join(", ");
 }
 function themaKeuze() { return [...document.querySelectorAll("#tThemas select")].map((s) => s.value); }
-function tekenThemas() {
+function tekenThemas(vanAanvraag) {
   if (!T) return;
-  const n = +$("tWeken").value, oud = themaKeuze();
-  const pats = (T.patronen || []).filter((p) => p.lessen === n);
+  const n = +$("tWeken").value, prive = TSOORT === "individueel";
+  const a = prive ? (T.aanvragen || []).find((x) => x.id === PLAN) : null;
+  const vorig = themaKeuze(), oud = Array.from({ length: n }, (_, i) => a && (vanAanvraag || !vorig[i]) ? a.themas[i % a.themas.length] : vorig[i]);
+  const pats = prive ? [] : (T.patronen || []).filter((p) => p.lessen === n);
   $("tPatroonVak").hidden = !pats.length;
   $("tPatroon").innerHTML = `<option value="">Kies een patroon</option>` + pats.map((p) => `<option value="${p.id}">${esc(p.naam)}</option>`).join("");
   const opts = (sel) => `<option value="">– geen thema –</option>` + Object.entries((T.themas || []).reduce((g, t) => ((g[t.groep] = g[t.groep] || []).push(t), g), {}))
     .map(([g, ts]) => `<optgroup label="${esc(g)}">${ts.map((t) => `<option value="${t.code}" ${t.code === sel ? "selected" : ""}>${esc(t.naam)}</option>`).join("")}</optgroup>`).join("");
   $("tThemas").innerHTML = pats.length ? `<span class="muted" style="font-size:.82rem">Voor een reeks van ${n} lessen is een vast patroon verplicht; het patroon bepaalt de thema's.</span>`
     : Array.from({ length: n }, (_, i) => `<label class="veld"><span class="lbl">Thema les ${i + 1}</span><select aria-label="Thema les ${i + 1}">${opts(oud[i] || "")}</select></label>`).join("")
-      + (n >= 3 ? `<span class="muted" style="font-size:.78rem">Vaste patronen voor reeksen van 3 tot 5 lessen worden nog bepaald door de trainers en de commissie.</span>` : "");
+      + (n >= 3 && !prive ? `<span class="muted" style="font-size:.78rem">Vaste patronen voor reeksen van 3 tot 5 lessen worden nog bepaald door de trainers en de commissie.</span>` : "");
 }
 function reeks() {
   const n = +$("tWeken").value, uur = $("tUur").value, start = $("tDatum").value, th = themaKeuze(), pat = $("tPatroon").value;
   if (!start || !uur) return [];
   const out = [];
   for (let i = 0; i < n; i++) { const x = new Date(start + "T12:00"); x.setDate(x.getDate() + 7 * i); const ds = `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`;
-    out.push({ start: `${ds}T${uur}`, duur: +$("tDuur").value, terrein: +$("tTerrein").value, soort: TSOORT, niveau_min: +$("tMin").value, niveau_max: +$("tMax").value, thema: th[i] || "", patroon: pat || "" }); }
+    out.push({ start: `${ds}T${uur}`, duur: +$("tDuur").value, terrein: +$("tTerrein").value, soort: TSOORT, niveau_min: TSOORT === "individueel" ? 50 : +$("tMin").value, niveau_max: TSOORT === "individueel" ? 1000 : +$("tMax").value, thema: th[i] || "", patroon: pat || "", aanvraag: TSOORT === "individueel" ? PLAN : null }); }
   return out;
 }
 async function controleer() {
   const r = reeks(); VOORSTEL = null;
   if (!r.length) { $("tUitslag").innerHTML = `<p class="melding fout">Kies een datum en een uur.</p>`; return; }
+  if (TSOORT === "individueel" && !PLAN) { $("tUitslag").innerHTML = `<p class="melding fout">Kies eerst de aanvraag waarvoor je de privéles inplant.</p>`; return; }
   if (+$("tMax").value < +$("tMin").value) { $("tUitslag").innerHTML = `<p class="melding fout">Het hoogste niveau moet minstens het laagste zijn.</p>`; return; }
   const j = await rpc("club_les_controle", { p_momenten: r });
   if (j.fout) { $("tUitslag").innerHTML = `<p class="melding fout">${esc(j.fout)}</p>`; return; }
@@ -414,14 +529,14 @@ async function controleer() {
   const allesOk = ok.length === r.length;
   VOORSTEL = allesOk ? r : null;
   $("tUitslag").innerHTML = `<div class="controle">${j.momenten.map((c, i) => `<div class="${c.reden ? "nee" : ""}"><b style="color:${c.reden ? "var(--bad)" : "var(--ok)"}">${c.reden ? "✕" : "✓"}</b><b>${fmt(r[i].start)}</b><span>${c.reden ? esc(c.reden) : "kan"}</span></div>`).join("")}</div>
-    ${allesOk ? `<button type="button" class="primary" data-act="voorstel">${r.length > 1 ? `Reeks van ${r.length} lessen voorstellen` : "Lesmoment voorstellen"}</button><span class="muted" style="font-size:.82rem">Daarna krijg je het overzicht voor Dominique om de terreinen in Elit te reserveren.</span>` : `<p class="melding fout">${r.length > 1 ? "Een reeks kan enkel als alle lessen kunnen. Pas het uur, het terrein of het aantal weken aan." : "Dit moment kan niet. Kies een ander uur, terrein of andere datum."}</p>`}`;
+    ${allesOk ? `<button type="button" class="primary" data-act="voorstel">${TSOORT === "individueel" ? `${r.length > 1 ? r.length + " privélessen" : "Privéles"} inplannen` : r.length > 1 ? `Reeks van ${r.length} lessen voorstellen` : "Lesmoment voorstellen"}</button><span class="muted" style="font-size:.82rem">Daarna krijg je het overzicht voor Dominique om de terreinen in Elit te reserveren.</span>` : `<p class="melding fout">${r.length > 1 ? "Een reeks kan enkel als alle lessen kunnen. Pas het uur, het terrein of het aantal weken aan." : "Dit moment kan niet. Kies een ander uur, terrein of andere datum."}</p>`}`;
 }
 async function stelVoor() {
   if (!VOORSTEL || !VOORSTEL.length) return;
   const j = await rpc("club_les_voorstellen", { p_momenten: VOORSTEL });
   if (j.fout) { $("tUitslag").innerHTML = `<p class="melding fout">${esc(j.fout)}</p>`; return; }
-  VOORSTEL = null;
-  $("tUitslag").innerHTML = `<p class="melding ok">${j.ok.length} lesmoment${j.ok.length === 1 ? "" : "en"} voorgesteld${j.geweigerd.length ? ` · ${j.geweigerd.length} geweigerd` : ""}.</p>
+  VOORSTEL = null; const wasPrive = TSOORT === "individueel";
+  $("tUitslag").innerHTML = `<p class="melding ok">${j.ok.length} ${wasPrive ? `privéles${j.ok.length === 1 ? "" : "sen"} ingepland; de lesnemer ziet ${j.ok.length === 1 ? "ze" : "ze"} nu bij Mijn lessen` : `lesmoment${j.ok.length === 1 ? "" : "en"} voorgesteld`}${j.geweigerd.length ? ` · ${j.geweigerd.length} geweigerd` : ""}.</p>
     ${j.bericht ? `<div class="lbl">Bericht voor Dominique (e-mail of WhatsApp)</div><pre class="bericht" id="bericht">${esc(j.bericht)}</pre><button type="button" data-act="kopieer">Kopieer bericht</button><span class="melding" id="kopieMelding"></span>` : ""}`;
   await laadTrainer();
 }
@@ -437,10 +552,10 @@ function tekenAgenda() {
       ${m.status === "bevestigd" || i.restbedrag !== "n.v.t." ? `<select data-act="bet" data-id="${i.id}" data-veld="restbedrag" aria-label="Restbedrag ${esc(i.naam)}">${REST.map((b) => `<option ${b === i.restbedrag ? "selected" : ""}>${b}</option>`).join("")}</select>` : ""}</div>`).join("");
     const acties = [];
     if (m.status === "voorgesteld") acties.push(`<button type="button" data-act="terrein" data-id="${m.id}">Terrein gereserveerd</button>`);
-    if (m.status === "open" && vol && m.eigen) acties.push(`<button type="button" class="primary" data-act="bevestig" data-id="${m.id}">Bevestigen</button>`);
+    if (m.status === "open" && vol) acties.push(`<button type="button" class="primary" data-act="bevestig" data-id="${m.id}">Bevestigen</button>`);
     if (["voorgesteld", "open"].includes(m.status)) acties.push(`<button type="button" data-act="sluit" data-id="${m.id}" style="color:var(--bad)">Sluiten</button>`);
     return `<tr><td><b>${fmt(m.start)}</b>–${eind(m.start, m.duur)}<div class="muted">terrein ${m.terrein}${m.reeks ? ` · reeks ${m.reeks}` : ""}</div></td><td>${esc(m.thema || "–")}</td>
-      <td>${pakket(m.soort)}<div class="muted">${niv(m)}</div></td>
+      <td>${pakket(m.soort)}<div class="muted">${m.soort === "individueel" ? esc(m.lesnemer || "–") : niv(m)}</div></td>
       <td><b>${m.bezet} / ${m.plaatsen}</b><div class="namen">${namen || `<span class="muted">nog niemand</span>`}</div></td>
       <td><span class="pill ${m.status === "open" && vol ? "warn" : s[1]}">${m.status === "open" && vol ? "Te bevestigen" : s[0]}</span></td>
       <td><div class="acties">${acties.join("")}</div></td></tr>`;
@@ -451,10 +566,10 @@ function tekenAgenda() {
 document.addEventListener("click", async (e) => {
   const tab = e.target.closest("[data-tab]");
   if (tab) { TAB = tab.dataset.tab; document.querySelectorAll("[data-tab]").forEach((b) => b.setAttribute("aria-selected", String(b === tab)));
-    ["inschrijven", "mijn", "trainer"].forEach((k) => $("v-" + k).hidden = k !== TAB); melding(""); return; }
+    ["inschrijven", "prive", "mijn", "trainer"].forEach((k) => $("v-" + k).hidden = k !== TAB); melding(""); return; }
   const s = e.target.closest("[data-soort]");
   if (s) { const g = s.parentElement; g.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b === s)));
-    if (g.id === "tSoort") TSOORT = s.dataset.soort; else { SOORT = s.dataset.soort; OPEN = null; tekenMomenten(); } return; }
+    if (g.id === "tSoort") zetSoort(s.dataset.soort); return; }
   const b = e.target.closest("[data-act]"); if (!b || b.tagName === "SELECT") return;
   const a = b.dataset.act, id = +b.dataset.id;
   try {
@@ -480,6 +595,22 @@ document.addEventListener("click", async (e) => {
       melding(j.voorschot === "behouden" ? "Afgezegd. Er was geen vervanger: je voorschot blijft bij de club." : "Uitgeschreven. Je voorschot krijg je terug." + (j.vervanger ? " Iemand van de wachtlijst neemt je plaats over." : ""), "ok"); await laad(); return;
     }
     if (a === "voorstel") { b.disabled = true; await stelVoor(); return; }
+    if (a === "intrekken") {
+      if (b.dataset.zeker !== "1") { b.dataset.zeker = "1"; b.textContent = "Zeker intrekken?"; return; }
+      const j = await rpc("club_les_aanvraag_intrekken", { p_aanvraag: id });
+      melding(j.fout ? j.fout : "Aanvraag ingetrokken.", j.fout ? "fout" : "ok"); await laad(); return;
+    }
+    if (a === "plan") {
+      PLAN = id; zetSoort("individueel"); tekenAanvragen(); tekenThemas(true);
+      $("nieuwPaneel").scrollIntoView({ behavior: "smooth", block: "start" }); $("tDatum").focus({ preventScroll: true }); return;
+    }
+    if (a === "afwijzen" || a === "afsluiten") {
+      if (b.dataset.zeker !== "1") { b.dataset.zeker = "1"; b.textContent = a === "afwijzen" ? "Zeker? Klik opnieuw" : "Alles ingepland? Klik opnieuw"; return; }
+      const j = await rpc("club_les_aanvraag_behandel", { p_aanvraag: id, p_actie: a, p_reden: null });
+      if (j.fout) { melding(j.fout, "fout"); return; }
+      if (PLAN === id) PLAN = null;
+      melding(a === "afwijzen" ? "Aanvraag afgewezen. Laat het de lesnemer ook even weten." : "Aanvraag afgesloten.", "ok"); await laadTrainer(); return;
+    }
     if (a === "kopieer") { try { await navigator.clipboard.writeText($("bericht").textContent); $("kopieMelding").textContent = "Gekopieerd."; } catch (_) { const r = document.createRange(); r.selectNodeContents($("bericht")); getSelection().removeAllRanges(); getSelection().addRange(r); $("kopieMelding").textContent = "Geselecteerd: kopieer met Ctrl+C."; } return; }
     if (a === "terrein" || a === "bevestig" || a === "sluit") {
       if (a === "sluit" && b.dataset.zeker !== "1") { b.dataset.zeker = "1"; b.textContent = "Zeker sluiten?"; return; }
@@ -494,11 +625,14 @@ document.addEventListener("click", async (e) => {
 document.addEventListener("change", async (e) => {
   const el = e.target;
   if (el.id === "fDag" || el.id === "fTrainer") { tekenMomenten(); return; }
+  if (el.closest && el.closest("#pDomeinen")) { domeinGrens(); return; }
+  if (el.id === "tAanvraag") { PLAN = el.value ? +el.value : null; VOORSTEL = null; $("tUitslag").innerHTML = ""; tekenAanvragen(); tekenAanvraagKeuze(); tekenThemas(true); return; }
   if (el.dataset && el.dataset.act === "bet") {
     try { const j = await rpc("club_les_betaling", { p_inschrijving: +el.dataset.id, p_veld: el.dataset.veld, p_waarde: el.value });
       melding(j.fout ? j.fout : "Betaling bijgewerkt.", j.fout ? "fout" : "ok"); await laadTrainer(); } catch (err) { melding(err.message, "fout"); }
   }
 });
+$("pVerstuur").addEventListener("click", () => verstuurAanvraag().catch((err) => melding(err.message, "fout")));
 $("tControle").addEventListener("click", () => controleer().catch((err) => melding(err.message, "fout")));
 ["tDatum", "tUur", "tDuur", "tTerrein", "tMin", "tMax", "tWeken", "tPatroon"].forEach((k) => $(k).addEventListener("change", () => { VOORSTEL = null; $("tUitslag").innerHTML = ""; if (k === "tWeken") tekenThemas(); }));
 $("tMin").innerHTML = LADDER.map((n) => `<option value="${n}" ${n === 200 ? "selected" : ""}>P${n}</option>`).join("");
