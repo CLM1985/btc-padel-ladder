@@ -2,6 +2,7 @@
 <html lang="nl">
 <head>
 <meta charset="utf-8">
+<script src="../toegang.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex">
 <title>BTC Padel Beheer</title>
@@ -80,7 +81,7 @@ td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
 </div></header>
 
 <main><div class="wrap">
-  <section id="login" class="card" aria-labelledby="lt">
+  <section id="login" class="card" hidden aria-labelledby="lt">
     <h2 id="lt">Aanmelden als beheerder</h2>
     <label for="zoek">Je naam<input id="zoek" autocomplete="off" placeholder="Typ minstens 3 letters"></label>
     <div class="hits" id="hits" role="group" aria-label="Gevonden leden"></div>
@@ -162,20 +163,17 @@ async function login() {
     $("code").value = ""; await start();
   } catch (err) { $("loginErr").textContent = err.message; }
 }
-$("logout").addEventListener("click", async () => {
-  try { await rpc("club_logout", { p_token: token }); } catch (e) {}
-  token = null; try { localStorage.removeItem("btc-club-token"); } catch (e) {}
-  $("app").hidden = true; $("who").hidden = true; $("login").hidden = false;
-});
+$("logout").addEventListener("click", () => BTC.afmelden());
 
 async function start() {
-  if (!token) return;
+  if (!token) { BTC.naarLogin(); return; }
   const r = await rpc("club_mij", { p_token: token });
-  if (r.fout) { token = null; try { localStorage.removeItem("btc-club-token"); } catch (e) {} return; }
+  if (r.fout) { BTC.naarLogin(); return; }
   mij = r;
   if (!mij.onderdelen.beheer) {
-    $("loginErr").textContent = "Je bent aangemeld als " + mij.naam + ", maar je bent geen beheerder.";
-    $("login").hidden = false; $("app").hidden = true; return;
+    $("login").hidden = false; $("app").hidden = true;
+    $("login").innerHTML = `<h2>Geen toegang</h2><p>Je bent aangemeld als ${esc(mij.naam)}, maar je bent geen beheerder. <a href="../">Terug naar Mijn padel</a></p>`;
+    return;
   }
   $("whoName").textContent = mij.naam; $("who").hidden = false; $("login").hidden = true; $("app").hidden = false;
 }
@@ -263,7 +261,7 @@ async function logboek() {
     <tr><td class="num">${new Date(l.moment).toLocaleString("nl-BE", { dateStyle: "short", timeStyle: "short" })}</td><td>${esc(l.door || "systeem")}</td><td>${esc(l.actie)}</td><td>${esc(l.lid)}</td><td>${esc(l.detail)}</td></tr>`).join("")}</tbody></table></div>` : `<p class="msg">Nog geen acties.</p>`;
 }
 
-start().catch(err => { $("loginErr").textContent = err.message; });
+start().catch(err => { $("login").hidden = false; $("loginErr").textContent = err.message; });
 </script>
 </body>
 </html>

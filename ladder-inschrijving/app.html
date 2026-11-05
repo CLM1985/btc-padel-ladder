@@ -2,6 +2,7 @@
 <html lang="nl">
 <head>
 <meta charset="utf-8">
+<script src="../toegang.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex">
 <title>Mijn padelladder – BTC Wemmel</title>
@@ -283,7 +284,8 @@ async function toonAanvraag() {
 async function afmelden(stil) {
   if (!stil && TOKEN) { try { await rpc("ladder_logout", {p_token: TOKEN}); } catch {} }
   TOKEN = null; opslag.set("ladder_token", null); DATA = null;
-  TAB = "ploegen"; STAND_LADDER = null; WED_LADDER = ""; VERGELIJK = null; toonLogin();
+  TAB = "ploegen"; STAND_LADDER = null; WED_LADDER = ""; VERGELIJK = null;
+  if (stil) sso(); else BTC.afmelden();
 }
 
 /* ---------------------------------------------------------------- hoofdscherm */
@@ -649,7 +651,25 @@ function partnerWissel(host, p) {
   host.querySelector(".z input").blur();
 }
 
-TOKEN ? laad() : toonLogin();
+/* Eén login: met de clubsessie (startpagina) krijg je zonder tweede code een laddersessie.
+   Bestaat die functie nog niet of lukt het niet, dan blijft de laddercode als reserve. */
+let ssoPogingen = 0;
+async function sso() {
+  if (++ssoPogingen > 2) { toonLogin(); return; }
+  let r;
+  try { r = await rpc("club_ladder_sessie", {p_token: BTC.token}); }
+  catch (e) { toonLogin(); return; }
+  if (r && r.token) { TOKEN = r.token; opslag.set("ladder_token", TOKEN); laad(); return; }
+  if (r && r.fout === "niet aangemeld") { BTC.naarLogin(); return; }
+  if (r && r.fout === "geen ladderdeelnemer") {
+    $("#wie").innerHTML = `<a href="../">Mijn padel</a> · <button class="link" id="uit">Afmelden</button>`;
+    $("#uit").addEventListener("click", () => BTC.afmelden());
+    $("#main").innerHTML = `<section class="card"><h2>Nog geen ladderploeg</h2><p>Je neemt (nog) niet deel aan de padelladder.</p><p><a class="knop" href="./" style="display:inline-block;text-decoration:none">Inschrijven</a></p></section>`;
+    return;
+  }
+  toonLogin();
+}
+TOKEN ? laad() : sso();
 </script>
 </body>
 </html>
