@@ -188,7 +188,10 @@ th{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mut
           <label class="veld"><span class="lbl">tot</span><select id="tMax"></select></label>
           <label class="veld"><span class="lbl">Aantal weken</span><select id="tWeken"><option value="1">1 (enkel deze datum)</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5" selected>5</option></select></label>
         </div>
+        <div id="tPatroonVak" hidden><label class="veld"><span class="lbl">Vast patroon</span><select id="tPatroon"></select></label></div>
+        <div id="tThemas" style="display:flex;flex-direction:column;gap:6px"></div>
         <div class="muted" style="font-size:.82rem" id="tGrens"></div>
+        <div class="muted" style="font-size:.82rem">Meerdere weken samen = één <b>reeks</b>: leden boeken de volledige reeks. Vanaf 72 uur vooraf kan iemand nog één les van een groepsreeks boeken als 2 van de 3 plaatsen bezet zijn.</div>
         <button type="button" id="tControle">Controleren</button>
         <div id="tUitslag"></div>
         <div class="muted" style="font-size:.8rem" id="tPiek"></div>
@@ -248,22 +251,59 @@ async function laad() {
   const tr = [...new Set((D.momenten || []).map((m) => m.trainer))].sort();
   const huidig = $("fTrainer").value;
   $("fTrainer").innerHTML = `<option value="">Alle trainers</option>` + tr.map((t) => `<option ${t === huidig ? "selected" : ""}>${esc(t)}</option>`).join("");
-  $("tabTrainer").hidden = !(D.trainer || D.commissie);
+  $("tabTrainer").hidden = !D.trainer;
   tekenMomenten(); tekenMijn();
-  if (D.trainer || D.commissie) await laadTrainer();
+  if (D.trainer) await laadTrainer();
 }
 
 /* ---------------------------------------------------------------- inschrijven */
 function tekenMomenten() {
   const dag = $("fDag").value, tr = $("fTrainer").value;
-  const lijst = (D.momenten || []).filter((m) => m.soort === SOORT && (!dag || isoDag(d(m.start)) === +dag) && (!tr || m.trainer === tr));
-  if (!lijst.length) { $("momenten").innerHTML = `<div class="leeg">Geen ${SOORT === "groep" ? "groepslessen" : "individuele lessen"} op jouw niveau in de komende 5 weken${dag || tr ? " met deze filter" : ""}.</div>`; return; }
+  const pas = (m) => m.soort === SOORT && (!dag || isoDag(d(m.start)) === +dag) && (!tr || m.trainer === tr);
+  const alle = (D.momenten || []).filter((m) => m.soort === SOORT && (!tr || m.trainer === tr));
+  const reeksen = {}, los = [], laatste = [];
+  alle.forEach((m) => { if (m.reeks) (reeksen[m.reeks] = reeksen[m.reeks] || []).push(m); else if (pas(m)) los.push(m); });
+  const items = [];
+  Object.values(reeksen).forEach((ms) => { const enkelLos = ms.every((m) => m.los);
+    if (!enkelLos && (!dag || ms.some(pas))) items.push({ reeks: true, start: ms[0].start, ms });
+    ms.forEach((m) => { if (m.los && !m.mijn && pas(m)) laatste.push(m); }); });
+  los.forEach((m) => items.push({ reeks: false, start: m.start, ms: [m] }));
+  items.sort((a, b) => d(a.start) - d(b.start));
+  let h = "";
+  if (laatste.length) h += `<div class="week">Laatste plaatsen · losse les binnen 72 uur</div><div class="kaarten">${laatste.map((m) => kaart(m, true)).join("")}</div>`;
+  if (!items.length && !laatste.length) { $("momenten").innerHTML = `<div class="leeg">Geen ${SOORT === "groep" ? "groepslessen" : "individuele lessen"} op jouw niveau in de komende 5 weken${dag || tr ? " met deze filter" : ""}.</div>`; return; }
   const weken = {};
-  lijst.forEach((m) => { const x = d(m.start); (weken[weeknr(x)] = weken[weeknr(x)] || []).push(m); });
-  $("momenten").innerHTML = Object.entries(weken).map(([w, ms]) => `<div class="week">Week ${w}</div><div class="kaarten">${ms.map(kaart).join("")}</div>`).join("");
+  items.forEach((it) => { const w = weeknr(d(it.start)); (weken[w] = weken[w] || []).push(it); });
+  h += Object.entries(weken).map(([w, its]) => `<div class="week">Start in week ${w}</div><div class="kaarten">${its.map((it) => it.reeks ? reeksKaart(it.ms) : kaart(it.ms[0], false)).join("")}</div>`).join("");
+  $("momenten").innerHTML = h;
 }
-function kaart(m) {
+function akkoordBlok(id, vol, tekst) {
+  return `<div class="akkoord">
+      <label><input type="checkbox" id="akk${id}"> Ik betaal nu 50% voorschot. Als de les volzet is en de trainer bevestigt, betaal ik de rest binnen 48 uur.</label>
+      <span class="muted" style="font-size:.82rem">Voorschot terug als de les niet doorgaat, als je je uitschrijft vóór de les vol is, of als een vervanger je plaats overneemt. Afzeggen na bevestiging zonder vervanger: het voorschot blijft bij de club.</span>
+      <button type="button" class="primary" data-act="in" data-id="${id}">${vol ? "Op de wachtlijst zetten" : tekst}</button></div>`;
+}
+function bolletjes(bezet, plaatsen, ik) {
+  return `<span class="bolletjes" role="img" aria-label="${bezet} van ${plaatsen} plaatsen bezet">${Array.from({ length: plaatsen }, (_, i) => `<span class="bol ${i < bezet ? (ik && i === bezet - 1 ? "ik" : "vol") : ""}"></span>`).join("")}</span>`;
+}
+function reeksKaart(ms) {
+  const m0 = ms[0], bezet = Math.max(...ms.map((m) => m.bezet)), vol = ms.some((m) => m.bezet >= m.plaatsen);
+  const ik = ms.some((m) => m.mijn === "ingeschreven"), wacht = ms.some((m) => m.mijn === "wachtlijst");
+  const sleutel = "r" + m0.reeks;
+  let knop;
+  const ontbreekt = ms.filter((m) => !m.mijn).length;
+  if ((ik || wacht) && ontbreekt) knop = `<span class="pill warn">Ingeschreven voor ${ms.length - ontbreekt} van de ${ms.length} lessen</span><button type="button" class="primary" data-act="open" data-id="${m0.id}" data-sleutel="${sleutel}">Vul je reeks aan (${ontbreekt} ${ontbreekt === 1 ? "les" : "lessen"})</button>`;
+  else if (ik || wacht) knop = `<span class="pill ${ik ? "ok" : "warn"}">${ik ? "Ingeschreven voor de reeks" : "Op de wachtlijst"}</span><span class="muted" style="font-size:.82rem">Uitschrijven per les kan bij Mijn lessen.</span>`;
+  else knop = `<button type="button" class="primary" data-act="open" data-id="${m0.id}" data-sleutel="${sleutel}">${vol ? "Op de wachtlijst voor de reeks" : `Inschrijven voor de volledige reeks (${ms.length} ${ms.length === 1 ? "les" : "lessen"})`}</button>`;
+  return `<article class="kaart ${ik || wacht ? "mijn" : ""}">
+    <div class="kop"><div><div class="lbl">Reeks van ${ms.length} ${ms.length === 1 ? "les" : "lessen"} · ${esc(m0.trainer)}</div><div class="wanneer">${DAG[isoDag(d(m0.start))]} ${String(d(m0.start).getHours()).padStart(2, "0")}:${String(d(m0.start).getMinutes()).padStart(2, "0")}–${eind(m0.start, m0.duur)}</div><div class="muted" style="font-size:.85rem">terrein ${m0.terrein} · ${m0.duur} min</div></div><span class="pill">${niv(m0)}</span></div>
+    <ol style="margin:0;padding-left:18px;font-size:.88rem">${ms.map((m) => `<li>${fmt(m.start)}${m.thema ? ` · <b>${esc(m.thema)}</b>` : ""}${m.status === "bevestigd" ? ` <span class="pill ok">bevestigd</span>` : ""}</li>`).join("")}</ol>
+    <div class="lijn">${bolletjes(bezet, m0.plaatsen, ik)}<b>${bezet} van ${m0.plaatsen}</b>${vol ? `<span class="pill warn">Volzet</span>` : m0.soort === "groep" ? `<span class="muted" style="font-size:.85rem">nog ${m0.plaatsen - bezet} speler${m0.plaatsen - bezet > 1 ? "s" : ""} nodig</span>` : ""}</div>
+    ${knop}${OPEN === sleutel && (ontbreekt || (!ik && !wacht)) ? akkoordBlok(m0.id, vol, ontbreekt && (ik || wacht) ? "Reeks aanvullen" : "Reeks boeken") : ""}</article>`;
+}
+function kaart(m, losInReeks) {
   const ik = m.mijn === "ingeschreven", wacht = m.mijn === "wachtlijst", vol = m.bezet >= m.plaatsen;
+  const sleutel = (losInReeks ? "l" : "m") + m.id;
   const bol = Array.from({ length: m.plaatsen }, (_, i) => `<span class="bol ${i < m.bezet ? (ik && i === m.bezet - 1 ? "ik" : "vol") : ""}"></span>`).join("");
   let st = "", knop = "";
   if (m.status === "bevestigd") st = `<span class="pill ok">Bevestigd</span>`;
@@ -271,13 +311,10 @@ function kaart(m) {
   else if (m.soort === "groep") st = `<span class="muted" style="font-size:.85rem">nog ${m.plaatsen - m.bezet} speler${m.plaatsen - m.bezet > 1 ? "s" : ""} nodig</span>`;
   if (ik) knop = `<button type="button" data-act="uit" data-id="${m.id}">${m.status === "bevestigd" ? "Afzeggen" : "Uitschrijven"}</button>`;
   else if (wacht) knop = `<button type="button" data-act="uit" data-id="${m.id}">Van de wachtlijst</button>`;
-  else knop = `<button type="button" class="primary" data-act="open" data-id="${m.id}">${vol ? "Op de wachtlijst" : "Inschrijven"}</button>`;
-  const akk = OPEN === m.id && !ik && !wacht ? `<div class="akkoord">
-      <label><input type="checkbox" id="akk${m.id}"> Ik betaal nu 50% voorschot. Als de les volzet is en de trainer bevestigt, betaal ik de rest binnen 48 uur.</label>
-      <span class="muted" style="font-size:.82rem">Voorschot terug als de les niet doorgaat, als je je uitschrijft vóór de les vol is, of als een vervanger je plaats overneemt. Afzeggen na bevestiging zonder vervanger: het voorschot blijft bij de club.</span>
-      <button type="button" class="primary" data-act="in" data-id="${m.id}">${vol ? "Op de wachtlijst zetten" : "Inschrijving bevestigen"}</button></div>` : "";
+  else knop = `<button type="button" class="primary" data-act="open" data-id="${m.id}" data-sleutel="${sleutel}">${vol ? "Op de wachtlijst" : losInReeks ? "Deze les boeken (laatste plaats)" : "Inschrijven"}</button>`;
+  const akk = OPEN === sleutel && !ik && !wacht ? akkoordBlok(m.id, vol, "Inschrijving bevestigen") : "";
   return `<article class="kaart ${ik || wacht ? "mijn" : ""}">
-    <div class="kop"><div><div class="wanneer">${fmt(m.start)}–${eind(m.start, m.duur)}</div><div class="muted" style="font-size:.85rem">${esc(m.trainer)} · terrein ${m.terrein} · ${m.duur} min</div></div><span class="pill">${niv(m)}</span></div>
+    <div class="kop"><div><div class="wanneer">${fmt(m.start)}–${eind(m.start, m.duur)}</div><div class="muted" style="font-size:.85rem">${esc(m.trainer)} · terrein ${m.terrein} · ${m.duur} min${losInReeks ? " · uit een reeks" : ""}</div>${m.thema ? `<div style="font-size:.88rem">Thema: <b>${esc(m.thema)}</b></div>` : ""}</div><span class="pill">${niv(m)}</span></div>
     <div class="lijn"><span class="bolletjes" role="img" aria-label="${m.bezet} van ${m.plaatsen} plaatsen bezet">${bol}</span><b>${m.bezet} van ${m.plaatsen}</b>${st}${ik ? `<span class="pill ok">Ingeschreven</span>` : ""}${wacht ? `<span class="pill warn">Op de wachtlijst</span>` : ""}</div>
     ${knop}${akk}</article>`;
 }
@@ -304,7 +341,7 @@ function mijnKaart(x) {
     ? `<div class="muted" style="font-size:.82rem">Nog ${x.plaatsen - x.bezet} speler(s) nodig. Is de groep 48 uur vooraf niet vol, dan gaat de les niet door en krijg je je voorschot terug.</div>` : "";
   const st = x.inschrijving_status === "afgezegd" ? "Afgezegd" : x.inschrijving_status === "uitgeschreven" ? "Uitgeschreven" : (STATUS[x.status] || [x.status])[0];
   return `<article class="kaart ${actief ? "mijn" : ""}">
-    <div class="kop"><div><div class="wanneer">${fmt(x.start)}–${eind(x.start, x.duur)}</div><div class="muted" style="font-size:.85rem">${pakket(x.soort)} ${niv(x)} · ${esc(x.trainer)} · terrein ${x.terrein}</div></div><span class="pill ${(STATUS[x.status] || [])[1] || ""}">${st}</span></div>
+    <div class="kop"><div><div class="wanneer">${fmt(x.start)}–${eind(x.start, x.duur)}</div><div class="muted" style="font-size:.85rem">${pakket(x.soort)} ${niv(x)} · ${esc(x.trainer)} · terrein ${x.terrein}${x.reeks ? " · reeks" : ""}</div>${x.thema ? `<div style="font-size:.88rem">Thema: <b>${esc(x.thema)}</b></div>` : ""}</div><span class="pill ${(STATUS[x.status] || [])[1] || ""}">${st}</span></div>
     <div class="lijn"><span class="pill ${v[1]}">${v[0]}</span>${rest}</div>${uitleg}
     ${actief ? `<button type="button" data-act="uit" data-id="${x.moment}">${x.status === "bevestigd" && x.inschrijving_status === "ingeschreven" ? "Afzeggen" : "Uitschrijven"}</button>` : ""}</article>`;
 }
@@ -313,12 +350,12 @@ function mijnKaart(x) {
 async function laadTrainer() {
   T = await rpc("club_les_trainer");
   if (T.fout) { $("tabTrainer").hidden = true; return; }
-  $("nieuwPaneel").hidden = !T.trainer;
-  $("tDatum").min = T.vroegst; $("tDatum").max = T.laatst;
+    $("tDatum").min = T.vroegst; $("tDatum").max = T.laatst;
   if (!$("tDatum").value) $("tDatum").value = T.vroegst;
   $("tGrens").textContent = `Vroegst ${datumKort(T.vroegst)} (8 dagen vooraf: leden boeken 7 dagen vooraf), laatst ${datumKort(T.laatst)} (5 weken).`;
   $("tPiek").textContent = "Piekuren (max. 1 terrein voor lessen, enkel terrein 4): " + piekTekst(T.piekuren) + ". Geen lessen tijdens interclubthuiswedstrijden of tornooien op BTC.";
-  $("agendaUitleg").textContent = T.commissie && !T.trainer ? "Alle lesmomenten (commissie)" : T.commissie ? "Alle lesmomenten (commissie)" : "Jouw lesmomenten";
+  $("agendaUitleg").textContent = "Jouw lesmomenten";
+  tekenThemas();
   tekenAgenda();
 }
 const datumKort = (s) => { const x = new Date(s + "T12:00"); return `${DAG[isoDag(x)]} ${x.getDate()}/${x.getMonth() + 1}`; };
@@ -326,12 +363,25 @@ function piekTekst(p) {
   const per = {}; (p || []).forEach((x) => (per[x.weekdag] = per[x.weekdag] || []).push(`${x.van}–${x.tot}`));
   return Object.entries(per).map(([w, u]) => `${DAG[w]} ${u.join(" en ")}`).join(", ");
 }
+function themaKeuze() { return [...document.querySelectorAll("#tThemas select")].map((s) => s.value); }
+function tekenThemas() {
+  if (!T) return;
+  const n = +$("tWeken").value, oud = themaKeuze();
+  const pats = (T.patronen || []).filter((p) => p.lessen === n);
+  $("tPatroonVak").hidden = !pats.length;
+  $("tPatroon").innerHTML = `<option value="">Kies een patroon</option>` + pats.map((p) => `<option value="${p.id}">${esc(p.naam)}</option>`).join("");
+  const opts = (sel) => `<option value="">– geen thema –</option>` + Object.entries((T.themas || []).reduce((g, t) => ((g[t.groep] = g[t.groep] || []).push(t), g), {}))
+    .map(([g, ts]) => `<optgroup label="${esc(g)}">${ts.map((t) => `<option value="${t.code}" ${t.code === sel ? "selected" : ""}>${esc(t.naam)}</option>`).join("")}</optgroup>`).join("");
+  $("tThemas").innerHTML = pats.length ? `<span class="muted" style="font-size:.82rem">Voor een reeks van ${n} lessen is een vast patroon verplicht; het patroon bepaalt de thema's.</span>`
+    : Array.from({ length: n }, (_, i) => `<label class="veld"><span class="lbl">Thema les ${i + 1}</span><select aria-label="Thema les ${i + 1}">${opts(oud[i] || "")}</select></label>`).join("")
+      + (n >= 3 ? `<span class="muted" style="font-size:.78rem">Vaste patronen voor reeksen van 3 tot 5 lessen worden nog bepaald door de trainers en de commissie.</span>` : "");
+}
 function reeks() {
-  const n = +$("tWeken").value, uur = $("tUur").value, start = $("tDatum").value;
+  const n = +$("tWeken").value, uur = $("tUur").value, start = $("tDatum").value, th = themaKeuze(), pat = $("tPatroon").value;
   if (!start || !uur) return [];
   const out = [];
   for (let i = 0; i < n; i++) { const x = new Date(start + "T12:00"); x.setDate(x.getDate() + 7 * i); const ds = `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`;
-    out.push({ start: `${ds}T${uur}`, duur: +$("tDuur").value, terrein: +$("tTerrein").value, soort: TSOORT, niveau_min: +$("tMin").value, niveau_max: +$("tMax").value }); }
+    out.push({ start: `${ds}T${uur}`, duur: +$("tDuur").value, terrein: +$("tTerrein").value, soort: TSOORT, niveau_min: +$("tMin").value, niveau_max: +$("tMax").value, thema: th[i] || "", patroon: pat || "" }); }
   return out;
 }
 async function controleer() {
@@ -341,9 +391,10 @@ async function controleer() {
   const j = await rpc("club_les_controle", { p_momenten: r });
   if (j.fout) { $("tUitslag").innerHTML = `<p class="melding fout">${esc(j.fout)}</p>`; return; }
   const ok = r.filter((x, i) => !j.momenten[i].reden);
-  VOORSTEL = ok;
+  const allesOk = ok.length === r.length;
+  VOORSTEL = allesOk ? r : null;
   $("tUitslag").innerHTML = `<div class="controle">${j.momenten.map((c, i) => `<div class="${c.reden ? "nee" : ""}"><b style="color:${c.reden ? "var(--bad)" : "var(--ok)"}">${c.reden ? "✕" : "✓"}</b><b>${fmt(r[i].start)}</b><span>${c.reden ? esc(c.reden) : "kan"}</span></div>`).join("")}</div>
-    ${ok.length ? `<button type="button" class="primary" data-act="voorstel">${ok.length} lesmoment${ok.length > 1 ? "en" : ""} voorstellen</button><span class="muted" style="font-size:.82rem">Daarna krijg je het overzicht voor Dominique om de terreinen in Elit te reserveren.</span>` : `<p class="melding fout">Geen enkel moment kan. Kies een ander uur, terrein of andere datum.</p>`}`;
+    ${allesOk ? `<button type="button" class="primary" data-act="voorstel">${r.length > 1 ? `Reeks van ${r.length} lessen voorstellen` : "Lesmoment voorstellen"}</button><span class="muted" style="font-size:.82rem">Daarna krijg je het overzicht voor Dominique om de terreinen in Elit te reserveren.</span>` : `<p class="melding fout">${r.length > 1 ? "Een reeks kan enkel als alle lessen kunnen. Pas het uur, het terrein of het aantal weken aan." : "Dit moment kan niet. Kies een ander uur, terrein of andere datum."}</p>`}`;
 }
 async function stelVoor() {
   if (!VOORSTEL || !VOORSTEL.length) return;
@@ -358,7 +409,7 @@ function tekenAgenda() {
   const L = (T.momenten || []);
   if (!L.length) { $("agenda").innerHTML = `<div class="leeg">Nog geen lesmomenten.</div>`; return; }
   const BET = ["te betalen", "betaald", "terug te betalen", "terugbetaald", "behouden"], REST = ["n.v.t.", "te betalen", "betaald"];
-  $("agenda").innerHTML = `<table><thead><tr><th>Moment</th>${T.commissie ? "<th>Trainer</th>" : ""}<th>Pakket</th><th>Ingeschreven</th><th>Status</th><th style="text-align:right">Actie</th></tr></thead><tbody>${L.map((m) => {
+  $("agenda").innerHTML = `<table><thead><tr><th>Moment</th><th>Thema</th><th>Pakket</th><th>Ingeschreven</th><th>Status</th><th style="text-align:right">Actie</th></tr></thead><tbody>${L.map((m) => {
     const s = STATUS[m.status] || [m.status, ""];
     const vol = m.bezet >= m.plaatsen;
     const namen = m.inschrijvingen.filter((i) => ["ingeschreven", "wachtlijst"].includes(i.status) || m.status === "bevestigd").map((i) => `<div class="r"><span>${esc(i.naam)}${i.status !== "ingeschreven" ? ` <span class="muted">(${esc(i.status)})</span>` : ""}</span>
@@ -368,7 +419,7 @@ function tekenAgenda() {
     if (m.status === "voorgesteld") acties.push(`<button type="button" data-act="terrein" data-id="${m.id}">Terrein gereserveerd</button>`);
     if (m.status === "open" && vol && m.eigen) acties.push(`<button type="button" class="primary" data-act="bevestig" data-id="${m.id}">Bevestigen</button>`);
     if (["voorgesteld", "open"].includes(m.status)) acties.push(`<button type="button" data-act="sluit" data-id="${m.id}" style="color:var(--bad)">Sluiten</button>`);
-    return `<tr><td><b>${fmt(m.start)}</b>–${eind(m.start, m.duur)}<div class="muted">terrein ${m.terrein}</div></td>${T.commissie ? `<td>${esc(m.trainer)}</td>` : ""}
+    return `<tr><td><b>${fmt(m.start)}</b>–${eind(m.start, m.duur)}<div class="muted">terrein ${m.terrein}${m.reeks ? ` · reeks ${m.reeks}` : ""}</div></td><td>${esc(m.thema || "–")}</td>
       <td>${pakket(m.soort)}<div class="muted">${niv(m)}</div></td>
       <td><b>${m.bezet} / ${m.plaatsen}</b><div class="namen">${namen || `<span class="muted">nog niemand</span>`}</div></td>
       <td><span class="pill ${m.status === "open" && vol ? "warn" : s[1]}">${m.status === "open" && vol ? "Te bevestigen" : s[0]}</span></td>
@@ -387,12 +438,12 @@ document.addEventListener("click", async (e) => {
   const b = e.target.closest("[data-act]"); if (!b || b.tagName === "SELECT") return;
   const a = b.dataset.act, id = +b.dataset.id;
   try {
-    if (a === "open") { OPEN = OPEN === id ? null : id; tekenMomenten(); return; }
+    if (a === "open") { const k = b.dataset.sleutel; OPEN = OPEN === k ? null : k; tekenMomenten(); return; }
     if (a === "in") {
       if (!$("akk" + id).checked) { melding("Vink eerst het akkoord over het voorschot aan.", "fout"); return; }
       b.disabled = true; const j = await rpc("club_les_inschrijven", { p_moment: id, p_akkoord: true });
       if (j.fout) { melding("Inschrijven lukte niet: " + j.fout + ".", "fout"); b.disabled = false; return; }
-      OPEN = null; melding(j.status === "wachtlijst" ? "Je staat op de wachtlijst." : j.vol ? "Ingeschreven. De les is nu volzet; de trainer bevestigt." : "Ingeschreven.", "ok"); await laad(); return;
+      OPEN = null; melding((j.status === "wachtlijst" ? "Je staat op de wachtlijst" : "Ingeschreven") + (j.reeks ? (j.aangevuld ? ` voor de ontbrekende lessen van de reeks (${j.lessen}).` : ` voor de reeks (${j.lessen} lessen).`) : ".") + (j.vol ? " De les is nu volzet; de trainer bevestigt." : ""), "ok"); await laad(); return;
     }
     if (a === "uit") {
       if (b.dataset.zeker !== "1") { b.dataset.zeker = "1"; b.textContent = "Zeker? Klik opnieuw"; return; }
@@ -421,7 +472,7 @@ document.addEventListener("change", async (e) => {
   }
 });
 $("tControle").addEventListener("click", () => controleer().catch((err) => melding(err.message, "fout")));
-["tDatum", "tUur", "tDuur", "tTerrein", "tMin", "tMax", "tWeken"].forEach((k) => $(k).addEventListener("change", () => { VOORSTEL = null; $("tUitslag").innerHTML = ""; }));
+["tDatum", "tUur", "tDuur", "tTerrein", "tMin", "tMax", "tWeken", "tPatroon"].forEach((k) => $(k).addEventListener("change", () => { VOORSTEL = null; $("tUitslag").innerHTML = ""; if (k === "tWeken") tekenThemas(); }));
 $("tMin").innerHTML = LADDER.map((n) => `<option value="${n}" ${n === 200 ? "selected" : ""}>P${n}</option>`).join("");
 $("tMax").innerHTML = LADDER.map((n) => `<option value="${n}" ${n === 300 ? "selected" : ""}>P${n}</option>`).join("");
 $("afmelden").addEventListener("click", () => BTC.afmelden());
