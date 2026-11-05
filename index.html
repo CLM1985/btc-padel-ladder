@@ -26,12 +26,13 @@ a.lk{display:grid;gap:2px;background:var(--surface);border:1px solid var(--line)
 a.lk:hover,a.lk:focus-visible{border-color:var(--accent)}a.lk:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 a.lk b{font-size:16px}a.lk span{color:var(--muted);font-size:14px}
 a{color:var(--title2)}
+#publiek .links{grid-template-columns:1fr}
 .note{font-size:14px;color:var(--muted);margin:8px 0 0}
 [hidden]{display:none!important}
 header .wrap > div:nth-child(2){flex:1;min-width:0}
 .wie{font-size:14px;text-align:right;display:grid;gap:4px;justify-items:end}
 .wie button{background:none;border:0;padding:0;font:600 14px inherit;font-family:inherit;color:var(--title2);text-decoration:underline;cursor:pointer}
-.login{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:grid;gap:12px;max-width:520px}
+.login{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:grid;gap:12px}
 .login h2{margin:0;color:var(--fg);font-size:18px;letter-spacing:.04em}
 .login p{margin:0;color:var(--muted);font-size:14px}
 .login label{display:grid;gap:4px;font-weight:600;font-size:14px}
@@ -57,8 +58,14 @@ header .wrap > div:nth-child(2){flex:1;min-width:0}
     <label for="lcode">Persoonlijke code<input id="lcode" autocomplete="one-time-code" maxlength="6" placeholder="6 tekens" style="text-transform:uppercase"></label>
     <button class="doe" id="ldoe" type="button" disabled>Aanmelden</button>
     <p class="err" id="lfout" role="alert"></p>
-    <p>Geen code? Vraag ze aan de padelcommissie. Nog niet ingeschreven voor de ladder? <a href="ladder-inschrijving/">Inschrijven</a>.</p>
+    <p>Geen code? Vraag ze aan de padelcommissie.</p>
   </section>
+  <div id="publiek" hidden style="display:contents">
+  <h2>Voor iedereen</h2>
+  <nav class="links" aria-label="Voor iedereen">
+    <a class="lk" href="ladder-inschrijving/"><b>Ladder: inschrijven</b><span>Schrijf je ploeg in voor de padelladder, ook zonder code</span></a>
+  </nav>
+  </div>
   <div id="menu" hidden style="display:contents">
   <h2>Ladder</h2>
   <nav class="links" aria-label="Ladder">
@@ -99,7 +106,7 @@ function terug(){
   const t=new URLSearchParams(location.search).get("terug")||"";
   return /^(ladder-inschrijving|tornooien|opstellingsplanner|klassementsimulator|beheer)\/([a-z-]+\.html)?(#[A-Za-z0-9-]*)?$/.test(t)?t:null;
 }
-function toonLogin(){ $("login").hidden=false; $("menu").hidden=true; $("wie").hidden=true; $("laden").hidden=true; }
+function toonLogin(){ $("login").hidden=false; $("publiek").hidden=false; $("menu").hidden=true; $("wie").hidden=true; $("laden").hidden=true; }
 async function toonMenu(){
   const tok=lees("btc-club-token"); if(!tok){toonLogin();return;}
   let m; try{ m=await rpc("club_mij",{p_token:tok}); }catch(e){ $("laden").textContent="De server antwoordt niet. Probeer later opnieuw."; return; }
@@ -108,7 +115,7 @@ async function toonMenu(){
   $("wieNaam").textContent=m.naam; $("wie").hidden=false;
   $("lkPlanner").hidden=!(m.onderdelen&&m.onderdelen.ploegen);
   $("blokBeheer").hidden=!(m.onderdelen&&m.onderdelen.beheer);
-  $("login").hidden=true; $("menu").hidden=false; $("laden").hidden=true;
+  $("login").hidden=true; $("publiek").hidden=true; $("menu").hidden=false; $("laden").hidden=true;
 }
 $("afmelden").addEventListener("click",async()=>{
   const c=lees("btc-club-token"), l=lees("ladder_token");
