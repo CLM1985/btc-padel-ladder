@@ -28,7 +28,7 @@ geeft enkel toegang tot die functies; tabellen en schema's zijn afgeschermd.
 - Detail per tornooi in de lay-out van het tornooirapport (poules, berekende stand, volledige bracket, overzicht reeksen).
   Het model wordt in de pagina opgebouwd uit de ruwe rijen van `club_tornooi_rapport`, met dezelfde rekenregels als
   `scraper/tornooi_rapport.py` (pariteit getest op W21 en Padelladder-finaleweekend).
-- Toegang tot de details: commissie en bestuur alle tornooien; anderen enkel tornooien waaraan ze deelnamen (B2).
+- Toegang tot de details: iedereen die aangemeld is, alle tornooien (B2 aangepast op 5/11/2026).
   Jeugdreeksen worden niet doorgegeven.
 - Links per tornooi en reeks: `tornooien/#t<tornooi-ID>-<reeks>`.
 
