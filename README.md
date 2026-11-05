@@ -20,8 +20,17 @@ geeft enkel toegang tot die functies; tabellen en schema's zijn afgeschermd.
 - Vrijgegeven op 5/11/2026.
 
 ## Mijn padel (`/`)
-- Startpagina met links. Tornooien en klassement zijn op 5/11/2026 van de site gehaald (beslissing CLM);
-  de databasefuncties `club_tornooien`, `club_tornooi` en `club_klassement` worden niet meer gebruikt.
+- Startpagina met links naar ladder, tornooien, interclub en beheer. Het klassementsoverzicht is op 5/11/2026
+  van de site gehaald (beslissing CLM); `club_tornooien`, `club_tornooi` en `club_klassement` zijn niet meer aanroepbaar.
+
+## Tornooien (`tornooien/`)
+- Lijst van alle interne BTC-padeltornooien (`club_tornooien_lijst`) voor wie aangemeld is: naam, datum, aantal reeksen.
+- Detail per tornooi in de lay-out van het tornooirapport (poules, berekende stand, volledige bracket, overzicht reeksen).
+  Het model wordt in de pagina opgebouwd uit de ruwe rijen van `club_tornooi_rapport`, met dezelfde rekenregels als
+  `scraper/tornooi_rapport.py` (pariteit getest op W21 en Padelladder-finaleweekend).
+- Toegang tot de details: commissie en bestuur alle tornooien; anderen enkel tornooien waaraan ze deelnamen (B2).
+  Jeugdreeksen worden niet doorgegeven.
+- Links per tornooi en reeks: `tornooien/#t<tornooi-ID>-<reeks>`.
 
 ## Ladder – inschrijving (`ladder-inschrijving/`)
 
