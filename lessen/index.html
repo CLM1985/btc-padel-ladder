@@ -291,13 +291,15 @@ function reeksKaart(ms) {
   const ik = ms.some((m) => m.mijn === "ingeschreven"), wacht = ms.some((m) => m.mijn === "wachtlijst");
   const sleutel = "r" + m0.reeks;
   let knop;
-  if (ik || wacht) knop = `<span class="pill ${ik ? "ok" : "warn"}">${ik ? "Ingeschreven voor de reeks" : "Op de wachtlijst"}</span><span class="muted" style="font-size:.82rem">Uitschrijven per les kan bij Mijn lessen.</span>`;
+  const ontbreekt = ms.filter((m) => !m.mijn).length;
+  if ((ik || wacht) && ontbreekt) knop = `<span class="pill warn">Ingeschreven voor ${ms.length - ontbreekt} van de ${ms.length} lessen</span><button type="button" class="primary" data-act="open" data-id="${m0.id}" data-sleutel="${sleutel}">Vul je reeks aan (${ontbreekt} ${ontbreekt === 1 ? "les" : "lessen"})</button>`;
+  else if (ik || wacht) knop = `<span class="pill ${ik ? "ok" : "warn"}">${ik ? "Ingeschreven voor de reeks" : "Op de wachtlijst"}</span><span class="muted" style="font-size:.82rem">Uitschrijven per les kan bij Mijn lessen.</span>`;
   else knop = `<button type="button" class="primary" data-act="open" data-id="${m0.id}" data-sleutel="${sleutel}">${vol ? "Op de wachtlijst voor de reeks" : `Inschrijven voor de volledige reeks (${ms.length} ${ms.length === 1 ? "les" : "lessen"})`}</button>`;
   return `<article class="kaart ${ik || wacht ? "mijn" : ""}">
     <div class="kop"><div><div class="lbl">Reeks van ${ms.length} ${ms.length === 1 ? "les" : "lessen"} · ${esc(m0.trainer)}</div><div class="wanneer">${DAG[isoDag(d(m0.start))]} ${String(d(m0.start).getHours()).padStart(2, "0")}:${String(d(m0.start).getMinutes()).padStart(2, "0")}–${eind(m0.start, m0.duur)}</div><div class="muted" style="font-size:.85rem">terrein ${m0.terrein} · ${m0.duur} min</div></div><span class="pill">${niv(m0)}</span></div>
     <ol style="margin:0;padding-left:18px;font-size:.88rem">${ms.map((m) => `<li>${fmt(m.start)}${m.thema ? ` · <b>${esc(m.thema)}</b>` : ""}${m.status === "bevestigd" ? ` <span class="pill ok">bevestigd</span>` : ""}</li>`).join("")}</ol>
     <div class="lijn">${bolletjes(bezet, m0.plaatsen, ik)}<b>${bezet} van ${m0.plaatsen}</b>${vol ? `<span class="pill warn">Volzet</span>` : m0.soort === "groep" ? `<span class="muted" style="font-size:.85rem">nog ${m0.plaatsen - bezet} speler${m0.plaatsen - bezet > 1 ? "s" : ""} nodig</span>` : ""}</div>
-    ${knop}${OPEN === sleutel && !ik && !wacht ? akkoordBlok(m0.id, vol, "Reeks boeken") : ""}</article>`;
+    ${knop}${OPEN === sleutel && (ontbreekt || (!ik && !wacht)) ? akkoordBlok(m0.id, vol, ontbreekt && (ik || wacht) ? "Reeks aanvullen" : "Reeks boeken") : ""}</article>`;
 }
 function kaart(m, losInReeks) {
   const ik = m.mijn === "ingeschreven", wacht = m.mijn === "wachtlijst", vol = m.bezet >= m.plaatsen;
@@ -441,7 +443,7 @@ document.addEventListener("click", async (e) => {
       if (!$("akk" + id).checked) { melding("Vink eerst het akkoord over het voorschot aan.", "fout"); return; }
       b.disabled = true; const j = await rpc("club_les_inschrijven", { p_moment: id, p_akkoord: true });
       if (j.fout) { melding("Inschrijven lukte niet: " + j.fout + ".", "fout"); b.disabled = false; return; }
-      OPEN = null; melding((j.status === "wachtlijst" ? "Je staat op de wachtlijst" : "Ingeschreven") + (j.reeks ? ` voor de reeks (${j.lessen} lessen).` : ".") + (j.vol ? " De les is nu volzet; de trainer bevestigt." : ""), "ok"); await laad(); return;
+      OPEN = null; melding((j.status === "wachtlijst" ? "Je staat op de wachtlijst" : "Ingeschreven") + (j.reeks ? (j.aangevuld ? ` voor de ontbrekende lessen van de reeks (${j.lessen}).` : ` voor de reeks (${j.lessen} lessen).`) : ".") + (j.vol ? " De les is nu volzet; de trainer bevestigt." : ""), "ok"); await laad(); return;
     }
     if (a === "uit") {
       if (b.dataset.zeker !== "1") { b.dataset.zeker = "1"; b.textContent = "Zeker? Klik opnieuw"; return; }
