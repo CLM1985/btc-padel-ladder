@@ -5,6 +5,7 @@
 | `/` | Mijn padel: links + na aanmelden tornooien en klassement | `https://clm1985.github.io/btc-tennis-padel/` |
 | `ladder-inschrijving/` | Ladderinschrijving (`index.html`) en Mijn ladder (`app.html`) | `…/ladder-inschrijving/` |
 | `beheer/` | Clublogin: codes, rollen, kapiteins, logboek (enkel beheerders) | `…/beheer/` |
+| `opstellingsplanner/` | Opstellingsplanner interclub (kapiteins, commissie, bestuur) | `…/opstellingsplanner/` |
 
 Geen enkele pagina bevat namen of gegevens: alles komt live uit Supabase `padel-interclub`
 via publieke functies die zelf sessie en rol controleren. De publieke sleutel in de pagina's
@@ -60,3 +61,9 @@ Sessie van 60 dagen, enkel als willekeurig token in de browser (de database bewa
 | Partner wijzigen (15 %-regel) | `ladder_zoek_partner`, `ladder_partner` |
 
 Privacy: `ladder_mijn` registreert enkel de actieve dag per speler (opvolging ladder, gewist na het seizoen). Gsm-nummers en e-mailadressen worden enkel gedeeld na toestemming (opt-in) en zijn enkel zichtbaar voor de tegenstanders van een lopende wedstrijd.
+
+## Opstellingsplanner (`opstellingsplanner/`, fase 3)
+- Zelfde login. Gegevens live via `club_planner_data` (ploegen, wedstrijden, poule, spelerslijsten met speelsterkte).
+- Kapitein: enkel eigen ploeg(en), mag plannen · commissie: alle ploegen, mag plannen · bestuur: alle ploegen, inzage.
+- Plannen in `club.opstellingen` via `club_planner_plan` / `club_planner_bewaar` met versiecontrole:
+  wie op een verouderde versie bewaart, krijgt de nieuwste versie terug in plaats van te overschrijven.
