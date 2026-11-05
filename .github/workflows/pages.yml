@@ -1,0 +1,62 @@
+# Publiceert de clubpagina's naar GitHub Pages.
+# Vervangt de standaard "pages build and deployment" (Jekyll) die herhaaldelijk
+# bleef hangen in "updating_pages". Werkt pas als Settings → Pages → Source = GitHub Actions.
+#
+# - Geen Jekyll: de site is gewone HTML en wordt ongewijzigd gepubliceerd.
+# - Een nieuwere push annuleert een lopende publicatie (nooit meer "in progress deployment").
+# - Hangt de publicatie toch, dan geeft de eerste poging na 4 minuten op en
+#   volgt na 1 minuut wachten automatisch een tweede poging.
+# - Handmatig opnieuw starten kan via Actions → Pages publiceren → Run workflow.
+
+name: Pages publiceren
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  publiceren:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.poging2.outputs.page_url || steps.poging1.outputs.page_url }}
+    steps:
+      - name: Code ophalen
+        uses: actions/checkout@v4
+
+      - name: Pages instellen
+        uses: actions/configure-pages@v5
+
+      - name: Site inpakken
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Publiceren (poging 1)
+        id: poging1
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+        with:
+          timeout: 240000
+
+      - name: Even wachten voor poging 2
+        if: steps.poging1.outcome == 'failure'
+        run: sleep 60
+
+      - name: Publiceren (poging 2)
+        id: poging2
+        if: steps.poging1.outcome == 'failure'
+        uses: actions/deploy-pages@v4
+        with:
+          timeout: 300000
