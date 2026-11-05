@@ -101,6 +101,13 @@ header .wrap > div:nth-child(2){flex:1;min-width:0}
     <a class="lk" href="opstellingsplanner/" id="lkPlanner" hidden><b>Opstellingsplanner</b><span>Voor kapiteins, commissie en bestuur</span></a>
     <a class="lk" href="klassementsimulator/"><b>Klassementsimulator</b><span>Wat doen je uitslagen met je klassement?</span></a>
   </nav>
+  <h2>Meldingen</h2>
+  <section class="app" id="meld" aria-labelledby="meldTitel">
+    <div><b id="meldTitel" style="font-size:16px">Meldingen op dit toestel</b><p id="meldUitleg">Krijg een melding als er iets voor jou gebeurt: een les ingepland of bevestigd, een plaats vrijgekomen, een tegenstander die een datum voorstelt of een uitslag invoert.</p></div>
+    <p id="meldStatus" style="font-weight:600;color:var(--fg)"></p>
+    <div class="knoppen"><button class="doe" type="button" id="meldAan" hidden>Meldingen aanzetten</button><button class="later" type="button" id="meldTest" hidden>Stuur een testmelding</button><button class="later" type="button" id="meldUit" hidden>Meldingen uitzetten</button></div>
+    <p class="err" id="meldFout" role="alert"></p>
+  </section>
   <div id="blokBeheer" hidden style="display:contents">
   <h2>Beheer</h2>
   <nav class="links" aria-label="Beheer">
@@ -143,7 +150,51 @@ async function toonMenu(){
   if(m.onderdelen&&m.onderdelen.trainer) $("lkLessenUitleg").textContent="Inschrijven, of als trainer lesmomenten openen";
   if(m.onderdelen&&m.onderdelen.hoofdcoach) $("lkLessenUitleg").textContent="Inschrijven, lesmomenten en het overzicht van alle coaches";
   $("login").hidden=true; $("publiek").hidden=true; $("menu").hidden=false; $("laden").hidden=true;
+  toonMeld().catch(()=>{});
 }
+// Meldingen (web push): enkel na toestemming; op iPhone enkel in de geïnstalleerde app
+const MELD={
+  ios:/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1),
+  app:matchMedia("(display-mode: standalone)").matches||navigator.standalone===true,
+  kan:"serviceWorker" in navigator&&"PushManager" in window&&"Notification" in window
+};
+const b64=s=>{s=s.replace(/-/g,"+").replace(/_/g,"/");const r=atob(s+"=".repeat((4-s.length%4)%4));return Uint8Array.from(r,c=>c.charCodeAt(0));};
+async function meldAbo(){ if(!MELD.kan) return null; const reg=await navigator.serviceWorker.ready; return reg.pushManager.getSubscription(); }
+async function toonMeld(){
+  const st=$("meldStatus"); $("meldFout").textContent="";
+  ["meldAan","meldUit","meldTest"].forEach(k=>$(k).hidden=true);
+  if(!MELD.kan){ st.textContent=MELD.ios&&!MELD.app?"Op iPhone werken meldingen enkel in de app: zet BTC Padel eerst op je beginscherm (zie hieronder) en open de app.":"Dit toestel of deze browser ondersteunt geen meldingen."; return; }
+  if(Notification.permission==="denied"){ st.textContent="Meldingen zijn geblokkeerd in de instellingen van je toestel of browser. Zet ze daar aan voor BTC Padel."; return; }
+  const abo=await meldAbo().catch(()=>null);
+  if(abo){ st.textContent="Meldingen staan aan op dit toestel."; $("meldUit").hidden=false; $("meldTest").hidden=false; }
+  else { st.textContent="Meldingen staan uit op dit toestel."; $("meldAan").hidden=false; }
+}
+$("meldAan").addEventListener("click",async()=>{
+  const b=$("meldAan"); b.disabled=true; $("meldFout").textContent="";
+  try{
+    const toestemming=await Notification.requestPermission();   // eerst: iPhone vraagt dit enkel rechtstreeks na een tik
+    if(toestemming!=="granted"){ await toonMeld(); return; }
+    const sleutel=await rpc("club_push_sleutel",{});
+    if(!sleutel) throw new Error("meldingen zijn nog niet geactiveerd door de beheerder");
+    const reg=await navigator.serviceWorker.ready;
+    const abo=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64(sleutel)});
+    const j=abo.toJSON();
+    const r=await rpc("club_push_abonneer",{p_token:lees("btc-club-token"),p_endpoint:j.endpoint,p_p256dh:j.keys.p256dh,p_auth:j.keys.auth,p_toestel:(MELD.ios?"iPhone":/Android/.test(navigator.userAgent)?"Android":"computer")+(MELD.app?" (app)":"")});
+    if(r.fout) throw new Error(r.fout);
+    await rpc("club_push_test",{p_token:lees("btc-club-token")});
+  }catch(e){ $("meldFout").textContent="Aanzetten lukte niet: "+(e.message||e); }
+  finally{ b.disabled=false; await toonMeld(); }
+});
+$("meldUit").addEventListener("click",async()=>{
+  try{ const abo=await meldAbo(); if(abo){ await rpc("club_push_afmelden",{p_token:lees("btc-club-token"),p_endpoint:abo.endpoint}); await abo.unsubscribe(); } }
+  catch(e){ $("meldFout").textContent=e.message||String(e); }
+  await toonMeld();
+});
+$("meldTest").addEventListener("click",async()=>{
+  const r=await rpc("club_push_test",{p_token:lees("btc-club-token")}).catch(e=>({fout:e.message}));
+  $("meldFout").textContent=r.fout?r.fout:""; $("meldStatus").textContent=r.fout?$("meldStatus").textContent:"Testmelding verstuurd. Ze komt binnen enkele seconden binnen.";
+});
+
 // App installeren: uitleg tonen zolang de site niet als app geopend is
 (function(){
   const standalone=matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;

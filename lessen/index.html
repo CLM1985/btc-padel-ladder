@@ -398,7 +398,14 @@ async function laad() {
   tekenMomenten(); tekenMijn(); tekenPrive();
   if (D.trainer) await laadTrainer();
   try { const mij = await rpc("club_mij"); $("tabOverzicht").hidden = !(mij.onderdelen && mij.onderdelen.hoofdcoach); } catch (_) {}
+  openTabUitHash();
 }
+function openTabUitHash() {
+  const t = { "#mijn": "mijn", "#prive": "prive", "#trainer": "trainer", "#overzicht": "overzicht", "#groep": "inschrijven" }[location.hash];
+  const knop = t && document.querySelector(`[data-tab="${t}"]`);
+  if (knop && !knop.hidden && TAB !== t) knop.click();
+}
+addEventListener("hashchange", openTabUitHash);
 
 /* ---------------------------------------------------------------- inschrijven */
 function tekenMomenten() {
