@@ -76,6 +76,10 @@ header .wrap > div:nth-child(2){flex:1;min-width:0}
   <nav class="links" aria-label="Tornooien">
     <a class="lk" href="tornooien/"><b>Tornooien</b><span>Alle interne BTC-padeltornooien, met poules en eindtabel</span></a>
   </nav>
+  <h2>Lessen</h2>
+  <nav class="links" aria-label="Lessen">
+    <a class="lk" href="lessen/"><b>Padellessen</b><span id="lkLessenUitleg">Groepsles of individuele les, op jouw niveau</span></a>
+  </nav>
   <h2>Interclub en klassement</h2>
   <nav class="links" aria-label="Interclub en klassement">
     <a class="lk" href="opstellingsplanner/" id="lkPlanner" hidden><b>Opstellingsplanner</b><span>Voor kapiteins, commissie en bestuur</span></a>
@@ -115,6 +119,7 @@ async function toonMenu(){
   $("wieNaam").textContent=m.naam; $("wie").hidden=false;
   $("lkPlanner").hidden=!(m.onderdelen&&m.onderdelen.ploegen);
   $("blokBeheer").hidden=!(m.onderdelen&&m.onderdelen.beheer);
+  if(m.onderdelen&&m.onderdelen.trainer) $("lkLessenUitleg").textContent="Inschrijven, of als trainer lesmomenten openen";
   $("login").hidden=true; $("publiek").hidden=true; $("menu").hidden=false; $("laden").hidden=true;
 }
 $("afmelden").addEventListener("click",async()=>{
