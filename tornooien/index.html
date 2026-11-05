@@ -2,6 +2,7 @@
 <html lang="nl">
 <head>
 <meta charset="utf-8">
+<script src="../toegang.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex">
 <title>BTC Padeltornooien</title>
@@ -416,8 +417,8 @@ async function rpc(fn,args){
 }
 function zet(id,toon){$(id).hidden=!toon;}
 function fout(t){$("fout").textContent=t||"";zet("fout",!!t);}
-function toonLogin(){["lijst","rapport","wie","naarLijst","bezig"].forEach(i=>zet(i,false));zet("login",true);$("meta").textContent="";}
-function afmelden(){ if(TOKEN) rpc("club_logout",{p_token:TOKEN}).catch(()=>{}); TOKEN=null; try{localStorage.removeItem("btc-club-token");}catch(e){} location.hash=""; toonLogin(); }
+function toonLogin(){BTC.naarLogin();}
+function afmelden(){ BTC.afmelden(); }
 $("afmelden").addEventListener("click",afmelden);
 function verlopen(){TOKEN=null;try{localStorage.removeItem("btc-club-token");}catch(e){}toonLogin();}
 

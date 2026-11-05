@@ -2,6 +2,7 @@
 <html lang="nl">
 <head>
 <meta charset="utf-8">
+<script src="../toegang.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex">
 <title>BTC Opstellingsplanner</title>
@@ -972,12 +973,8 @@ async function wieBenIk(){
   if(m.fout){ token=null; try{ localStorage.removeItem("btc-club-token"); }catch(e){} return false; }
   $("wieNaam").textContent=m.naam; $("wie").hidden=false; return true;
 }
-function toonLogin(){ $("login").hidden=false; $("wie").hidden=true; $("status").innerHTML="<span>Aanmelden vereist</span>"; }
-function afmelden(){
-  if(token) rpc("club_logout",{p_token:token}).catch(()=>{});
-  token=null; try{ localStorage.removeItem("btc-club-token"); }catch(e){}
-  lijsten={}; ploegen={}; bewerkbaar=new Set(); plan=leegPlan(); planPad=undefined; render(false); toonLogin();
-}
+function toonLogin(){ BTC.naarLogin(); }
+function afmelden(){ BTC.afmelden(); }
 $("afmelden").addEventListener("click",afmelden);
 let lKeuze=null, lTimer;
 $("lzoek").addEventListener("input",()=>{ lKeuze=null; $("ldoe").disabled=true; clearTimeout(lTimer);
