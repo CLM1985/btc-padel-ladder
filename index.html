@@ -120,6 +120,7 @@ async function toonMenu(){
   $("lkPlanner").hidden=!(m.onderdelen&&m.onderdelen.ploegen);
   $("blokBeheer").hidden=!(m.onderdelen&&m.onderdelen.beheer);
   if(m.onderdelen&&m.onderdelen.trainer) $("lkLessenUitleg").textContent="Inschrijven, of als trainer lesmomenten openen";
+  if(m.onderdelen&&m.onderdelen.hoofdcoach) $("lkLessenUitleg").textContent="Inschrijven, lesmomenten en het overzicht van alle coaches";
   $("login").hidden=true; $("publiek").hidden=true; $("menu").hidden=false; $("laden").hidden=true;
 }
 $("afmelden").addEventListener("click",async()=>{
