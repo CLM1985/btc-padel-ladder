@@ -897,7 +897,8 @@ $("ploeg").addEventListener("change",e=>{ui.ploegId=+e.target.value; render();})
 $("fases").addEventListener("click",e=>{const b=e.target.closest("[data-fase]"); if(!b) return; const f=b.dataset.fase, w=wedstrijdenVanPloeg();
   ui.slot=(FASES[f].slots.find(([id])=>w[id]&&!w[id].gespeeld)||FASES[f].slots.find(([id])=>w[id]||slotHeeftIets(id))||FASES[f].slots[0])[0]; render(false);});
 ["zoek","filtG","filtOk"].forEach(id=>$(id).addEventListener("input",renderSpelers));
-$("plist").addEventListener("change",e=>{const v=e.target.dataset.kern; if(v==null) return; if(spelersOpen===null) spelersOpen=true;   // niet dichtklappen terwijl je kiest const id=+v, K=plan.kern, i=K.indexOf(id);
+$("plist").addEventListener("change",e=>{const v=e.target.dataset.kern; if(v==null) return; if(spelersOpen===null) spelersOpen=true;   // niet dichtklappen terwijl je kiest
+  const id=+v, K=plan.kern, i=K.indexOf(id);
   if(e.target.checked&&i<0) K.push(id); if(!e.target.checked&&i>=0) K.splice(i,1); wijziging();});
 $("tabs").addEventListener("click",e=>{const b=e.target.closest("[data-slot]"); if(!b) return; ui.slot=b.dataset.slot; render(false);});
 $("datum").addEventListener("change",e=>{dag().datum=e.target.value; wijziging();});
