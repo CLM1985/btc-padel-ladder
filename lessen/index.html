@@ -99,6 +99,15 @@ select,input[type=date],input[type=time],input[type=number]{background:var(--sur
 .bolletjes{display:flex;gap:4px}
 .bol{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);background:var(--surface)}
 .bol.vol{background:var(--accent);border-color:var(--accent)}.bol.ik{background:var(--lime);border-color:var(--accent)}
+.reeksframe{grid-column:1/-1;border:2px solid var(--accent);border-radius:14px;padding:12px 14px;background:var(--surface);display:flex;flex-direction:column;gap:10px}
+.reeksframe .kop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.reeksframe .wanneer{font-family:var(--f-display);font-weight:700;font-size:1.1rem}
+.reeksframe .lessen{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,200px),1fr));gap:8px}
+.les{text-align:left;border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--sunk);display:flex;flex-direction:column;gap:5px;font:inherit;color:inherit;cursor:pointer;font-weight:400}
+.les:hover:not(:disabled){border-color:var(--accent)}
+.les.gekozen{background:var(--accent-soft);border:2px solid var(--accent);box-shadow:inset 0 -3px 0 var(--lime);padding:9px}
+.les.mijn{background:var(--ok-soft);border-color:var(--accent);cursor:default;opacity:1}
+.les .los{font-size:.74rem;font-weight:700;color:var(--warn)}
 .akkoord{background:var(--warn-soft);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;font-size:.88rem}
 .akkoord label{display:flex;gap:10px;align-items:flex-start}
 .akkoord input{width:18px;height:18px;flex:none;margin-top:2px;accent-color:var(--accent)}
@@ -221,7 +230,7 @@ const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<
 const TOKEN = BTC.token;
 const LADDER = [50, 100, 200, 300, 400, 500, 700, 1000];
 const DAG = ["", "ma", "di", "wo", "do", "vr", "za", "zo"], MND = ["jan", "feb", "mrt", "apr", "mei", "jun", "jul", "aug", "sep", "okt", "nov", "dec"];
-let D = null, T = null, SOORT = "groep", TSOORT = "groep", OPEN = null, TAB = "inschrijven", VOORSTEL = null;
+let SEL = null, D = null, T = null, SOORT = "groep", TSOORT = "groep", OPEN = null, TAB = "inschrijven", VOORSTEL = null;
 
 async function rpc(fn, args) {
   const r = await fetch(API + fn, { method: "POST", cache: "no-store", headers: { apikey: KEY, Authorization: "Bearer " + KEY, "Content-Type": "application/json" }, body: JSON.stringify({ p_token: TOKEN, ...(args || {}) }) });
@@ -261,21 +270,16 @@ function tekenMomenten() {
   const dag = $("fDag").value, tr = $("fTrainer").value;
   const pas = (m) => m.soort === SOORT && (!dag || isoDag(d(m.start)) === +dag) && (!tr || m.trainer === tr);
   const alle = (D.momenten || []).filter((m) => m.soort === SOORT && (!tr || m.trainer === tr));
-  const reeksen = {}, los = [], laatste = [];
+  const reeksen = {}, los = [];
   alle.forEach((m) => { if (m.reeks) (reeksen[m.reeks] = reeksen[m.reeks] || []).push(m); else if (pas(m)) los.push(m); });
   const items = [];
-  Object.values(reeksen).forEach((ms) => { const enkelLos = ms.every((m) => m.los);
-    if (!enkelLos && (!dag || ms.some(pas))) items.push({ reeks: true, start: ms[0].start, ms });
-    ms.forEach((m) => { if (m.los && !m.mijn && pas(m)) laatste.push(m); }); });
+  Object.values(reeksen).forEach((ms) => { if (!dag || ms.some(pas)) items.push({ reeks: true, start: ms[0].start, ms }); });
   los.forEach((m) => items.push({ reeks: false, start: m.start, ms: [m] }));
   items.sort((a, b) => d(a.start) - d(b.start));
-  let h = "";
-  if (laatste.length) h += `<div class="week">Laatste plaatsen · losse les binnen 72 uur</div><div class="kaarten">${laatste.map((m) => kaart(m, true)).join("")}</div>`;
-  if (!items.length && !laatste.length) { $("momenten").innerHTML = `<div class="leeg">Geen ${SOORT === "groep" ? "groepslessen" : "individuele lessen"} op jouw niveau in de komende 5 weken${dag || tr ? " met deze filter" : ""}.</div>`; return; }
+  if (!items.length) { $("momenten").innerHTML = `<div class="leeg">Geen ${SOORT === "groep" ? "groepslessen" : "individuele lessen"} op jouw niveau in de komende 5 weken${dag || tr ? " met deze filter" : ""}.</div>`; return; }
   const weken = {};
   items.forEach((it) => { const w = weeknr(d(it.start)); (weken[w] = weken[w] || []).push(it); });
-  h += Object.entries(weken).map(([w, its]) => `<div class="week">Start in week ${w}</div><div class="kaarten">${its.map((it) => it.reeks ? reeksKaart(it.ms) : kaart(it.ms[0], false)).join("")}</div>`).join("");
-  $("momenten").innerHTML = h;
+  $("momenten").innerHTML = Object.entries(weken).map(([w, its]) => `<div class="week">Start in week ${w}</div><div class="kaarten">${its.map((it) => it.reeks ? reeksKaart(it.ms) : kaart(it.ms[0], false)).join("")}</div>`).join("");
 }
 function akkoordBlok(id, vol, tekst) {
   return `<div class="akkoord">
@@ -286,20 +290,36 @@ function akkoordBlok(id, vol, tekst) {
 function bolletjes(bezet, plaatsen, ik) {
   return `<span class="bolletjes" role="img" aria-label="${bezet} van ${plaatsen} plaatsen bezet">${Array.from({ length: plaatsen }, (_, i) => `<span class="bol ${i < bezet ? (ik && i === bezet - 1 ? "ik" : "vol") : ""}"></span>`).join("")}</span>`;
 }
+// Reeks: grote kader met een kadertje per les. Klik op een les kiest de hele reeks (alle kadertjes
+// kleuren mee); enkel een les binnen 72 uur met 2 van 3 plaatsen bezet kan apart gekozen worden.
 function reeksKaart(ms) {
-  const m0 = ms[0], bezet = Math.max(...ms.map((m) => m.bezet)), vol = ms.some((m) => m.bezet >= m.plaatsen);
-  const ik = ms.some((m) => m.mijn === "ingeschreven"), wacht = ms.some((m) => m.mijn === "wachtlijst");
-  const sleutel = "r" + m0.reeks;
-  let knop;
-  const ontbreekt = ms.filter((m) => !m.mijn).length;
-  if ((ik || wacht) && ontbreekt) knop = `<span class="pill warn">Ingeschreven voor ${ms.length - ontbreekt} van de ${ms.length} lessen</span><button type="button" class="primary" data-act="open" data-id="${m0.id}" data-sleutel="${sleutel}">Vul je reeks aan (${ontbreekt} ${ontbreekt === 1 ? "les" : "lessen"})</button>`;
-  else if (ik || wacht) knop = `<span class="pill ${ik ? "ok" : "warn"}">${ik ? "Ingeschreven voor de reeks" : "Op de wachtlijst"}</span><span class="muted" style="font-size:.82rem">Uitschrijven per les kan bij Mijn lessen.</span>`;
-  else knop = `<button type="button" class="primary" data-act="open" data-id="${m0.id}" data-sleutel="${sleutel}">${vol ? "Op de wachtlijst voor de reeks" : `Inschrijven voor de volledige reeks (${ms.length} ${ms.length === 1 ? "les" : "lessen"})`}</button>`;
-  return `<article class="kaart ${ik || wacht ? "mijn" : ""}">
-    <div class="kop"><div><div class="lbl">Reeks van ${ms.length} ${ms.length === 1 ? "les" : "lessen"} · ${esc(m0.trainer)}</div><div class="wanneer">${DAG[isoDag(d(m0.start))]} ${String(d(m0.start).getHours()).padStart(2, "0")}:${String(d(m0.start).getMinutes()).padStart(2, "0")}–${eind(m0.start, m0.duur)}</div><div class="muted" style="font-size:.85rem">terrein ${m0.terrein} · ${m0.duur} min</div></div><span class="pill">${niv(m0)}</span></div>
-    <ol style="margin:0;padding-left:18px;font-size:.88rem">${ms.map((m) => `<li>${fmt(m.start)}${m.thema ? ` · <b>${esc(m.thema)}</b>` : ""}${m.status === "bevestigd" ? ` <span class="pill ok">bevestigd</span>` : ""}</li>`).join("")}</ol>
-    <div class="lijn">${bolletjes(bezet, m0.plaatsen, ik)}<b>${bezet} van ${m0.plaatsen}</b>${vol ? `<span class="pill warn">Volzet</span>` : m0.soort === "groep" ? `<span class="muted" style="font-size:.85rem">nog ${m0.plaatsen - bezet} speler${m0.plaatsen - bezet > 1 ? "s" : ""} nodig</span>` : ""}</div>
-    ${knop}${OPEN === sleutel && (ontbreekt || (!ik && !wacht)) ? akkoordBlok(m0.id, vol, ontbreekt && (ik || wacht) ? "Reeks aanvullen" : "Reeks boeken") : ""}</article>`;
+  ms = ms.slice().sort((a, b) => d(a.start) - d(b.start));
+  const m0 = ms[0], rk = m0.reeks, vol = ms.some((m) => m.bezet >= m.plaatsen);
+  const mijnN = ms.filter((m) => m.mijn).length, ontbreekt = ms.length - mijnN;
+  const sel = SEL && SEL.reeks === rk ? SEL : null;
+  const uur = `${String(d(m0.start).getHours()).padStart(2, "0")}:${String(d(m0.start).getMinutes()).padStart(2, "0")}`;
+  const lessen = ms.map((m, i) => {
+    const gekozen = sel && sel.ids.includes(m.id), ik = !!m.mijn;
+    return `<button type="button" class="les ${gekozen ? "gekozen" : ""} ${ik ? "mijn" : ""}" data-act="kies" data-reeks="${rk}" data-id="${m.id}" aria-pressed="${gekozen ? "true" : "false"}" ${ik ? "disabled" : ""}>
+      <span class="lbl">Les ${i + 1}</span>
+      <b>${fmt(m.start)}</b>
+      ${m.thema ? `<span>${esc(m.thema)}</span>` : `<span class="muted">thema volgt</span>`}
+      <span class="lijn">${bolletjes(m.bezet, m.plaatsen, ik)}<span style="font-size:.85rem">${m.bezet}/${m.plaatsen}</span></span>
+      ${ik ? `<span class="pill ok">${m.mijn === "wachtlijst" ? "Wachtlijst" : "Ingeschreven"}</span>` : m.status === "bevestigd" ? `<span class="pill ok">Bevestigd</span>` : ""}
+      ${m.los && !ik ? `<span class="los">Laatste plaats: apart te boeken</span>` : ""}
+    </button>`;
+  }).join("");
+  let voet;
+  if (sel) {
+    const n = sel.ids.length, enkel = n === 1 && ms.find((m) => m.id === sel.ids[0]).los;
+    voet = `<div class="muted" style="font-size:.85rem">Gekozen: ${enkel ? "enkel deze les (laatste plaats binnen 72 uur)" : mijnN ? `de ${n} ontbrekende ${n === 1 ? "les" : "lessen"} van je reeks` : `de volledige reeks (${n} ${n === 1 ? "les" : "lessen"})`}. Klik opnieuw om te annuleren.</div>`
+      + akkoordBlok(sel.klik, vol, enkel ? "Deze les boeken" : mijnN ? "Reeks aanvullen" : `Reeks boeken (${n} lessen)`);
+  } else if (!ontbreekt) voet = `<div class="lijn"><span class="pill ok">Ingeschreven voor de volledige reeks</span><span class="muted" style="font-size:.82rem">Uitschrijven per les kan bij Mijn lessen.</span></div>`;
+  else voet = `<div class="muted" style="font-size:.85rem">${mijnN ? `Je bent ingeschreven voor ${mijnN} van de ${ms.length} lessen. Klik op een les om je reeks aan te vullen.` : `Klik op een les om de volledige reeks te kiezen${vol ? " (wachtlijst)" : ""}.`}${ms.some((m) => m.los) ? " Een les binnen 72 uur met nog één vrije plaats kun je ook apart boeken." : ""}</div>`;
+  return `<section class="reeksframe ${mijnN ? "mijn" : ""}" aria-label="Lessenreeks ${esc(m0.trainer)}">
+    <div class="kop"><div><div class="lbl">Lessenreeks · ${ms.length} ${ms.length === 1 ? "les" : "lessen"} · ${esc(m0.trainer)}</div>
+      <div class="wanneer">${DAG[isoDag(d(m0.start))]} ${uur}–${eind(m0.start, m0.duur)} · terrein ${m0.terrein}</div></div><span class="pill">${niv(m0)}</span></div>
+    <div class="lessen">${lessen}</div>${voet}</section>`;
 }
 function kaart(m, losInReeks) {
   const ik = m.mijn === "ingeschreven", wacht = m.mijn === "wachtlijst", vol = m.bezet >= m.plaatsen;
@@ -439,11 +459,19 @@ document.addEventListener("click", async (e) => {
   const a = b.dataset.act, id = +b.dataset.id;
   try {
     if (a === "open") { const k = b.dataset.sleutel; OPEN = OPEN === k ? null : k; tekenMomenten(); return; }
+    if (a === "kies") {
+      const rk = +b.dataset.reeks, ms = (D.momenten || []).filter((m) => m.reeks === rk), m = ms.find((x) => x.id === id);
+      if (!m || m.mijn) return;
+      if (SEL && SEL.reeks === rk && SEL.ids.includes(id)) { SEL = null; tekenMomenten(); return; }
+      if (m.los) SEL = { reeks: rk, ids: [id], klik: id };
+      else { const open = ms.filter((x) => !x.mijn); SEL = { reeks: rk, ids: open.map((x) => x.id), klik: (open.find((x) => !x.los) || m).id }; }
+      OPEN = null; tekenMomenten(); return;
+    }
     if (a === "in") {
       if (!$("akk" + id).checked) { melding("Vink eerst het akkoord over het voorschot aan.", "fout"); return; }
       b.disabled = true; const j = await rpc("club_les_inschrijven", { p_moment: id, p_akkoord: true });
       if (j.fout) { melding("Inschrijven lukte niet: " + j.fout + ".", "fout"); b.disabled = false; return; }
-      OPEN = null; melding((j.status === "wachtlijst" ? "Je staat op de wachtlijst" : "Ingeschreven") + (j.reeks ? (j.aangevuld ? ` voor de ontbrekende lessen van de reeks (${j.lessen}).` : ` voor de reeks (${j.lessen} lessen).`) : ".") + (j.vol ? " De les is nu volzet; de trainer bevestigt." : ""), "ok"); await laad(); return;
+      OPEN = null; SEL = null; melding((j.status === "wachtlijst" ? "Je staat op de wachtlijst" : "Ingeschreven") + (j.reeks ? (j.aangevuld ? ` voor de ontbrekende lessen van de reeks (${j.lessen}).` : ` voor de reeks (${j.lessen} lessen).`) : ".") + (j.vol ? " De les is nu volzet; de trainer bevestigt." : ""), "ok"); await laad(); return;
     }
     if (a === "uit") {
       if (b.dataset.zeker !== "1") { b.dataset.zeker = "1"; b.textContent = "Zeker? Klik opnieuw"; return; }
