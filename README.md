@@ -8,7 +8,7 @@ Eén HTML-pagina op GitHub Pages; bevat geen namen of gegevens. Alles komt live 
 |---|---|
 | `ladder_config()` | open seizoen en ladders, aantal ploegen (geen persoonsgegevens) |
 | `ladder_zoek_lid(ladder, zoekterm, partner_van)` | max. 10 leden van het ledenjaar vanaf 3 letters, met toelating voor die ladder |
-| `ladder_inschrijven(ladder, inschrijver, partner, email, website)` | enkel invoegen: ploeg als `aangemeld`, mailadres voor de inlogcode |
+| `ladder_inschrijven(ladder, inschrijver, partner, email, website, gsm, gsm_delen, email_delen)` | enkel invoegen: ploeg als `aangemeld`, mailadres voor de inlogcode, gsm en contactkeuze (minstens één kanaal delen) |
 
 Regels in de database: enkel leden van het ledenjaar · dames: enkel speelsters · gemengd: één speler en één speelster ·
 niet twee keer in dezelfde ladder · maximaal 2 ladders per speler.
@@ -28,4 +28,7 @@ Sessie van 60 dagen, enkel als willekeurig token in de browser (de database bewa
 | Agenda 0/1/2 per ronde | `ladder_agenda` |
 | Stand (gespeeld, gewonnen, ▲/▼ t.o.v. vorige ronde, 🔥 bij 3+ overwinningen op rij, 💪 meeste wedstrijden, bij gelijkstand meeste overwinningen) + ratingverloop (lijngrafiek per ploeg over de rondes) | `ladder_stand`, `ladder_ratingverloop` |
 | Wedstrijden: alle ladders of één ladder, per ronde, met uitslag, ratingwijziging en wissel | `ladder_wedstrijden` |
+| Contact: gsm en e-mail delen (opt-in), WhatsApp- en mailknop naar tegenstanders van een lopende wedstrijd | `ladder_contact`, `ladder_mijn` |
 | Partner wijzigen (15 %-regel) | `ladder_zoek_partner`, `ladder_partner` |
+
+Privacy: `ladder_mijn` registreert enkel de actieve dag per speler (opvolging ladder, gewist na het seizoen). Gsm-nummers en e-mailadressen worden enkel gedeeld na toestemming (opt-in) en zijn enkel zichtbaar voor de tegenstanders van een lopende wedstrijd.
