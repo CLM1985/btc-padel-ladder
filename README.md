@@ -19,9 +19,15 @@ geeft enkel toegang tot die functies; tabellen en schema's zijn afgeschermd.
   `club_beheer_rol`, `club_beheer_kapiteins`, `club_beheer_koppel`, `club_beheer_logboek`.
 - Vrijgegeven op 5/11/2026.
 
-## Mijn padel (`/`)
-- Startpagina met links naar ladder, tornooien, interclub en beheer. Het klassementsoverzicht is op 5/11/2026
-  van de site gehaald (beslissing CLM); `club_tornooien`, `club_tornooi` en `club_klassement` zijn niet meer aanroepbaar.
+## Mijn padel (`/`) – één login
+- De startpagina is de enige aanmeldpagina (`club_zoek`, `club_login`). Na aanmelden verschijnen de links volgens de rol
+  (`club_mij.onderdelen`): opstellingsplanner enkel voor kapitein/commissie/bestuur, beheer enkel voor beheerders.
+- Elke onderliggende pagina laadt eerst `toegang.js`: zonder (geldige) clubsessie → `../?terug=<pagina>`; na aanmelden
+  terug naar die pagina (enkel pagina's van deze site). Afmelden op eender welke pagina meldt overal af.
+- Mijn ladder vraagt met de clubsessie een laddersessie aan (`club_ladder_sessie`), zodat er geen tweede code nodig is.
+  Zolang die functie niet bestaat, blijft de laddercode als reserve.
+- Publiek (zonder login): enkel het inschrijvingsformulier `ladder-inschrijving/`.
+- De beveiliging zit in de database (elke functie controleert de sessie); de pagina's zelf bevatten geen namen.
 
 ## Tornooien (`tornooien/`)
 - Lijst van alle interne BTC-padeltornooien (`club_tornooien_lijst`) voor wie aangemeld is: naam, datum, aantal reeksen.
