@@ -202,8 +202,13 @@ h1::after{content:"";display:block;width:28px;height:3px;background:var(--ball);
 .preset:hover{border-color:var(--accent)}
 .preset small{color:var(--muted)}
 .effect{display:grid;gap:10px;border:2px solid var(--accent);border-radius:8px;padding:10px 14px;margin-top:10px}
-.effect .kop{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center}
-.effect .kop b{font:700 1.3rem var(--f-display)}
+.voorsp{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:stretch}
+.vk{flex:1 1 200px;display:grid;gap:2px;border:1px solid var(--line);border-radius:8px;padding:8px 12px}
+.vk.na{background:var(--accent-soft);border-color:var(--accent)}
+.vk .sub{font-size:.78rem;color:var(--muted)}
+.vk b{font:700 1.5rem var(--f-display)}
+.voorsp .pijl{align-self:center;font-size:1.4rem;color:var(--muted)}
+@media (max-width:520px){.voorsp .pijl{display:none}}
 .effect .rung{margin:0}
 .dtl{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--ink);vertical-align:-1px;margin-left:4px}
 .dtl.open{background:var(--surface);border:2px solid var(--ink)}
@@ -907,7 +912,7 @@ function renderSim(res) {
   if (res.final !== S.own && res.from != null) lv = res.from;
   else { const near = res.levels.filter((x) => x.lv >= S.own && x.target != null).sort((a, b) => a.lv - b.lv); lv = near.length ? near[0].lv : S.own; }
   const rB = Object.fromEntries(base.levels.map((x) => [x.lv, x])), rS = Object.fromEntries(res.levels.map((x) => [x.lv, x]));
-  $("simEffect").innerHTML = S.sim.length ? `<div class="effect"><div class="kop"><span>Voorspelling: <b>${P(base.final)}</b> → <b>${P(res.final)}</b></span> <span class="pill ${d1 > 0 ? "up" : d1 < 0 ? "down" : "same"}">${w(d1)}</span><small class="muted">bepaald door je ratio op ${P(lv)} · <span class="dtl open"></span> nu · <span class="dtl"></span> met simulatie</small></div>${rungHtml(lv, rS[lv], rB[lv])}</div>` : "";
+  $("simEffect").innerHTML = S.sim.length ? `<div class="effect"><div class="voorsp"><div class="vk"><div class="eyebrow">Voorspelling nu</div><div class="sub">enkel gespeelde wedstrijden</div><div><b>${P(base.final)}</b> <span class="pill ${d0 > 0 ? "up" : d0 < 0 ? "down" : "same"}">${w(d0)}</span></div></div><div class="pijl" aria-hidden="true">→</div><div class="vk na"><div class="eyebrow">Voorspelling na simulatie</div><div class="sub">met ${S.sim.length} gesimuleerde wedstrijd${S.sim.length > 1 ? "en" : ""}</div><div><b>${P(res.final)}</b> <span class="pill ${d1 > 0 ? "up" : d1 < 0 ? "down" : "same"}">${w(d1)}</span></div></div></div><small class="muted">Bepaald door je ratio op ${P(lv)}: <span class="dtl open"></span> nu · <span class="dtl"></span> na simulatie</small>${rungHtml(lv, rS[lv], rB[lv])}</div>` : "";
 }
 
 /* ---------- simulatie bewerken ---------- */
