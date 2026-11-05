@@ -29,6 +29,16 @@ geeft enkel toegang tot die functies; tabellen en schema's zijn afgeschermd.
 - Publiek (zonder login): enkel het inschrijvingsformulier `ladder-inschrijving/`.
 - De beveiliging zit in de database (elke functie controleert de sessie); de pagina's zelf bevatten geen namen.
 
+## Padellessen (`lessen/`)
+- Voorstel 09_Leden_Groei (lessen), sectie 10; database: schema `club` (`les_momenten`, `les_inschrijvingen`, `les_piekuren`).
+- **Leden**: groepsles (3) of individueel; enkel momenten op hun niveaus (klassement ±1 + rond de speelsterkte);
+  inschrijven met akkoord over 50% voorschot; wachtlijst; max. 2 openstaande inschrijvingen; uitschrijven/afzeggen.
+- **Trainers** (rol `trainer`): momenten 60/90 min, minstens 8 dagen en hoogstens 5 weken vooruit, wekelijks herhalen;
+  controle op interclubthuiswedstrijden, tornooien op BTC en piekuren (max. 1 terrein, terrein 4); bericht voor Dominique
+  (terrein in Elit), daarna "Terrein gereserveerd" → zichtbaar voor leden; bevestigen als volzet; betalingen manueel markeren.
+- Functies: `club_les_data`, `club_les_inschrijven`, `club_les_uitschrijven`, `club_les_trainer`, `club_les_controle`,
+  `club_les_voorstellen`, `club_les_terrein`, `club_les_bevestig`, `club_les_sluit`, `club_les_betaling`.
+
 ## Tornooien (`tornooien/`)
 - Lijst van alle interne BTC-padeltornooien (`club_tornooien_lijst`) voor wie aangemeld is: naam, datum, aantal reeksen.
 - Detail per tornooi in de lay-out van het tornooirapport (poules, berekende stand, volledige bracket, overzicht reeksen).

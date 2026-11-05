@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<script src="../toegang.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>BTC Padellessen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@500;600;700&family=Montserrat:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --bg:#F3F1E9; --surface:#FFFFFF; --sunk:#FAF9F4; --ink:#152B46; --muted:#5A6676; --line:#E2DED2;
+  --accent:#435B28; --accent-soft:#DCE4D2; --brand:#435B28; --lime:#C5E75A; --on-lime:#152B46;
+  --band:#152B46; --on-band:#FFFFFF; --on-band-muted:#C9D3DE;
+  --ok:#435B28; --ok-soft:#DCE4D2; --warn:#9A6410; --warn-soft:#F4E8CF; --bad:#A5432A; --bad-soft:#F3DED6;
+  --dame:#B65A3A; --heer:#152B46; --info-soft:#DFE7EE;
+  --f-display:"League Spartan","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Montserrat",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"Montserrat",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0E1A2A; --surface:#15263B; --sunk:#112033; --ink:#F3F1E9; --muted:#A3B1C1; --line:#2A3D55;
+  --accent:#C5E75A; --accent-soft:#2A3A22; --brand:#B5D677; --lime:#C5E75A; --on-lime:#152B46;
+  --band:#152B46; --on-band:#F3F1E9; --on-band-muted:#A9B7C6;
+  --ok:#B5D677; --ok-soft:#26341F; --warn:#E4B45A; --warn-soft:#3A2F1A; --bad:#E58B6C; --bad-soft:#3D2620;
+  --dame:#E39A7C; --heer:#A9C3E0; --info-soft:#1E3149; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1A2A; --surface:#15263B; --sunk:#112033; --ink:#F3F1E9; --muted:#A3B1C1; --line:#2A3D55;
+  --accent:#C5E75A; --accent-soft:#2A3A22; --brand:#B5D677; --lime:#C5E75A; --on-lime:#152B46;
+  --band:#152B46; --on-band:#F3F1E9; --on-band-muted:#A9B7C6;
+  --ok:#B5D677; --ok-soft:#26341F; --warn:#E4B45A; --warn-soft:#3A2F1A; --bad:#E58B6C; --bad-soft:#3D2620;
+  --dame:#E39A7C; --heer:#A9C3E0; --info-soft:#1E3149; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14.5px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+.wrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{font-family:var(--f-display);font-weight:700;letter-spacing:0;margin:0;text-wrap:balance}
+h1{font-size:clamp(1.55rem,6vw,2.1rem);line-height:1;overflow-wrap:anywhere}
+h2{font-size:1.35rem}
+h3{font-size:1.1rem;font-weight:600}
+.lbl{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.muted{color:var(--muted)}
+button,select,input,textarea{font:inherit;color:inherit}
+select,input[type=text],input[type=date],textarea{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 8px;min-width:0}
+textarea{width:100%;font-family:var(--f-mono);font-size:.8rem}
+button{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:6px 12px;cursor:pointer;font-weight:600}
+button:hover:not(:disabled){border-color:var(--accent)}
+button:disabled{opacity:.5;cursor:not-allowed}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+button.primary:hover:not(:disabled){border-color:var(--lime);box-shadow:inset 0 -3px 0 var(--lime)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+header.top{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;justify-content:space-between;
+  background:var(--band);color:var(--on-band);border-radius:12px;padding:16px 20px;border-bottom:4px solid var(--lime);
+  --ink:var(--on-band); --muted:var(--on-band-muted)}
+.merk{display:flex;align-items:center;gap:14px;min-width:0}
+.merk > div{min-width:0}
+.logo{width:40px;height:58px;flex:none;background:var(--lime);
+  -webkit-mask:url(data:image/png;base64,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) center/contain no-repeat;mask:url(data:image/png;base64,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) center/contain no-repeat}
+.eyebrow{font-family:var(--f-display);font-weight:600;font-size:.78rem;letter-spacing:.42em;text-transform:uppercase;color:var(--lime)}
+header.top button{background:var(--lime);border-color:var(--lime);color:var(--on-lime)}
+header.top .toast{color:var(--on-band)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.tab{border:0;border-bottom:3px solid transparent;border-radius:0;background:none;padding:8px 12px;font-family:var(--f-display);font-size:1.05rem;font-weight:600}
+.tab[aria-selected=true]{border-bottom-color:var(--lime);color:var(--ink);font-weight:700}
+.tab .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:6px;vertical-align:middle}
+h1::after{content:"";display:block;width:28px;height:3px;background:var(--lime);border-radius:2px;margin-top:8px}
+.wie{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--on-band)}
+.wie a{color:var(--lime)}
+</style>
+<style>
+/* Padellessen */
+body{margin:0}
+header.top .wie button{background:none;border:0;padding:0;color:var(--on-band);text-decoration:underline;font-weight:600;box-shadow:none}
+.melding{margin:0}.melding:empty{display:none}
+.lijn{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lbl{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.muted{color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-block;font-weight:700;font-size:.8rem;padding:3px 10px;border-radius:999px;background:var(--accent-soft);color:var(--ink);border:1px solid var(--accent-soft)}
+.chip.sterk{background:var(--surface);border-color:var(--accent)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;border-radius:0;padding:9px 14px;font-weight:600}
+.seg button[aria-pressed=true]{background:var(--accent-soft);box-shadow:inset 0 -3px 0 var(--accent)}
+select,input[type=date],input[type=time],input[type=number]{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:7px 9px;min-width:0}
+.filters{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+.veld{display:flex;flex-direction:column;gap:4px;min-width:0}
+.week{font-family:var(--f-display);font-weight:700;font-size:.95rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.kaarten{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:10px}
+.kaart{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.kaart.mijn{border-color:var(--accent)}
+.kaart .kop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.kaart .wanneer{font-family:var(--f-display);font-weight:700;font-size:1.1rem}
+.pill{display:inline-block;border-radius:999px;padding:2px 9px;font-size:.76rem;font-weight:700;background:var(--info-soft);color:var(--ink);white-space:nowrap}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}.pill.warn{background:var(--warn-soft);color:var(--warn)}.pill.bad{background:var(--bad-soft);color:var(--bad)}.pill.paars{background:#EFEDFF;color:#3D3580}
+.bolletjes{display:flex;gap:4px}
+.bol{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);background:var(--surface)}
+.bol.vol{background:var(--accent);border-color:var(--accent)}.bol.ik{background:var(--lime);border-color:var(--accent)}
+.akkoord{background:var(--warn-soft);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;font-size:.88rem}
+.akkoord label{display:flex;gap:10px;align-items:flex-start}
+.akkoord input{width:18px;height:18px;flex:none;margin-top:2px;accent-color:var(--accent)}
+.melding{font-size:.88rem;min-height:1.1em}
+.melding.fout{color:var(--bad)}.melding.ok{color:var(--ok)}
+.leeg{padding:18px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:8px}
+.info{background:var(--info-soft);border-radius:8px;padding:10px 12px;font-size:.88rem}
+.grid2{display:grid;grid-template-columns:minmax(300px,400px) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:900px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.form2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.form2 .veld > *:last-child{width:100%}
+.controle{border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.controle div{display:grid;grid-template-columns:20px 110px minmax(0,1fr);gap:6px;padding:7px 10px;border-bottom:1px solid var(--line);font-size:.86rem}
+.controle div:last-child{border-bottom:0}
+.controle .nee{background:var(--bad-soft)}
+.bericht{white-space:pre-wrap;font-family:var(--f-body);font-size:.86rem;background:var(--sunk);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:0}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{padding:8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.namen{display:flex;flex-direction:column;gap:4px}
+.namen .r{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.namen select{font-size:.78rem;padding:2px 4px}
+.acties{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="merk">
+      <span class="logo" role="img" aria-label="BTC Wemmel"></span>
+      <div><div class="eyebrow">BTC Wemmel · padel</div><h1>Padellessen</h1></div>
+    </div>
+    <div class="wie" id="wie"><span id="wieNaam"></span> · <a href="../">Mijn padel</a> · <button type="button" id="afmelden">Afmelden</button></div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Lessen">
+    <button class="tab" role="tab" data-tab="inschrijven" aria-selected="true">Inschrijven</button>
+    <button class="tab" role="tab" data-tab="mijn" aria-selected="false">Mijn lessen</button>
+    <button class="tab" role="tab" data-tab="trainer" aria-selected="false" id="tabTrainer" hidden>Trainer</button>
+  </nav>
+  <p class="melding" id="melding" role="status"></p>
+
+  <!-- ===================== Inschrijven ===================== -->
+  <section id="v-inschrijven" style="display:flex;flex-direction:column;gap:14px">
+    <div class="panel">
+      <div class="lijn" style="justify-content:space-between">
+        <div class="lijn" style="gap:22px">
+          <div><div class="lbl">Klassement</div><div style="font-family:var(--f-display);font-weight:700;font-size:1.5rem" id="kKlas">–</div></div>
+          <div><div class="lbl">Speelsterkte</div><div style="font-family:var(--f-display);font-weight:700;font-size:1.5rem" id="kSterk">–</div></div>
+          <div><div class="lbl">Je kunt lessen kiezen op</div><div class="chips" id="kNiv"></div></div>
+        </div>
+        <div class="seg" role="group" aria-label="Pakket">
+          <button type="button" data-soort="groep" aria-pressed="true">Groepsles (3 spelers)</button>
+          <button type="button" data-soort="individueel" aria-pressed="false">Individuele les</button>
+        </div>
+      </div>
+      <div class="filters">
+        <label class="veld"><span class="lbl">Dag</span><select id="fDag"><option value="">Alle dagen</option><option value="1">Maandag</option><option value="2">Dinsdag</option><option value="3">Woensdag</option><option value="4">Donderdag</option><option value="5">Vrijdag</option><option value="6">Zaterdag</option><option value="7">Zondag</option></select></label>
+        <label class="veld"><span class="lbl">Trainer</span><select id="fTrainer"><option value="">Alle trainers</option></select></label>
+      </div>
+      <div class="info">Bij inschrijving betaal je <b>50% voorschot</b>, de rest als de les volzet is en de trainer bevestigt. Gaat de les niet door (een groepsles zonder 3 spelers 48 uur vooraf), dan krijg je je voorschot terug. Betalen gebeurt voorlopig via de tennisschool; de betaalmanier volgt.</div>
+    </div>
+    <div id="momenten"></div>
+  </section>
+
+  <!-- ===================== Mijn lessen ===================== -->
+  <section id="v-mijn" hidden style="display:flex;flex-direction:column;gap:14px">
+    <div id="mijnLijst"></div>
+  </section>
+
+  <!-- ===================== Trainer ===================== -->
+  <section id="v-trainer" hidden>
+    <div class="grid2">
+      <section class="panel" id="nieuwPaneel" aria-labelledby="nieuwTitel">
+        <h2 id="nieuwTitel">Nieuwe lesmomenten</h2>
+        <div class="seg" role="group" aria-label="Pakket" id="tSoort">
+          <button type="button" data-soort="groep" aria-pressed="true">Groepsles (3)</button>
+          <button type="button" data-soort="individueel" aria-pressed="false">Individueel (1)</button>
+        </div>
+        <div class="form2">
+          <label class="veld"><span class="lbl">Eerste datum</span><input type="date" id="tDatum"></label>
+          <label class="veld"><span class="lbl">Uur</span><input type="time" id="tUur" value="19:00" step="900"></label>
+          <label class="veld"><span class="lbl">Duur</span><select id="tDuur"><option value="60">60 min</option><option value="90">90 min</option></select></label>
+          <label class="veld"><span class="lbl">Terrein</span><select id="tTerrein"><option>1</option><option>2</option><option>3</option><option selected>4</option></select></label>
+          <label class="veld"><span class="lbl">Niveau van</span><select id="tMin"></select></label>
+          <label class="veld"><span class="lbl">tot</span><select id="tMax"></select></label>
+          <label class="veld"><span class="lbl">Aantal weken</span><select id="tWeken"><option value="1">1 (enkel deze datum)</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5" selected>5</option></select></label>
+        </div>
+        <div class="muted" style="font-size:.82rem" id="tGrens"></div>
+        <button type="button" id="tControle">Controleren</button>
+        <div id="tUitslag"></div>
+        <div class="muted" style="font-size:.8rem" id="tPiek"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="agendaTitel" style="min-width:0">
+        <div class="lijn" style="justify-content:space-between">
+          <h2 id="agendaTitel">Agenda</h2>
+          <span class="muted" style="font-size:.82rem" id="agendaUitleg"></span>
+        </div>
+        <div class="tbl" id="agenda"></div>
+        <div class="muted" style="font-size:.8rem">
+          <b>Wacht op terrein</b>: Dominique moet het terrein nog reserveren in Elit; nog niet zichtbaar voor leden. Klik op "Terrein gereserveerd" zodra het in Elit staat.
+          <b>Open</b>: leden kunnen inschrijven. <b>Bevestigen</b> kan als de les volzet is; daarna krijgen de leden de vraag voor het restbedrag.
+          Groepsles niet vol 48 uur vooraf: vervallen.
+        </div>
+      </section>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+const API = "https://povgjkvmzfrhhaxfanwn.supabase.co/rest/v1/rpc/", KEY = "sb_publishable_LfcbY6X1DgOBFW1rH3Umnw__RdObpur";
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const TOKEN = BTC.token;
+const LADDER = [50, 100, 200, 300, 400, 500, 700, 1000];
+const DAG = ["", "ma", "di", "wo", "do", "vr", "za", "zo"], MND = ["jan", "feb", "mrt", "apr", "mei", "jun", "jul", "aug", "sep", "okt", "nov", "dec"];
+let D = null, T = null, SOORT = "groep", TSOORT = "groep", OPEN = null, TAB = "inschrijven", VOORSTEL = null;
+
+async function rpc(fn, args) {
+  const r = await fetch(API + fn, { method: "POST", cache: "no-store", headers: { apikey: KEY, Authorization: "Bearer " + KEY, "Content-Type": "application/json" }, body: JSON.stringify({ p_token: TOKEN, ...(args || {}) }) });
+  if (!r.ok) throw new Error("de server antwoordt niet (" + r.status + ")");
+  const j = await r.json();
+  if (j && j.fout === "niet aangemeld") { BTC.naarLogin(); throw new Error("niet aangemeld"); }
+  return j;
+}
+const d = (s) => new Date(String(s).replace(" ", "T"));
+const isoDag = (x) => ((x.getDay() + 6) % 7) + 1;
+const fmt = (s) => { const x = d(s); return `${DAG[isoDag(x)]} ${x.getDate()} ${MND[x.getMonth()]} · ${String(x.getHours()).padStart(2, "0")}:${String(x.getMinutes()).padStart(2, "0")}`; };
+const eind = (s, duur) => { const x = new Date(d(s).getTime() + duur * 60000); return `${String(x.getHours()).padStart(2, "0")}:${String(x.getMinutes()).padStart(2, "0")}`; };
+const niv = (m) => m.niveau_min === m.niveau_max ? "P" + m.niveau_min : `P${m.niveau_min}–P${m.niveau_max}`;
+const pakket = (s) => s === "groep" ? "Groepsles" : "Individuele les";
+const weeknr = (x) => { const t = new Date(Date.UTC(x.getFullYear(), x.getMonth(), x.getDate())); const dn = t.getUTCDay() || 7; t.setUTCDate(t.getUTCDate() + 4 - dn); const y = new Date(Date.UTC(t.getUTCFullYear(), 0, 1)); return Math.ceil(((t - y) / 86400000 + 1) / 7); };
+function melding(t, soort) { const m = $("melding"); m.textContent = t || ""; m.className = "melding " + (soort || ""); }
+const STATUS = { open: ["Open", ""], bevestigd: ["Bevestigd", "ok"], vervallen: ["Vervallen", "bad"], gesloten: ["Gesloten", "bad"], voorbij: ["Voorbij", ""], voorgesteld: ["Wacht op terrein", "paars"] };
+
+/* ---------------------------------------------------------------- laden */
+async function laad() {
+  D = await rpc("club_les_data");
+  if (D.fout) { melding(D.fout, "fout"); return; }
+  $("wieNaam").textContent = D.naam;
+  $("kKlas").textContent = D.klassement ? "P" + D.klassement : "–";
+  $("kSterk").textContent = D.sterkte ?? "–";
+  $("kNiv").innerHTML = (D.niveaus || []).map((n) => `<span class="chip ${D.klassement && Math.abs(LADDER.indexOf(n) - LADDER.indexOf(D.klassement)) > 1 ? "sterk" : ""}">P${n}</span>`).join("");
+  const tr = [...new Set((D.momenten || []).map((m) => m.trainer))].sort();
+  const huidig = $("fTrainer").value;
+  $("fTrainer").innerHTML = `<option value="">Alle trainers</option>` + tr.map((t) => `<option ${t === huidig ? "selected" : ""}>${esc(t)}</option>`).join("");
+  $("tabTrainer").hidden = !(D.trainer || D.commissie);
+  tekenMomenten(); tekenMijn();
+  if (D.trainer || D.commissie) await laadTrainer();
+}
+
+/* ---------------------------------------------------------------- inschrijven */
+function tekenMomenten() {
+  const dag = $("fDag").value, tr = $("fTrainer").value;
+  const lijst = (D.momenten || []).filter((m) => m.soort === SOORT && (!dag || isoDag(d(m.start)) === +dag) && (!tr || m.trainer === tr));
+  if (!lijst.length) { $("momenten").innerHTML = `<div class="leeg">Geen ${SOORT === "groep" ? "groepslessen" : "individuele lessen"} op jouw niveau in de komende 5 weken${dag || tr ? " met deze filter" : ""}.</div>`; return; }
+  const weken = {};
+  lijst.forEach((m) => { const x = d(m.start); (weken[weeknr(x)] = weken[weeknr(x)] || []).push(m); });
+  $("momenten").innerHTML = Object.entries(weken).map(([w, ms]) => `<div class="week">Week ${w}</div><div class="kaarten">${ms.map(kaart).join("")}</div>`).join("");
+}
+function kaart(m) {
+  const ik = m.mijn === "ingeschreven", wacht = m.mijn === "wachtlijst", vol = m.bezet >= m.plaatsen;
+  const bol = Array.from({ length: m.plaatsen }, (_, i) => `<span class="bol ${i < m.bezet ? (ik && i === m.bezet - 1 ? "ik" : "vol") : ""}"></span>`).join("");
+  let st = "", knop = "";
+  if (m.status === "bevestigd") st = `<span class="pill ok">Bevestigd</span>`;
+  else if (vol) st = `<span class="pill warn">Volzet${m.wachtlijst ? ` · ${m.wachtlijst} op wachtlijst` : ""}</span>`;
+  else if (m.soort === "groep") st = `<span class="muted" style="font-size:.85rem">nog ${m.plaatsen - m.bezet} speler${m.plaatsen - m.bezet > 1 ? "s" : ""} nodig</span>`;
+  if (ik) knop = `<button type="button" data-act="uit" data-id="${m.id}">${m.status === "bevestigd" ? "Afzeggen" : "Uitschrijven"}</button>`;
+  else if (wacht) knop = `<button type="button" data-act="uit" data-id="${m.id}">Van de wachtlijst</button>`;
+  else knop = `<button type="button" class="primary" data-act="open" data-id="${m.id}">${vol ? "Op de wachtlijst" : "Inschrijven"}</button>`;
+  const akk = OPEN === m.id && !ik && !wacht ? `<div class="akkoord">
+      <label><input type="checkbox" id="akk${m.id}"> Ik betaal nu 50% voorschot. Als de les volzet is en de trainer bevestigt, betaal ik de rest binnen 48 uur.</label>
+      <span class="muted" style="font-size:.82rem">Voorschot terug als de les niet doorgaat, als je je uitschrijft vóór de les vol is, of als een vervanger je plaats overneemt. Afzeggen na bevestiging zonder vervanger: het voorschot blijft bij de club.</span>
+      <button type="button" class="primary" data-act="in" data-id="${m.id}">${vol ? "Op de wachtlijst zetten" : "Inschrijving bevestigen"}</button></div>` : "";
+  return `<article class="kaart ${ik || wacht ? "mijn" : ""}">
+    <div class="kop"><div><div class="wanneer">${fmt(m.start)}–${eind(m.start, m.duur)}</div><div class="muted" style="font-size:.85rem">${esc(m.trainer)} · terrein ${m.terrein} · ${m.duur} min</div></div><span class="pill">${niv(m)}</span></div>
+    <div class="lijn"><span class="bolletjes" role="img" aria-label="${m.bezet} van ${m.plaatsen} plaatsen bezet">${bol}</span><b>${m.bezet} van ${m.plaatsen}</b>${st}${ik ? `<span class="pill ok">Ingeschreven</span>` : ""}${wacht ? `<span class="pill warn">Op de wachtlijst</span>` : ""}</div>
+    ${knop}${akk}</article>`;
+}
+
+/* ---------------------------------------------------------------- mijn lessen */
+function tekenMijn() {
+  const L = D.mijn || [];
+  if (!L.length) { $("mijnLijst").innerHTML = `<div class="leeg">Je hebt nog geen lessen. Kies een lesmoment bij Inschrijven.</div>`; return; }
+  const groep = (f) => L.filter(f);
+  const blok = (titel, ms) => ms.length ? `<div class="week">${titel}</div><div class="kaarten">${ms.map(mijnKaart).join("")}</div>` : "";
+  const actief = (x) => ["ingeschreven", "wachtlijst"].includes(x.inschrijving_status);
+  $("mijnLijst").innerHTML =
+    blok("Bevestigd", groep((x) => actief(x) && x.status === "bevestigd")) +
+    blok("Wacht op spelers", groep((x) => x.inschrijving_status === "ingeschreven" && x.status === "open")) +
+    blok("Wachtlijst", groep((x) => x.inschrijving_status === "wachtlijst" && ["open", "bevestigd"].includes(x.status))) +
+    blok("Afgelopen of niet doorgegaan", groep((x) => !actief(x) || ["vervallen", "gesloten", "voorbij"].includes(x.status)));
+}
+const VOOR = { "te betalen": ["Voorschot te betalen", "warn"], betaald: ["Voorschot betaald ✓", "ok"], "terug te betalen": ["Voorschot wordt terugbetaald", ""], terugbetaald: ["Voorschot terugbetaald ✓", "ok"], behouden: ["Voorschot behouden door de club", "bad"] };
+function mijnKaart(x) {
+  const v = VOOR[x.voorschot] || [x.voorschot, ""];
+  const actief = ["ingeschreven", "wachtlijst"].includes(x.inschrijving_status) && ["open", "bevestigd"].includes(x.status);
+  const rest = x.restbedrag === "te betalen" ? `<span class="pill warn">Restbedrag te betalen</span>` : x.restbedrag === "betaald" ? `<span class="pill ok">Volledig betaald ✓</span>` : "";
+  const uitleg = x.status === "open" && x.inschrijving_status === "ingeschreven" && x.soort === "groep"
+    ? `<div class="muted" style="font-size:.82rem">Nog ${x.plaatsen - x.bezet} speler(s) nodig. Is de groep 48 uur vooraf niet vol, dan gaat de les niet door en krijg je je voorschot terug.</div>` : "";
+  const st = x.inschrijving_status === "afgezegd" ? "Afgezegd" : x.inschrijving_status === "uitgeschreven" ? "Uitgeschreven" : (STATUS[x.status] || [x.status])[0];
+  return `<article class="kaart ${actief ? "mijn" : ""}">
+    <div class="kop"><div><div class="wanneer">${fmt(x.start)}–${eind(x.start, x.duur)}</div><div class="muted" style="font-size:.85rem">${pakket(x.soort)} ${niv(x)} · ${esc(x.trainer)} · terrein ${x.terrein}</div></div><span class="pill ${(STATUS[x.status] || [])[1] || ""}">${st}</span></div>
+    <div class="lijn"><span class="pill ${v[1]}">${v[0]}</span>${rest}</div>${uitleg}
+    ${actief ? `<button type="button" data-act="uit" data-id="${x.moment}">${x.status === "bevestigd" && x.inschrijving_status === "ingeschreven" ? "Afzeggen" : "Uitschrijven"}</button>` : ""}</article>`;
+}
+
+/* ---------------------------------------------------------------- trainer */
+async function laadTrainer() {
+  T = await rpc("club_les_trainer");
+  if (T.fout) { $("tabTrainer").hidden = true; return; }
+  $("nieuwPaneel").hidden = !T.trainer;
+  $("tDatum").min = T.vroegst; $("tDatum").max = T.laatst;
+  if (!$("tDatum").value) $("tDatum").value = T.vroegst;
+  $("tGrens").textContent = `Vroegst ${datumKort(T.vroegst)} (8 dagen vooraf: leden boeken 7 dagen vooraf), laatst ${datumKort(T.laatst)} (5 weken).`;
+  $("tPiek").textContent = "Piekuren (max. 1 terrein voor lessen, enkel terrein 4): " + piekTekst(T.piekuren) + ". Geen lessen tijdens interclubthuiswedstrijden of tornooien op BTC.";
+  $("agendaUitleg").textContent = T.commissie && !T.trainer ? "Alle lesmomenten (commissie)" : T.commissie ? "Alle lesmomenten (commissie)" : "Jouw lesmomenten";
+  tekenAgenda();
+}
+const datumKort = (s) => { const x = new Date(s + "T12:00"); return `${DAG[isoDag(x)]} ${x.getDate()}/${x.getMonth() + 1}`; };
+function piekTekst(p) {
+  const per = {}; (p || []).forEach((x) => (per[x.weekdag] = per[x.weekdag] || []).push(`${x.van}–${x.tot}`));
+  return Object.entries(per).map(([w, u]) => `${DAG[w]} ${u.join(" en ")}`).join(", ");
+}
+function reeks() {
+  const n = +$("tWeken").value, uur = $("tUur").value, start = $("tDatum").value;
+  if (!start || !uur) return [];
+  const out = [];
+  for (let i = 0; i < n; i++) { const x = new Date(start + "T12:00"); x.setDate(x.getDate() + 7 * i); const ds = `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`;
+    out.push({ start: `${ds}T${uur}`, duur: +$("tDuur").value, terrein: +$("tTerrein").value, soort: TSOORT, niveau_min: +$("tMin").value, niveau_max: +$("tMax").value }); }
+  return out;
+}
+async function controleer() {
+  const r = reeks(); VOORSTEL = null;
+  if (!r.length) { $("tUitslag").innerHTML = `<p class="melding fout">Kies een datum en een uur.</p>`; return; }
+  if (+$("tMax").value < +$("tMin").value) { $("tUitslag").innerHTML = `<p class="melding fout">Het hoogste niveau moet minstens het laagste zijn.</p>`; return; }
+  const j = await rpc("club_les_controle", { p_momenten: r });
+  if (j.fout) { $("tUitslag").innerHTML = `<p class="melding fout">${esc(j.fout)}</p>`; return; }
+  const ok = r.filter((x, i) => !j.momenten[i].reden);
+  VOORSTEL = ok;
+  $("tUitslag").innerHTML = `<div class="controle">${j.momenten.map((c, i) => `<div class="${c.reden ? "nee" : ""}"><b style="color:${c.reden ? "var(--bad)" : "var(--ok)"}">${c.reden ? "✕" : "✓"}</b><b>${fmt(r[i].start)}</b><span>${c.reden ? esc(c.reden) : "kan"}</span></div>`).join("")}</div>
+    ${ok.length ? `<button type="button" class="primary" data-act="voorstel">${ok.length} lesmoment${ok.length > 1 ? "en" : ""} voorstellen</button><span class="muted" style="font-size:.82rem">Daarna krijg je het overzicht voor Dominique om de terreinen in Elit te reserveren.</span>` : `<p class="melding fout">Geen enkel moment kan. Kies een ander uur, terrein of andere datum.</p>`}`;
+}
+async function stelVoor() {
+  if (!VOORSTEL || !VOORSTEL.length) return;
+  const j = await rpc("club_les_voorstellen", { p_momenten: VOORSTEL });
+  if (j.fout) { $("tUitslag").innerHTML = `<p class="melding fout">${esc(j.fout)}</p>`; return; }
+  VOORSTEL = null;
+  $("tUitslag").innerHTML = `<p class="melding ok">${j.ok.length} lesmoment${j.ok.length === 1 ? "" : "en"} voorgesteld${j.geweigerd.length ? ` · ${j.geweigerd.length} geweigerd` : ""}.</p>
+    ${j.bericht ? `<div class="lbl">Bericht voor Dominique (e-mail of WhatsApp)</div><pre class="bericht" id="bericht">${esc(j.bericht)}</pre><button type="button" data-act="kopieer">Kopieer bericht</button><span class="melding" id="kopieMelding"></span>` : ""}`;
+  await laadTrainer();
+}
+function tekenAgenda() {
+  const L = (T.momenten || []);
+  if (!L.length) { $("agenda").innerHTML = `<div class="leeg">Nog geen lesmomenten.</div>`; return; }
+  const BET = ["te betalen", "betaald", "terug te betalen", "terugbetaald", "behouden"], REST = ["n.v.t.", "te betalen", "betaald"];
+  $("agenda").innerHTML = `<table><thead><tr><th>Moment</th>${T.commissie ? "<th>Trainer</th>" : ""}<th>Pakket</th><th>Ingeschreven</th><th>Status</th><th style="text-align:right">Actie</th></tr></thead><tbody>${L.map((m) => {
+    const s = STATUS[m.status] || [m.status, ""];
+    const vol = m.bezet >= m.plaatsen;
+    const namen = m.inschrijvingen.filter((i) => ["ingeschreven", "wachtlijst"].includes(i.status) || m.status === "bevestigd").map((i) => `<div class="r"><span>${esc(i.naam)}${i.status !== "ingeschreven" ? ` <span class="muted">(${esc(i.status)})</span>` : ""}</span>
+      <select data-act="bet" data-id="${i.id}" data-veld="voorschot" aria-label="Voorschot ${esc(i.naam)}">${BET.map((b) => `<option ${b === i.voorschot ? "selected" : ""}>${b}</option>`).join("")}</select>
+      ${m.status === "bevestigd" || i.restbedrag !== "n.v.t." ? `<select data-act="bet" data-id="${i.id}" data-veld="restbedrag" aria-label="Restbedrag ${esc(i.naam)}">${REST.map((b) => `<option ${b === i.restbedrag ? "selected" : ""}>${b}</option>`).join("")}</select>` : ""}</div>`).join("");
+    const acties = [];
+    if (m.status === "voorgesteld") acties.push(`<button type="button" data-act="terrein" data-id="${m.id}">Terrein gereserveerd</button>`);
+    if (m.status === "open" && vol && m.eigen) acties.push(`<button type="button" class="primary" data-act="bevestig" data-id="${m.id}">Bevestigen</button>`);
+    if (["voorgesteld", "open"].includes(m.status)) acties.push(`<button type="button" data-act="sluit" data-id="${m.id}" style="color:var(--bad)">Sluiten</button>`);
+    return `<tr><td><b>${fmt(m.start)}</b>–${eind(m.start, m.duur)}<div class="muted">terrein ${m.terrein}</div></td>${T.commissie ? `<td>${esc(m.trainer)}</td>` : ""}
+      <td>${pakket(m.soort)}<div class="muted">${niv(m)}</div></td>
+      <td><b>${m.bezet} / ${m.plaatsen}</b><div class="namen">${namen || `<span class="muted">nog niemand</span>`}</div></td>
+      <td><span class="pill ${m.status === "open" && vol ? "warn" : s[1]}">${m.status === "open" && vol ? "Te bevestigen" : s[0]}</span></td>
+      <td><div class="acties">${acties.join("")}</div></td></tr>`;
+  }).join("")}</tbody></table>`;
+}
+
+/* ---------------------------------------------------------------- acties */
+document.addEventListener("click", async (e) => {
+  const tab = e.target.closest("[data-tab]");
+  if (tab) { TAB = tab.dataset.tab; document.querySelectorAll("[data-tab]").forEach((b) => b.setAttribute("aria-selected", String(b === tab)));
+    ["inschrijven", "mijn", "trainer"].forEach((k) => $("v-" + k).hidden = k !== TAB); melding(""); return; }
+  const s = e.target.closest("[data-soort]");
+  if (s) { const g = s.parentElement; g.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b === s)));
+    if (g.id === "tSoort") TSOORT = s.dataset.soort; else { SOORT = s.dataset.soort; OPEN = null; tekenMomenten(); } return; }
+  const b = e.target.closest("[data-act]"); if (!b || b.tagName === "SELECT") return;
+  const a = b.dataset.act, id = +b.dataset.id;
+  try {
+    if (a === "open") { OPEN = OPEN === id ? null : id; tekenMomenten(); return; }
+    if (a === "in") {
+      if (!$("akk" + id).checked) { melding("Vink eerst het akkoord over het voorschot aan.", "fout"); return; }
+      b.disabled = true; const j = await rpc("club_les_inschrijven", { p_moment: id, p_akkoord: true });
+      if (j.fout) { melding("Inschrijven lukte niet: " + j.fout + ".", "fout"); b.disabled = false; return; }
+      OPEN = null; melding(j.status === "wachtlijst" ? "Je staat op de wachtlijst." : j.vol ? "Ingeschreven. De les is nu volzet; de trainer bevestigt." : "Ingeschreven.", "ok"); await laad(); return;
+    }
+    if (a === "uit") {
+      if (b.dataset.zeker !== "1") { b.dataset.zeker = "1"; b.textContent = "Zeker? Klik opnieuw"; return; }
+      const j = await rpc("club_les_uitschrijven", { p_moment: id });
+      if (j.fout) { melding(j.fout, "fout"); return; }
+      melding(j.voorschot === "behouden" ? "Afgezegd. Er was geen vervanger: je voorschot blijft bij de club." : "Uitgeschreven. Je voorschot krijg je terug." + (j.vervanger ? " Iemand van de wachtlijst neemt je plaats over." : ""), "ok"); await laad(); return;
+    }
+    if (a === "voorstel") { b.disabled = true; await stelVoor(); return; }
+    if (a === "kopieer") { try { await navigator.clipboard.writeText($("bericht").textContent); $("kopieMelding").textContent = "Gekopieerd."; } catch (_) { const r = document.createRange(); r.selectNodeContents($("bericht")); getSelection().removeAllRanges(); getSelection().addRange(r); $("kopieMelding").textContent = "Geselecteerd: kopieer met Ctrl+C."; } return; }
+    if (a === "terrein" || a === "bevestig" || a === "sluit") {
+      if (a === "sluit" && b.dataset.zeker !== "1") { b.dataset.zeker = "1"; b.textContent = "Zeker sluiten?"; return; }
+      const fn = { terrein: "club_les_terrein", bevestig: "club_les_bevestig", sluit: "club_les_sluit" }[a];
+      const j = await rpc(fn, { p_moment: id });
+      if (j.fout) { melding(j.fout, "fout"); return; }
+      melding({ terrein: "Zichtbaar voor de leden.", bevestig: "Les bevestigd. De leden krijgen de vraag voor het restbedrag.", sluit: "Lesmoment gesloten; voorschotten worden terugbetaald." }[a], "ok");
+      await laad(); return;
+    }
+  } catch (err) { melding(err.message || String(err), "fout"); }
+});
+document.addEventListener("change", async (e) => {
+  const el = e.target;
+  if (el.id === "fDag" || el.id === "fTrainer") { tekenMomenten(); return; }
+  if (el.dataset && el.dataset.act === "bet") {
+    try { const j = await rpc("club_les_betaling", { p_inschrijving: +el.dataset.id, p_veld: el.dataset.veld, p_waarde: el.value });
+      melding(j.fout ? j.fout : "Betaling bijgewerkt.", j.fout ? "fout" : "ok"); await laadTrainer(); } catch (err) { melding(err.message, "fout"); }
+  }
+});
+$("tControle").addEventListener("click", () => controleer().catch((err) => melding(err.message, "fout")));
+["tDatum", "tUur", "tDuur", "tTerrein", "tMin", "tMax", "tWeken"].forEach((k) => $(k).addEventListener("change", () => { VOORSTEL = null; $("tUitslag").innerHTML = ""; }));
+$("tMin").innerHTML = LADDER.map((n) => `<option value="${n}" ${n === 200 ? "selected" : ""}>P${n}</option>`).join("");
+$("tMax").innerHTML = LADDER.map((n) => `<option value="${n}" ${n === 300 ? "selected" : ""}>P${n}</option>`).join("");
+$("afmelden").addEventListener("click", () => BTC.afmelden());
+laad().catch((err) => melding("Laden lukte niet: " + (err.message || err), "fout"));
+})();
+</script>
+</body>
+</html>
