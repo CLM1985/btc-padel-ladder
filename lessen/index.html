@@ -145,6 +145,27 @@ textarea{font:inherit;width:100%;min-height:72px;padding:8px 10px;border:1px sol
 .aanvraag{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface);display:flex;flex-direction:column;gap:8px}
 .aanvraag.gekozen{border:2px solid var(--accent);padding:11px 13px}
 .aanvraag .wens{font-size:.88rem;background:var(--sunk);border-radius:8px;padding:8px 10px;white-space:pre-wrap}
+.periode{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.tegels{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),1fr));gap:10px}
+.tegel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.tegel b{font-family:var(--f-display);font-size:1.6rem;font-weight:700;line-height:1.15;font-variant-numeric:tabular-nums}
+.tegel span.muted{font-size:.78rem}
+.signalen{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:10px}
+.signaal{border:1px solid var(--line);border-left:4px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;background:var(--surface)}
+.signaal.actie{border-left-color:var(--warn)}.signaal.ok{border-left-color:var(--ok)}
+.signaal .kop{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.signaal ul{margin:0;padding-left:18px;font-size:.85rem;display:flex;flex-direction:column;gap:2px}
+.balken{display:flex;flex-direction:column;gap:6px}
+.balk{display:grid;grid-template-columns:minmax(90px,150px) minmax(0,1fr) 44px;gap:10px;align-items:center;font-size:.86rem}
+.balk .spoor{height:14px;background:var(--sunk);border-radius:0 4px 4px 0;position:relative}
+.balk .vul{height:100%;background:var(--accent);border-radius:0 4px 4px 0;min-width:2px}
+.balk .vul.gepland{background:var(--accent-soft);border:1px solid var(--accent);box-sizing:border-box}
+.balk .w{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.tarieven{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,170px),1fr));gap:10px}
+.tarieven input{width:100%}
+.grid2b{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:900px){.grid2b{grid-template-columns:minmax(0,1fr)}}
 .aanvraagvak{background:var(--accent-soft);border-radius:8px;padding:10px 12px;font-size:.88rem;display:flex;flex-direction:column;gap:6px}
 </style>
 </head>
@@ -163,6 +184,7 @@ textarea{font:inherit;width:100%;min-height:72px;padding:8px 10px;border:1px sol
     <button class="tab" role="tab" data-tab="prive" aria-selected="false">Privéles</button>
     <button class="tab" role="tab" data-tab="mijn" aria-selected="false">Mijn lessen</button>
     <button class="tab" role="tab" data-tab="trainer" aria-selected="false" id="tabTrainer" hidden>Trainer</button>
+    <button class="tab" role="tab" data-tab="overzicht" aria-selected="false" id="tabOverzicht" hidden>Overzicht coaches</button>
   </nav>
   <p class="melding" id="melding" role="status"></p>
 
@@ -261,6 +283,66 @@ textarea{font:inherit;width:100%;min-height:72px;padding:8px 10px;border:1px sol
       </section>
     </div>
   </section>
+
+  <!-- ===================== Overzicht (hoofdcoach) ===================== -->
+  <section id="v-overzicht" hidden style="display:flex;flex-direction:column;gap:14px">
+    <div class="panel">
+      <div class="periode">
+        <label class="veld"><span class="lbl">Periode</span><select id="oPeriode">
+          <option value="seizoen">Seizoen (sinds 1 september)</option><option value="maand">Deze maand</option><option value="vorige">Vorige maand</option>
+          <option value="90">Laatste 90 dagen en komende 5 weken</option><option value="eigen">Zelf kiezen</option></select></label>
+        <label class="veld" id="oVanVak" hidden><span class="lbl">Van</span><input type="date" id="oVan"></label>
+        <label class="veld" id="oTotVak" hidden><span class="lbl">Tot</span><input type="date" id="oTot"></label>
+        <button type="button" id="oVernieuw">Vernieuwen</button>
+        <span class="muted" style="font-size:.82rem" id="oPeriodeTekst"></span>
+      </div>
+    </div>
+
+    <section class="panel" aria-labelledby="opvTitel">
+      <div class="lijn" style="justify-content:space-between"><h2 id="opvTitel">Opvolging</h2><span class="muted" style="font-size:.82rem">Altijd de toestand van vandaag, los van de gekozen periode</span></div>
+      <div class="signalen" id="oOpvolging"></div>
+    </section>
+
+    <section aria-labelledby="kpiTitel" style="display:flex;flex-direction:column;gap:8px">
+      <h2 id="kpiTitel" style="margin:0">Kerncijfers in de periode</h2>
+      <div class="tegels" id="oKpi"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="coachTitel" style="min-width:0">
+      <h2 id="coachTitel">Per lesgever</h2>
+      <div class="balken" id="oCoachBalk"></div>
+      <div class="muted" style="font-size:.8rem">Donker: gegeven lessen · licht: geplande lessen.</div>
+      <div class="tbl" id="oCoaches"></div>
+    </section>
+
+    <div class="grid2b">
+      <section class="panel" aria-labelledby="nivTitel" style="min-width:0">
+        <h2 id="nivTitel">Lesniveau</h2>
+        <div class="balken" id="oNiveaus"></div>
+        <div class="tbl" id="oNiveauTabel"></div>
+      </section>
+      <section class="panel" aria-labelledby="themaTitel" style="min-width:0">
+        <h2 id="themaTitel">Thema's</h2>
+        <div class="balken" id="oThemas"></div>
+      </section>
+    </div>
+
+    <section class="panel" aria-labelledby="deelnTitel" style="min-width:0">
+      <div class="lijn" style="justify-content:space-between"><h2 id="deelnTitel">Deelnemers</h2><span class="muted" style="font-size:.82rem" id="oDeelnTeller"></span></div>
+      <div class="tbl" id="oDeelnemers"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="finTitel" style="min-width:0">
+      <h2 id="finTitel">Financieel</h2>
+      <div class="info" id="oPrijsInfo"></div>
+      <div class="tarieven" id="oTarieven"></div>
+      <div class="tegels" id="oFinTegels"></div>
+      <div class="grid2b">
+        <div class="tbl" id="oBetalingen"></div>
+        <div class="tbl" id="oPerMaand"></div>
+      </div>
+    </section>
+  </section>
 </div>
 
 <script>
@@ -271,7 +353,7 @@ const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<
 const TOKEN = BTC.token;
 const LADDER = [50, 100, 200, 300, 400, 500, 700, 1000];
 const DAG = ["", "ma", "di", "wo", "do", "vr", "za", "zo"], MND = ["jan", "feb", "mrt", "apr", "mei", "jun", "jul", "aug", "sep", "okt", "nov", "dec"];
-let SEL = null, D = null, T = null, SOORT = "groep", TSOORT = "groep", OPEN = null, TAB = "inschrijven", VOORSTEL = null, PLAN = null;
+let O = null, SEL = null, D = null, T = null, SOORT = "groep", TSOORT = "groep", OPEN = null, TAB = "inschrijven", VOORSTEL = null, PLAN = null;
 
 async function rpc(fn, args) {
   const r = await fetch(API + fn, { method: "POST", cache: "no-store", headers: { apikey: KEY, Authorization: "Bearer " + KEY, "Content-Type": "application/json" }, body: JSON.stringify({ p_token: TOKEN, ...(args || {}) }) });
@@ -306,6 +388,7 @@ async function laad() {
   $("tabTrainer").hidden = !D.trainer;
   tekenMomenten(); tekenMijn(); tekenPrive();
   if (D.trainer) await laadTrainer();
+  try { const mij = await rpc("club_mij"); $("tabOverzicht").hidden = !(mij.onderdelen && mij.onderdelen.hoofdcoach); } catch (_) {}
 }
 
 /* ---------------------------------------------------------------- inschrijven */
@@ -562,11 +645,106 @@ function tekenAgenda() {
   }).join("")}</tbody></table>`;
 }
 
+/* ---------------------------------------------------------------- overzicht hoofdcoach */
+const iso = (x) => `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`;
+function periode() {
+  const k = $("oPeriode").value, n = new Date();
+  if (k === "maand") return [iso(new Date(n.getFullYear(), n.getMonth(), 1)), iso(new Date(n.getFullYear(), n.getMonth() + 1, 0))];
+  if (k === "vorige") return [iso(new Date(n.getFullYear(), n.getMonth() - 1, 1)), iso(new Date(n.getFullYear(), n.getMonth(), 0))];
+  if (k === "90") return [null, null];
+  if (k === "eigen") return [$("oVan").value || null, $("oTot").value || null];
+  const j = n.getMonth() >= 8 ? n.getFullYear() : n.getFullYear() - 1;
+  return [`${j}-09-01`, `${j + 1}-08-31`];
+}
+const euro = (v) => v == null ? "–" : "€ " + Number(v).toLocaleString("nl-BE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const getal = (v, dec) => v == null ? "–" : Number(v).toLocaleString("nl-BE", { maximumFractionDigits: dec || 0 });
+const dKort = (s) => { const x = d(s); return `${DAG[isoDag(x)]} ${x.getDate()}/${x.getMonth() + 1}`; };
+async function laadOverzicht() {
+  const [van, tot] = periode();
+  O = await rpc("club_les_overzicht", { p_van: van, p_tot: tot });
+  if (O.fout) { melding(O.fout, "fout"); return; }
+  $("oPeriodeTekst").textContent = `${datumKort(O.van)} ${O.van.slice(0, 4)} – ${datumKort(O.tot)} ${O.tot.slice(0, 4)}`;
+  tekenOverzicht();
+}
+function balken(rijen, max, fmtW) {
+  if (!rijen.length) return `<div class="leeg">Geen lessen in deze periode.</div>`;
+  max = Math.max(max, 1);
+  return rijen.map((r) => `<div class="balk" title="${esc(r.label)}: ${esc(r.tip)}"><span>${esc(r.label)}</span>
+    <span class="spoor" role="img" aria-label="${esc(r.label)}: ${esc(r.tip)}" style="display:flex">${(r.delen || [{ w: r.w, cls: "" }]).filter((x) => x.w > 0).map((x) => `<span class="vul ${x.cls}" style="width:${(100 * x.w / max).toFixed(1)}%"></span>`).join("")}</span>
+    <span class="w">${fmtW ? fmtW(r) : getal(r.w)}</span></div>`).join("");
+}
+function signaal(titel, lijst, regel, leegTekst) {
+  const n = lijst.length;
+  return `<article class="signaal ${n ? "actie" : "ok"}"><div class="kop"><b>${titel}</b><span class="pill ${n ? "warn" : "ok"}">${n ? n : "✓"}</span></div>
+    ${n ? `<ul>${lijst.slice(0, 6).map((x) => `<li>${regel(x)}</li>`).join("")}${n > 6 ? `<li class="muted">en nog ${n - 6}</li>` : ""}</ul>` : `<span class="muted" style="font-size:.85rem">${leegTekst}</span>`}</article>`;
+}
+function tekenOverzicht() {
+  const o = O.opvolging, k = O.kpi, f = O.financieel;
+  const soortT = (s) => s === "individueel" ? "privéles" : "groepsles";
+  $("oOpvolging").innerHTML = [
+    signaal("Terrein te reserveren", o.terrein, (x) => `${dKort(x.start)} ${fmt(x.start).split("· ")[1]} · ${esc(x.coach)} · ${soortT(x.soort)}`, "Alle voorgestelde lessen hebben een terrein."),
+    signaal("Te bevestigen (volzet)", o.bevestigen, (x) => `${dKort(x.start)} · ${esc(x.coach)} · ${soortT(x.soort)}`, "Geen volle lessen die wachten op bevestiging."),
+    signaal("Dreigt te vervallen (binnen 5 dagen, niet vol)", o.risico, (x) => `${dKort(x.start)} · ${esc(x.coach)} · ${x.bezet}/${x.plaatsen}`, "Geen lessen in gevaar."),
+    signaal("Privélesaanvragen zonder antwoord", o.aanvragen, (x) => `${esc(x.lid)} → ${esc(x.coach)} · ${x.dagen === 0 ? "vandaag" : x.dagen + " dag" + (x.dagen === 1 ? "" : "en")}`, "Alle aanvragen zijn behandeld."),
+    signaal("Voorschot nog te ontvangen", o.voorschot, (x) => `${esc(x.lid)} · ${dKort(x.start)} · ${esc(x.coach)}`, "Alle voorschotten zijn betaald."),
+    signaal("Restbedrag nog te ontvangen", o.restbedrag, (x) => `${esc(x.lid)} · ${dKort(x.start)} · ${esc(x.coach)}`, "Geen openstaande restbedragen."),
+    signaal("Voorschot terug te betalen", o.terugbetalen, (x) => `${esc(x.lid)} · ${dKort(x.start)} · ${esc(x.coach)}`, "Geen terugbetalingen open."),
+  ].join("");
+  const tegel = (w, l, sub) => `<div class="tegel"><span class="lbl">${l}</span><b>${w}</b>${sub ? `<span class="muted">${sub}</span>` : ""}</div>`;
+  $("oKpi").innerHTML = [
+    tegel(getal(k.gegeven), "Lessen gegeven", `${getal(k.uren_gegeven, 1)} uur`),
+    tegel(getal(k.gepland), "Lessen gepland", `waarvan ${getal(k.prive)} privé`),
+    tegel(getal(k.deelnemers), "Deelnemers", `${getal(k.deelnames)} deelnames`),
+    tegel(k.bezetting_groep == null ? "–" : k.bezetting_groep + "%", "Bezetting groepslessen", "ingeschreven / plaatsen"),
+    tegel(getal(k.vervallen), "Vervallen", `${getal(k.gesloten)} gesloten`),
+    tegel(getal(k.aanvragen), "Privéaanvragen", `${getal(k.aanvragen_open)} open`),
+  ].join("");
+  const C = O.coaches || [], cmax = Math.max(0, ...C.map((c) => c.gegeven + c.gepland));
+  $("oCoachBalk").innerHTML = balken(C.map((c) => ({ label: c.naam, w: c.gegeven + c.gepland, tip: `${c.gegeven} gegeven, ${c.gepland} gepland`,
+    delen: [{ w: c.gegeven, cls: "" }, { w: c.gepland, cls: "gepland" }] })), cmax, (r) => `${r.w}`);
+  $("oCoaches").innerHTML = `<table><thead><tr><th>Lesgever</th><th class="num">Gegeven</th><th class="num">Gepland</th><th class="num">Groep</th><th class="num">Privé</th><th class="num">Uren</th><th class="num">Deelnemers</th><th class="num">Bezetting</th><th class="num">Vervallen</th><th class="num">Aanvragen</th><th class="num">Omzet gegeven</th></tr></thead><tbody>${C.map((c) =>
+    `<tr><td>${esc(c.naam)}</td><td class="num">${c.gegeven}</td><td class="num">${c.gepland}</td><td class="num">${c.groep}</td><td class="num">${c.prive}</td><td class="num">${getal(c.uren, 1)}</td>
+      <td class="num">${c.deelnemers}${c.deelnames !== c.deelnemers ? ` <span class="muted">(${c.deelnames})</span>` : ""}</td><td class="num">${c.bezetting == null ? "–" : c.bezetting + "%"}</td>
+      <td class="num">${c.vervallen}</td><td class="num">${c.aanvragen}${c.aanvragen_open ? ` <span class="pill warn">${c.aanvragen_open} open</span>` : ""}</td><td class="num">${euro(c.omzet)}</td></tr>`).join("")}</tbody></table>
+    <div class="muted" style="font-size:.78rem">Deelnemers: verschillende leden (tussen haakjes het aantal deelnames). Bezetting: enkel groepslessen die open, bevestigd of gegeven zijn. Vervallen: vervallen of gesloten lessen.</div>`;
+  const N = O.niveaus || [];
+  $("oNiveaus").innerHTML = balken(N.map((n) => ({ label: n.niveau, w: n.lessen, tip: `${n.lessen} lessen, ${n.gegeven} gegeven` })), Math.max(0, ...N.map((n) => n.lessen)));
+  $("oNiveauTabel").innerHTML = N.length ? `<table><thead><tr><th>Niveau</th><th class="num">Lessen</th><th class="num">Gegeven</th><th class="num">Deelnames</th></tr></thead><tbody>${N.map((n) => `<tr><td>${esc(n.niveau)}</td><td class="num">${n.lessen}</td><td class="num">${n.gegeven}</td><td class="num">${n.deelnames ?? 0}</td></tr>`).join("")}</tbody></table>` : "";
+  const TH = (O.themas || []).slice(0, 12);
+  $("oThemas").innerHTML = balken(TH.map((t) => ({ label: t.thema, w: t.lessen, tip: `${t.lessen} lessen` })), Math.max(0, ...TH.map((t) => t.lessen)));
+  const P = O.deelnemers || [];
+  $("oDeelnTeller").textContent = `${P.length} ${P.length === 1 ? "lid" : "leden"}`;
+  $("oDeelnemers").innerHTML = P.length ? `<table><thead><tr><th>Lid</th><th>Klassement</th><th class="num">Lessen</th><th class="num">Gegeven</th><th class="num">Groep</th><th class="num">Privé</th><th>Coach(es)</th><th>Laatste les</th><th>Betaling</th></tr></thead><tbody>${P.map((p) =>
+    `<tr><td>${esc(p.naam)}</td><td>${p.klassement ? "P" + p.klassement : "–"}</td><td class="num">${p.lessen}</td><td class="num">${p.gegeven}</td><td class="num">${p.groep}</td><td class="num">${p.prive}</td>
+      <td>${(p.coaches || []).map(esc).join(", ")}</td><td>${p.laatste ? dKort(p.laatste) : "–"}</td><td>${p.open ? `<span class="pill warn">${p.open} open</span>` : `<span class="pill ok">in orde</span>`}</td></tr>`).join("")}</tbody></table>`
+    : `<div class="leeg">Nog geen deelnemers in deze periode.</div>`;
+  // financieel
+  const tar = O.tarieven || [];
+  $("oPrijsInfo").innerHTML = f.prijzen_ingevuld ? "Bedragen = prijs per deelnemer per les. Voorschot en restbedrag zijn elk 50%."
+    : "<b>Nog niet alle prijzen zijn ingevuld.</b> Bedragen voor pakketten zonder prijs blijven leeg (–); de aantallen kloppen wel. Vul de prijs per deelnemer per les in zodra de raad van bestuur ze vastlegt.";
+  $("oTarieven").innerHTML = tar.map((t) => `<label class="veld"><span class="lbl">${t.soort === "groep" ? "Groepsles" : "Privéles"} ${t.duur} min (per deelnemer)</span>
+    <input type="number" min="0" step="0.5" inputmode="decimal" data-tarief="${t.soort}|${t.duur}" value="${t.prijs ?? ""}" placeholder="prijs volgt"></label>`).join("");
+  $("oFinTegels").innerHTML = [
+    tegel(euro(f.omzet_gegeven), "Omzet gegeven lessen"),
+    tegel(euro(f.omzet_gepland), "Omzet geplande lessen", "als alles doorgaat"),
+    tegel(euro(f.behouden), "Behouden voorschotten", "afzeggingen zonder vervanger"),
+  ].join("");
+  const V = f.voorschot || {}, RB = f.restbedrag || {};
+  const rij = (l, x) => `<tr><td>${l}</td><td class="num">${x ? x.aantal : 0}</td><td class="num">${euro(x ? x.bedrag : null)}</td></tr>`;
+  $("oBetalingen").innerHTML = `<table><thead><tr><th>Betalingen</th><th class="num">Aantal</th><th class="num">Bedrag</th></tr></thead><tbody>
+    ${rij("Voorschot te ontvangen", V["te betalen"])}${rij("Voorschot ontvangen", V.betaald)}${rij("Voorschot terug te betalen", V["terug te betalen"])}${rij("Voorschot terugbetaald", V.terugbetaald)}${rij("Voorschot behouden", V.behouden)}
+    ${rij("Restbedrag te ontvangen", RB["te betalen"])}${rij("Restbedrag ontvangen", RB.betaald)}</tbody></table>`;
+  const M = f.per_maand || [];
+  $("oPerMaand").innerHTML = M.length ? `<table><thead><tr><th>Maand</th><th class="num">Lessen</th><th class="num">Deelnames</th><th class="num">Omzet</th></tr></thead><tbody>${M.map((m) => {
+    const [j, mm] = m.maand.split("-"); return `<tr><td>${MND[+mm - 1]} ${j}</td><td class="num">${m.lessen}</td><td class="num">${m.deelnames}</td><td class="num">${euro(m.omzet)}</td></tr>`; }).join("")}</tbody></table>` : "";
+}
+
 /* ---------------------------------------------------------------- acties */
 document.addEventListener("click", async (e) => {
   const tab = e.target.closest("[data-tab]");
   if (tab) { TAB = tab.dataset.tab; document.querySelectorAll("[data-tab]").forEach((b) => b.setAttribute("aria-selected", String(b === tab)));
-    ["inschrijven", "prive", "mijn", "trainer"].forEach((k) => $("v-" + k).hidden = k !== TAB); melding(""); return; }
+    ["inschrijven", "prive", "mijn", "trainer", "overzicht"].forEach((k) => $("v-" + k).hidden = k !== TAB); melding("");
+    if (TAB === "overzicht" && !O) laadOverzicht().catch((err) => melding(err.message, "fout")); return; }
   const s = e.target.closest("[data-soort]");
   if (s) { const g = s.parentElement; g.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b === s)));
     if (g.id === "tSoort") zetSoort(s.dataset.soort); return; }
@@ -626,12 +804,20 @@ document.addEventListener("change", async (e) => {
   const el = e.target;
   if (el.id === "fDag" || el.id === "fTrainer") { tekenMomenten(); return; }
   if (el.closest && el.closest("#pDomeinen")) { domeinGrens(); return; }
+  if (el.id === "oPeriode") { const eigen = el.value === "eigen"; $("oVanVak").hidden = $("oTotVak").hidden = !eigen; if (!eigen) laadOverzicht().catch((err) => melding(err.message, "fout")); return; }
+  if (el.dataset && el.dataset.tarief) {
+    const [soort, duur] = el.dataset.tarief.split("|"), v = el.value === "" ? null : Number(el.value);
+    try { const j = await rpc("club_les_tarief", { p_soort: soort, p_duur: +duur, p_prijs: v });
+      melding(j.fout ? j.fout : "Prijs opgeslagen.", j.fout ? "fout" : "ok"); if (!j.fout) await laadOverzicht(); } catch (err) { melding(err.message, "fout"); }
+    return;
+  }
   if (el.id === "tAanvraag") { PLAN = el.value ? +el.value : null; VOORSTEL = null; $("tUitslag").innerHTML = ""; tekenAanvragen(); tekenAanvraagKeuze(); tekenThemas(true); return; }
   if (el.dataset && el.dataset.act === "bet") {
     try { const j = await rpc("club_les_betaling", { p_inschrijving: +el.dataset.id, p_veld: el.dataset.veld, p_waarde: el.value });
       melding(j.fout ? j.fout : "Betaling bijgewerkt.", j.fout ? "fout" : "ok"); await laadTrainer(); } catch (err) { melding(err.message, "fout"); }
   }
 });
+$("oVernieuw").addEventListener("click", () => laadOverzicht().catch((err) => melding(err.message, "fout")));
 $("pVerstuur").addEventListener("click", () => verstuurAanvraag().catch((err) => melding(err.message, "fout")));
 $("tControle").addEventListener("click", () => controleer().catch((err) => melding(err.message, "fout")));
 ["tDatum", "tUur", "tDuur", "tTerrein", "tMin", "tMax", "tWeken", "tPatroon"].forEach((k) => $(k).addEventListener("change", () => { VOORSTEL = null; $("tUitslag").innerHTML = ""; if (k === "tWeken") tekenThemas(); }));
