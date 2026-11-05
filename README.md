@@ -2,7 +2,7 @@
 
 | Map | Pagina | Link |
 |---|---|---|
-| `/` | Startpagina met links | `https://clm1985.github.io/btc-tennis-padel/` |
+| `/` | Mijn padel: links + na aanmelden tornooien en klassement | `https://clm1985.github.io/btc-tennis-padel/` |
 | `ladder-inschrijving/` | Ladderinschrijving (`index.html`) en Mijn ladder (`app.html`) | `…/ladder-inschrijving/` |
 | `beheer/` | Clublogin: codes, rollen, kapiteins, logboek (enkel beheerders) | `…/beheer/` |
 
@@ -15,7 +15,14 @@ geeft enkel toegang tot die functies; tabellen en schema's zijn afgeschermd.
 - Rollen: commissie, bestuur, wedstrijdleider, beheerder (handmatig); kapitein automatisch uit de interclubploegen.
 - Functies: `club_zoek`, `club_login`, `club_logout`, `club_mij`, `club_beheer_zoek`, `club_beheer_code`,
   `club_beheer_rol`, `club_beheer_kapiteins`, `club_beheer_koppel`, `club_beheer_logboek`.
-- Werkt pas na vrijgave in de database (`11_club_vrijgeven.sql` in het project).
+- Vrijgegeven op 5/11/2026.
+
+## Mijn padel (`/`, fase 2)
+- Zelfde login als beheer en Mijn ladder (sessie gedeeld via `btc-club-token`).
+- `club_tornooien`, `club_tornooi`: enkel padeltornooien. Commissie en bestuur zien alle tornooien;
+  anderen enkel tornooien waarin ze speelden, volledig en met namen van externe spelers (beslissing B2).
+- `club_klassement`: commissie alle leden; kapitein zichzelf + spelers van zijn ploeg(en)
+  (effectieve opstellingen interclub); anderen enkel zichzelf.
 
 ---
 
