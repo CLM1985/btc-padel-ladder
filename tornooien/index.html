@@ -427,7 +427,7 @@ function renderLijst(){
   $("eyebrow").textContent="Tornooien · BTC Wemmel · intern, niet publiek delen";
   $("titel").textContent="Tornooien";
   $("meta").textContent=`${L.tornooien.length} interne padeltornooien`;
-  $("lijstUitleg").textContent=L.alles?"Je ziet de details van alle tornooien (commissie of bestuur).":"Je ziet de details van de tornooien waaraan je deelnam. Van de andere tornooien zie je enkel de naam en de datum.";
+  $("lijstUitleg").textContent="Klik op een tornooi voor poules, eindtabel en uitslagen. Groen = BTC-lid.";
   let jaar=null, h="";
   for(const t of L.tornooien){
     const j=(t.start||"").slice(0,4);
