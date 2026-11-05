@@ -1,0 +1,1006 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>BTC Opstellingsplanner</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@500;600;700&family=Montserrat:wght@400;500;600;700&display=swap">
+<style>
+/* Huisstijl BTC Wemmel (communicatievoorstel bestuur, p. 11): Clubgroen, Navy, Lime, Crème, Salie, Blauwgrijs, Zand, Gravel;
+   League Spartan voor titels, Montserrat voor informatie. Layout: werkbank, spelerskolom links, speeldag rechts; stapelt op gsm. */
+:root{
+  --bg:#F3F1E9; --surface:#FFFFFF; --sunk:#FAF9F4; --ink:#152B46; --muted:#5A6676; --line:#E2DED2;
+  --accent:#435B28; --accent-soft:#DCE4D2; --brand:#435B28; --lime:#C5E75A; --on-lime:#152B46;
+  --band:#152B46; --on-band:#FFFFFF; --on-band-muted:#C9D3DE;
+  --ok:#435B28; --ok-soft:#DCE4D2; --warn:#9A6410; --warn-soft:#F4E8CF; --bad:#A5432A; --bad-soft:#F3DED6;
+  --dame:#B65A3A; --heer:#152B46; --info-soft:#DFE7EE;
+  --f-display:"League Spartan","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Montserrat",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"Montserrat",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0E1A2A; --surface:#15263B; --sunk:#112033; --ink:#F3F1E9; --muted:#A3B1C1; --line:#2A3D55;
+  --accent:#C5E75A; --accent-soft:#2A3A22; --brand:#B5D677; --lime:#C5E75A; --on-lime:#152B46;
+  --band:#152B46; --on-band:#F3F1E9; --on-band-muted:#A9B7C6;
+  --ok:#B5D677; --ok-soft:#26341F; --warn:#E4B45A; --warn-soft:#3A2F1A; --bad:#E58B6C; --bad-soft:#3D2620;
+  --dame:#E39A7C; --heer:#A9C3E0; --info-soft:#1E3149; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1A2A; --surface:#15263B; --sunk:#112033; --ink:#F3F1E9; --muted:#A3B1C1; --line:#2A3D55;
+  --accent:#C5E75A; --accent-soft:#2A3A22; --brand:#B5D677; --lime:#C5E75A; --on-lime:#152B46;
+  --band:#152B46; --on-band:#F3F1E9; --on-band-muted:#A9B7C6;
+  --ok:#B5D677; --ok-soft:#26341F; --warn:#E4B45A; --warn-soft:#3A2F1A; --bad:#E58B6C; --bad-soft:#3D2620;
+  --dame:#E39A7C; --heer:#A9C3E0; --info-soft:#1E3149; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14.5px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+.wrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{font-family:var(--f-display);font-weight:700;letter-spacing:0;margin:0;text-wrap:balance}
+h1{font-size:clamp(1.55rem,6vw,2.1rem);line-height:1;overflow-wrap:anywhere}
+h2{font-size:1.35rem}
+h3{font-size:1.1rem;font-weight:600}
+.lbl{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.muted{color:var(--muted)}
+button,select,input,textarea{font:inherit;color:inherit}
+select,input[type=text],input[type=date],textarea{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 8px;min-width:0}
+textarea{width:100%;font-family:var(--f-mono);font-size:.8rem}
+button{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:6px 12px;cursor:pointer;font-weight:600}
+button:hover:not(:disabled){border-color:var(--accent)}
+button:disabled{opacity:.5;cursor:not-allowed}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+button.primary:hover:not(:disabled){border-color:var(--lime);box-shadow:inset 0 -3px 0 var(--lime)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+header.top{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;justify-content:space-between;
+  background:var(--band);color:var(--on-band);border-radius:12px;padding:16px 20px;border-bottom:4px solid var(--lime);
+  --ink:var(--on-band); --muted:var(--on-band-muted)}
+.merk{display:flex;align-items:center;gap:14px;min-width:0}
+.merk > div{min-width:0}
+.logo{width:40px;height:58px;flex:none;background:var(--lime);
+  -webkit-mask:url(data:image/png;base64,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) center/contain no-repeat;mask:url(data:image/png;base64,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) center/contain no-repeat}
+.eyebrow{font-family:var(--f-display);font-weight:600;font-size:.78rem;letter-spacing:.42em;text-transform:uppercase;color:var(--lime)}
+header.top button{background:var(--lime);border-color:var(--lime);color:var(--on-lime)}
+header.top .toast{color:var(--on-band)}
+.status{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.82rem;color:var(--muted)}
+.status b{color:var(--ink);font-weight:600}
+.pill{display:inline-block;border-radius:4px;padding:1px 8px;font-size:.76rem;font-weight:700}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.info{background:var(--info-soft);color:var(--ink)}
+.notice{background:var(--warn-soft);border:1px solid var(--warn);border-radius:8px;padding:8px 12px;font-size:.9rem}
+.config{display:flex;flex-wrap:wrap;gap:12px;align-items:end}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.facts{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.88rem;width:100%;border-top:1px solid var(--line);padding-top:10px}
+.facts b{font-family:var(--f-mono);font-weight:500}
+
+.grid{display:grid;grid-template-columns:minmax(320px,410px) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+
+.spelerskop{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;border:0;background:none;padding:0;text-align:left;cursor:pointer}
+.spelerskop .h2{font-family:var(--f-display);font-weight:700;font-size:1.4rem;color:var(--ink)}
+.spelerskop .h2::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--lime);margin-right:8px;vertical-align:.12em}
+.kopinfo{display:flex;gap:10px;align-items:center;font-size:.85rem;color:var(--muted);font-weight:600;text-align:right}
+.spelerskop #bronlabel{display:none}
+.pijl{display:inline-block;transition:transform .15s}
+.spelerskop[aria-expanded=false] .pijl{transform:rotate(-90deg)}
+.plist{display:flex;flex-direction:column;max-height:560px;overflow:auto;border:1px solid var(--line);border-radius:8px;background:var(--sunk)}
+.prow{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto auto;gap:8px;align-items:center;padding:6px 10px;border-bottom:1px solid var(--line);font-size:.9rem}
+.prow:last-child{border-bottom:0}
+.prow span:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prow.off{opacity:.45}
+.g{font-size:.7rem;font-weight:700;border-radius:3px;padding:0 5px}
+.g.V{color:var(--dame);border:1px solid var(--dame)}
+.g.M{color:var(--heer);border:1px solid var(--heer)}
+.kl{font-family:var(--f-mono);font-size:.82rem;font-variant-numeric:tabular-nums}
+.st{font-family:var(--f-mono);font-size:.78rem;font-variant-numeric:tabular-nums;min-width:4.6em;text-align:right}
+.st.op{color:var(--ok)}.st.neer{color:var(--bad)}.st.geen{color:var(--muted)}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.filters input[type=text]{flex:1 1 120px}
+
+.tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.tab{border:0;border-bottom:3px solid transparent;border-radius:0;background:none;padding:8px 12px;font-family:var(--f-display);font-size:1.05rem;font-weight:600}
+.tab[aria-selected=true]{border-bottom-color:var(--lime);color:var(--ink);font-weight:700}
+.tab .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:6px;vertical-align:middle}
+.dot.ok{background:var(--ok)}.dot.warn{background:var(--warn)}.dot.bad{background:var(--bad)}.dot.leeg{background:var(--line)}
+
+.avail{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:.86rem;background:var(--sunk);cursor:pointer;font-weight:600}
+.chip[aria-pressed=true]{background:var(--ok-soft);border-color:var(--ok)}
+.chip[aria-pressed=false]{text-decoration:line-through;color:var(--muted)}
+
+.rots{display:grid;gap:12px}
+.rot{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.rot-h{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--sunk);border-bottom:1px solid var(--line)}
+.match{display:grid;grid-template-columns:56px minmax(0,220px) minmax(0,220px) minmax(96px,1fr);gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line)}
+.match:last-child{border-bottom:0}
+.match select{width:100%}
+.mnr{font-family:var(--f-display);font-weight:700;font-size:1.05rem}
+.mnr small{display:block;font-family:var(--f-body);font-weight:600;font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.dsum{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:.85rem;line-height:1.25}
+.dsum small{display:block;color:var(--muted)}
+.dsum{justify-self:end}
+@media (max-width:520px){.match{grid-template-columns:44px minmax(0,1fr) 70px}.match select:nth-of-type(2){grid-column:2}.match .dsum{grid-row:1/3;grid-column:3}}
+
+.gauge{display:flex;align-items:center;gap:8px;min-width:220px;flex:1 1 220px;max-width:360px}
+.gbar{position:relative;flex:1;height:10px;border-radius:5px;background:var(--line)}
+.gband{position:absolute;top:0;bottom:0;background:var(--ok-soft);border:1px solid var(--ok);border-radius:5px}
+.gmark{position:absolute;top:-4px;width:3px;height:18px;border-radius:2px;background:var(--ink)}
+.gval{font-family:var(--f-mono);font-size:.85rem;font-variant-numeric:tabular-nums;white-space:nowrap}
+.gval.bad{color:var(--bad)}.gval.warn{color:var(--warn)}.gval.ok{color:var(--ok)}
+
+.checks{display:flex;flex-direction:column;gap:4px;margin:0;padding:0;list-style:none}
+.checks li{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:baseline;padding:6px 10px;border-radius:6px;font-size:.9rem}
+.checks .bad{background:var(--bad-soft)}.checks .warn{background:var(--warn-soft)}.checks .ok{background:var(--ok-soft)}
+.tag{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.bad .tag{color:var(--bad)}.warn .tag{color:var(--warn)}.ok .tag{color:var(--ok)}
+
+.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{border:0;border-radius:0;padding:6px 10px}
+.seg button[aria-pressed=true]{background:var(--accent-soft);color:var(--ink);box-shadow:inset 0 -2px 0 var(--accent)}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+td.n,th.n{text-align:center;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.toast{min-height:1.2em;font-size:.85rem;color:var(--ok);max-width:60ch}
+#syncMsg{color:var(--ink)}
+.matchinfo{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;font-size:.92rem}
+.matchinfo .tegen{font-family:var(--f-display);font-size:1.25rem;font-weight:600}
+tr.wij td{background:var(--accent-soft)}
+.poulelijst{display:grid;gap:4px;font-size:.88rem}
+.poulelijst div{display:grid;grid-template-columns:minmax(64px,auto) minmax(0,1fr) auto;gap:10px;padding:4px 8px;border-bottom:1px solid var(--line)}
+.poulelijst > div > span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tab small{display:block;font-family:var(--f-body);font-size:.7rem;color:var(--muted);font-weight:600;letter-spacing:.02em}
+.footnote{font-size:.82rem;color:var(--muted);max-width:80ch}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* Padelrubriek (communicatievoorstel v1): lime streep onder de titel */
+h1::after{content:"";display:block;width:28px;height:3px;background:var(--lime);border-radius:2px;margin-top:8px}
+</style>
+<style>
+/* Clublogin */
+.login{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:grid;gap:12px;max-width:520px}
+.login label{display:grid;gap:4px;font-weight:600;font-size:14px}
+.login input{font:400 15px var(--f-body);padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);width:100%}
+.login .hits{display:grid;gap:4px}
+.login .hit{text-align:left;font:500 15px var(--f-body);padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);cursor:pointer}
+.login .hit[aria-pressed=true]{border-color:var(--accent);background:var(--accent-soft)}
+.login .err{color:var(--bad);font-size:14px;margin:0}
+.login .msgl{font-size:14px;color:var(--muted);margin:0}
+.wie{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--on-band)}
+.wie a{color:var(--lime)}
+</style>
+
+</head>
+<body>
+
+
+<div class="wrap">
+  <header class="top">
+    <div class="merk">
+      <span class="logo" role="img" aria-label="BTC Wemmel"></span>
+      <div>
+        <div class="eyebrow">BTC Wemmel · padel</div>
+        <h1>Opstellingsplanner</h1>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+      <div class="status" id="status"><span>Gegevens laden…</span></div>
+      <div class="wie" id="wie" hidden><span id="wieNaam"></span> · <a href="../">Mijn padel</a> · <button id="afmelden" type="button">Afmelden</button></div>
+    </div>
+  </header>
+  <div class="notice" id="notice" hidden></div>
+  <section class="login" id="login" hidden aria-labelledby="loginTitel">
+    <div class="h2" id="loginTitel">Aanmelden</div>
+    <p class="msgl">Voor kapiteins, commissie en bestuur. Gebruik je persoonlijke code (dezelfde als voor Mijn ladder).</p>
+    <label for="lzoek">Je naam<input id="lzoek" autocomplete="off" placeholder="Typ minstens 3 letters"></label>
+    <div class="hits" id="lhits" role="group" aria-label="Gevonden leden"></div>
+    <label for="lcode">Persoonlijke code<input id="lcode" autocomplete="one-time-code" maxlength="6" placeholder="6 tekens" style="text-transform:uppercase"></label>
+    <button id="ldoe" type="button" disabled style="justify-self:start">Aanmelden</button>
+    <p class="err" id="lfout" role="alert"></p>
+  </section>
+
+  <section class="panel" aria-label="Competitie, afdeling en ploeg">
+    <button class="spelerskop" data-paneel="config" aria-expanded="true" aria-controls="configBody">
+      <span class="h2">Ploeg</span>
+      <span class="kopinfo"><span id="configKort"></span><span class="pijl" aria-hidden="true">▾</span></span>
+    </button>
+    <div class="config" id="configBody">
+      <div class="field"><label class="lbl" for="comp">Competitie</label><select id="comp"></select></div>
+      <div class="field"><label class="lbl" for="afd">Afdeling</label><select id="afd"></select></div>
+      <div class="field" style="flex:1 1 220px"><label class="lbl" for="ploeg">Ploeg</label><select id="ploeg"></select></div>
+      <div class="facts" id="facts"></div>
+    </div>
+  </section>
+
+  <div class="grid">
+    <aside class="panel" aria-label="Spelerslijst">
+      <button class="spelerskop" id="spelersKop" aria-expanded="true" aria-controls="spelersBody">
+        <span><span class="h2">Spelerslijst</span> <span id="bronlabel" class="muted" style="font-size:.82rem"></span></span>
+        <span class="kopinfo"><span id="kernkort"></span><span class="pijl" aria-hidden="true">▾</span></span>
+      </button>
+      <div id="spelersBody" style="display:flex;flex-direction:column;gap:10px">
+      <div class="filters">
+        <input type="text" id="zoek" placeholder="Zoek naam">
+        <select id="filtG" aria-label="Geslacht"><option value="">Iedereen</option><option value="V">Dames</option><option value="M">Heren</option></select>
+        <label style="display:flex;gap:4px;align-items:center;font-size:.85rem"><input type="checkbox" id="filtOk" checked> Toegelaten in afdeling</label>
+      </div>
+      <div class="muted" style="font-size:.82rem" id="kerninfo"></div>
+      <div class="plist" id="plist"></div>
+      <div class="footnote">Kolommen: klassement en speelsterkte (padelstats.be). Groen = speelt sterker dan zijn klassement, rood = zwakker.</div>
+      </div>
+    </aside>
+
+    <main class="panel" aria-label="Opstellingen en resultaten">
+      <button class="spelerskop" data-paneel="opst" aria-expanded="true" aria-controls="opstBody">
+        <span class="h2">Opstellingen/Resultaten</span>
+        <span class="kopinfo"><span id="opstKort"></span><span class="pijl" aria-hidden="true">▾</span></span>
+      </button>
+      <div id="opstBody" style="display:flex;flex-direction:column;gap:10px">
+      <span class="seg" role="group" aria-label="Fase" id="fases">
+        <button data-fase="poule">Poule</button><button data-fase="er">Eindronde</button><button data-fase="vf">Vlaamse Finals</button>
+      </span>
+      <div class="tabs" role="tablist" id="tabs"></div>
+      <div id="standView" hidden></div>
+      <div id="dagView" style="display:flex;flex-direction:column;gap:10px">
+      <div class="matchinfo" id="matchinfo"></div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px 18px;align-items:end" id="handmatig">
+        <div class="field"><label class="lbl" for="datum">Datum</label><input type="date" id="datum"></div>
+        <div class="field" style="flex:1 1 200px"><label class="lbl" for="tegen">Tegenstander</label><input type="text" id="tegen" placeholder="Nog niet geloot: vul zelf in"></div>
+      </div>
+      <div>
+        <div class="lbl" style="margin-bottom:6px">Beschikbaar deze speeldag</div>
+        <div class="avail" id="avail"></div>
+      </div>
+      <div class="rots" id="rots"></div>
+      <div class="actions">
+        <button class="primary" id="voorstel">Stel sterkste opstelling voor</button>
+        <span class="seg" role="group" aria-label="Sterkste volgens">
+          <button id="optSt" aria-pressed="true">Speelsterkte</button><button id="optKl" aria-pressed="false">Klassement</button>
+        </span>
+        <button id="wis">Opstelling wissen</button>
+        <button id="kopieer">Kopieer voor de ploeggroep</button>
+        <span class="toast" id="msg" role="status"></span>
+      </div>
+      <textarea id="copyOut" rows="6" readonly hidden aria-label="Opstelling als tekst"></textarea>
+      <div>
+        <h3 style="margin-bottom:6px">Controles</h3>
+        <ul class="checks" id="checks"></ul>
+      </div>
+      </div>
+      </div>
+    </main>
+  </div>
+
+  <section class="panel" aria-label="Resultaten spelers">
+    <button class="spelerskop" data-paneel="inzet" aria-expanded="true" aria-controls="inzetBody">
+      <span class="h2">Resultaten spelers</span>
+      <span class="kopinfo"><span id="inzetKort"></span><span class="pijl" aria-hidden="true">▾</span></span>
+    </button>
+    <div id="inzetBody" style="display:flex;flex-direction:column;gap:10px">
+      <div class="tablewrap"><table id="inzet"></table></div>
+      <div class="footnote">Gespeelde ontmoetingen volgens het uitslagenblad in ELIT: gewonnen / gespeelde wedstrijden. Grijs = gepland, nog niet gespeeld.</div>
+    </div>
+  </section>
+
+  <p class="footnote">Regels: reglementen 2026 van Padel Vlaanderen (Schweppes Interclub, Mixed Cup, Senior Cup; art. 2.1, 6.3, 6.6, 8.7, 9.3). De grenzen per rotatie en de volgorde sterkste duo gaan altijd over de klassementspunten (P300 = 300); de speelsterkte van padelstats.be (privé-initiatief) dient enkel om de sterkste geldige opstelling te kiezen. Een sterklassement (P200*) telt als 200, te verifiëren. ELIT blijft bindend. Spelerslijsten zijn persoonsgegevens: deel deze planner enkel met kapiteins, commissie en bestuur.</p>
+</div>
+
+<script>
+(function(){
+"use strict";
+// ---------------------------------------------------------------- reglementen 2026
+const COMP = {
+  "vj-open":  {label:"Voorjaar · Schweppes Interclub · Open", cat:"PADEL OPEN", seizoen:"Voorjaar", rot:3, mps:3, mixed:false,
+    afd:[[100,250,500,50,200],[200,500,900,100,300],[300,900,1300,200,400],[400,1300,1700,300,500],[500,1700,2200,400,700],[700,2200,3100,500,1000],[1000,3100,4000,700,1000]]},
+  "vj-dames": {label:"Voorjaar · Schweppes Interclub · Dames", cat:"PADEL DAMES", seizoen:"Voorjaar", rot:3, mps:3, mixed:false, enkelDames:true,
+    afd:[[50,200,250,50,100],[100,250,500,50,200],[200,500,900,100,300],[300,900,1300,200,400],[400,1300,1700,300,500],[500,1700,2800,400,700]]},
+  "nj-mixed": {label:"Najaar · Padel Mixed Cup · Gemengd", cat:"PADEL GEMENGD", seizoen:"Najaar", rot:2, mps:2, mixed:true,
+    afd:[[1,1700,2400,400,700],[2,1300,1600,300,500],[3,900,1200,200,400],[4,500,800,100,300],[5,300,450,50,200]]},
+  "nj-sen-open":  {label:"Najaar · Padel Senior Cup · Open 40", cat:"PADEL OPEN 40", seizoen:"Najaar", rot:2, mps:2, mixed:false,
+    afd:[[1,2400,3500,500,1000],[2,1700,2300,400,700],[3,1300,1600,300,500],[4,900,1200,200,400],[5,500,800,100,300],[6,300,450,50,200]]},
+  "nj-sen-dames": {label:"Najaar · Padel Senior Cup · Dames 40", cat:"PADEL DAMES 40", seizoen:"Najaar", rot:2, mps:2, mixed:false, enkelDames:true,
+    afd:[[1,1600,2200,400,700],[2,900,1500,200,400],[3,500,800,100,300],[4,250,450,50,200],[5,200,200,50,50]]}
+};
+// Speeldagen: poule (5), eindronde vanaf de 1/32 finale, Vlaamse Finals
+const FASES={poule:{label:"Poule", slots:[["p1","Speeldag 1"],["p2","Speeldag 2"],["p3","Speeldag 3"],["p4","Speeldag 4"],["p5","Speeldag 5"]]},
+  er:{label:"Eindronde", slots:[["er32","1/32 finale"],["er16","1/16 finale"],["er8","1/8 finale"],["er4","1/4 finale"],["er2","1/2 finale"],["er1","Finale"]]},
+  vf:{label:"Vlaamse Finals", slots:[["vf4","1/4 finale"],["vf2","1/2 finale"],["vf1","Finale"]]}};
+const ALLE_SLOTS=Object.values(FASES).flatMap(f=>f.slots.map(x=>x[0]));
+const SLOT_LABEL=Object.fromEntries(Object.entries(FASES).flatMap(([k,f])=>f.slots.map(([id,l])=>[id,(k==="vf"?"Vlaamse Finals ":k==="er"?"Eindronde ":"")+l])));
+const faseVan=id=>id.startsWith("vf")?"vf":id.startsWith("er")?"er":"poule";
+function slotVanWedstrijd(w){
+  const r=String(w.ronde||""), vf=/vlaamse finals/i.test(w.comp||"");
+  const m=r.match(/poule\s+\S+\s*-\s*(\d+)/i); if(m && !vf) return "p"+m[1];
+  const f=r.match(/1\/(\d+)\s*finale/i); const code=f?f[1]:(/finale/i.test(r)?"1":null);
+  if(!code) return null;
+  return (vf?"vf":"er")+code;
+}
+const reeksNaam=(c,a)=>c.cat+" - "+a;
+
+// ---------------------------------------------------------------- voorbeelddata (alleen zonder gedeelde opslag)
+const DEMO_LIJST = {categorie:"PADEL GEMENGD", seizoen:"Najaar", periode:"Voorbeeld", spelers:[
+ ["Aerts Lotte","V",400,452],["Bogaert Jens","M",500,488],["Claes Hanne","V",300,341],["De Wit Pieter","M",400,431],["Dewulf Sofie","V",300,297],
+ ["Goossens Bram","M",300,362],["Hermans Lien","V",200,214],["Jacobs Wim","M",400,405],["Lambrechts Nora","V",400,379],["Maes Koen","M",300,318],
+ ["Peeters Ruben","M",500,512],["Thys Joris","M",300,288],["Vandamme Kato","V",500,470],["Stevens Ellen","V",300,333]
+].map((r,i)=>({id:900+i,naam:r[0],g:r[1],k:r[2],kl:"P"+r[2],st:r[3]}))};
+
+// ---------------------------------------------------------------- state
+const UI_LS="btc-opstelling-ui-v2";
+const ui = Object.assign({comp:"nj-mixed", afdIdx:1, ploegId:null, slot:"p1", opt:"st"}, laadUi());
+if(!ALLE_SLOTS.includes(ui.slot) && ui.slot!=="stand") ui.slot="p1";
+function laadUi(){ try{ return JSON.parse(localStorage.getItem(UI_LS)||"{}"); }catch(e){ return {}; } }
+function bewaarUi(){ try{ localStorage.setItem(UI_LS, JSON.stringify(ui)); }catch(e){} }
+
+let db=null, kanSchrijven=false, demo=false;
+let spelersOpen=null;
+// Inklapbare panelen: keuze per toestel onthouden; standaard ingeklapt zodra er een ploeg gekozen is (behalve opstellingen)
+if(!ui.panelen) ui.panelen={};
+function paneelOpen(naam, standaard){ return ui.panelen[naam] ?? standaard; }
+function zetPanelen(){
+  const pl=ploegen[ui.ploegId];
+  const st={config: paneelOpen("config", !pl), opst: paneelOpen("opst", true), inzet: paneelOpen("inzet", true)};
+  for(const [naam,open] of Object.entries(st)){
+    const knop=document.querySelector(`[data-paneel="${naam}"]`); if(!knop) continue;
+    knop.setAttribute("aria-expanded", open); $(knop.getAttribute("aria-controls")).hidden=!open;
+  }
+  const kort=p=>String(p.ploeg).replace(/^.*?\s(ploeg\s+\S+)$/i,(m,x)=>x.charAt(0).toUpperCase()+x.slice(1));
+  $("configKort").textContent = pl ? `${C().label.split(" · ").slice(1).join(" · ")} · ${C().seizoen==="Voorjaar"?"P"+R().afd:"Afdeling "+R().afd} · ${kort(pl)}` : "kies een ploeg";
+  const x=wedstrijdenVanPloeg()[ui.slot];
+  $("opstKort").textContent = ui.slot==="stand" ? "Klassement" : (SLOT_LABEL[ui.slot]||"") + (x?.tegen?` · ${x.tu==="thuis"?"tegen":"bij"} ${x.tegen}`:"");
+  const gesp=ALLE_SLOTS.filter(id=>effDag(id).officieel).length;
+  $("inzetKort").textContent = gesp ? `${gesp} ontmoeting${gesp>1?"en":""} gespeeld` : "";
+}
+document.querySelectorAll("[data-paneel]").forEach(k=>k.addEventListener("click",()=>{
+  const naam=k.dataset.paneel, open=k.getAttribute("aria-expanded")!=="true"; ui.panelen[naam]=open; bewaarUi(); zetPanelen(); }));   // null = automatisch (open zonder selectie, dicht met selectie); anders de keuze van de gebruiker
+let lijsten={}, ploegen={}, meta=null;           // uit de gedeelde opslag
+let plan=null, planUnsub=null, planPad=null, planGeladen=false;
+let spelersMap=new Map(), huidigeLijst=null;
+
+const C=()=>COMP[ui.comp];
+function R(){ const a=C().afd[ui.afdIdx]; return {afd:a[0],pmin:a[1],pmax:a[2],kmin:a[3],kmax:a[4]}; }
+function leegDag(){ return {datum:"",tegen:"",afwezig:[],opst:Array.from({length:3},()=>[[null,null],[null,null]])}; }
+function leegPlan(){ return {kern:[], dagen:Object.fromEntries(ALLE_SLOTS.map(id=>[id,leegDag()]))}; }
+function dag(){ return plan.dagen[ui.slot] || (plan.dagen[ui.slot]=leegDag()); }
+function wedstrijdenVanPloeg(){ const pl=ploegen[ui.ploegId]; const uit={}; (pl?.wedstrijden||[]).forEach(w=>{ const id=slotVanWedstrijd(w); if(id && !uit[id]) uit[id]=w; }); return uit; }
+function eersteSlot(){
+  const w=wedstrijdenVanPloeg(), nu=new Date().toISOString().slice(0,16);
+  const volgende=ALLE_SLOTS.filter(id=>w[id] && !w[id].gespeeld && String(w[id].datum)>=nu.slice(0,10));
+  return volgende[0] || ALLE_SLOTS.filter(id=>w[id]).pop() || "p1";
+}
+const sp=id=>spelersMap.get(id);
+const sterkte=p=>p ? (typeof p.st==="number" ? p.st : p.k) : 0;
+
+// ---------------------------------------------------------------- regels
+const geslachtOk=(id,want)=>{ const p=sp(id); return !want || (p && p.g===want); };
+function slotGeslacht(r,m,s){
+  const c=C();
+  if(c.enkelDames) return "V";
+  if(!c.mixed) return null;
+  if(r===0) return m===0?"V":"M";      // R1: damesdubbel (1) + herendubbel (2)
+  return s===0?"V":"M";                 // R2: gemengd
+}
+const sterksteRegel=r=>!(C().mixed && r===0);   // Mixed R1 heeft geen volgorde-regel
+const kOf=(id,d)=>(d&&d.klOver&&d.klOver[id]!=null)?d.klOver[id]:(sp(id)?.k||0);   // officieel: klassement op het moment van de wedstrijd
+const duoKl=(duo,d)=>kOf(duo[0],d)+kOf(duo[1],d);
+const duoSt=d=>sterkte(sp(d[0]))+sterkte(sp(d[1]));
+const naam=id=>sp(id)?.naam || ("speler "+id);
+
+function controle(d){
+  const c=C(), r=R(), uit=[], add=(lvl,txt)=>uit.push({lvl,txt});
+  const gebruikt=new Map(), duos=new Set(); let ingevuld=0;
+  for(let ri=0; ri<c.rot; ri++){
+    const rot=d.opst[ri]; const ids=rot.flat().filter(x=>x!=null);
+    if(!ids.length) continue;
+    ingevuld++;
+    const nm=`Rotatie ${ri+1}`;
+    if(ids.length<4) add("warn",`${nm}: nog niet volledig ingevuld.`);
+    const dub=ids.filter((x,i)=>ids.indexOf(x)!==i);
+    if(dub.length) add("bad",`${nm}: ${naam(dub[0])} staat twee keer in dezelfde rotatie (WO voor de rotatie).`);
+    ids.forEach(id=>gebruikt.set(id,(gebruikt.get(id)||0)+1));
+    rot.forEach((duo,mi)=>{
+      if(duo[0]!=null&&duo[1]!=null){
+        const key=[duo[0],duo[1]].sort().join("+");
+        if(duos.has(key)) add("bad",`Duo ${naam(duo[0])} / ${naam(duo[1])} speelt twee keer (WO voor beide wedstrijden).`);
+        duos.add(key);
+      }
+      duo.forEach((id,si)=>{ const w=slotGeslacht(ri,mi,si);
+        if(id!=null && !geslachtOk(id,w)) add("bad",`${nm}, match ${ri*2+mi+1}: ${naam(id)} heeft het verkeerde geslacht voor deze plaats (WO).`); });
+    });
+    if(ids.length===4 && !dub.length){
+      const som=ids.reduce((a,id)=>a+kOf(id,d),0);
+      if(som>r.pmax) add("bad",`${nm}: ${som} punten, maximum is ${r.pmax} (WO voor beide wedstrijden).`);
+      else if(som<r.pmin) add("warn",`${nm}: ${som} punten, minimum is ${r.pmin} (boete 25 EUR vanaf het 3e speelweekend; uitslagen blijven).`);
+      if(sterksteRegel(ri) && duoKl(rot[0],d)<duoKl(rot[1],d))
+        add("bad",`${nm}: het duo met de hoogste klassementspunten (${duoKl(rot[1],d)}) moet op match ${ri*2+1} staan (WO).`);
+    }
+  }
+  const spelers=[...gebruikt.keys()];
+  spelers.forEach(id=>{ const p=sp(id);
+    if(!p){ add("bad",`Speler ${id} staat niet (meer) op de spelerslijst (WO).`); return; }
+    const k=kOf(id,d);
+    if(k>r.kmax) add("bad",`${p.naam} (P${k}) heeft een te hoog klassement voor deze afdeling (max P${r.kmax}, WO).`);
+    else if(k<r.kmin) add("warn",`${p.naam} (P${k}) heeft een te laag klassement (min P${r.kmin}; boete 25 EUR, niet in de eerste 2 speelweekends).`);
+    if(gebruikt.get(id)>c.mps) add("bad",`${p.naam} speelt ${gebruikt.get(id)} wedstrijden; normaal ${c.mps}.`);
+    if(!d.officieel && d.afwezig.includes(id)) add("warn",`${p.naam} staat op afwezig maar is opgesteld.`);
+    if(!d.officieel && !plan.kern.includes(id)) add("warn",`${p.naam} hoort niet bij de ploegselectie.`);
+  });
+  if(ingevuld===c.rot){
+    if(spelers.length<4) add("bad",`Minstens 4 spelers nodig (nu ${spelers.length}).`);
+    if(spelers.length>8) add("bad",`Maximaal 8 spelers per ontmoeting (nu ${spelers.length}).`);
+    if(c.mixed){ const v=spelers.filter(id=>sp(id)?.g==="V").length;
+      if(v<2||spelers.length-v<2) add("bad",`Mixed Cup: minstens 2 dames en 2 heren (nu ${v} dames, ${spelers.length-v} heren).`); }
+  }
+  if(!uit.length && ingevuld===c.rot) add("ok",d.officieel?"De gespeelde opstelling voldoet aan alle gecontroleerde regels.":"Opstelling voldoet aan alle gecontroleerde regels.");
+  if(!ingevuld) add("warn","Nog geen opstelling voor deze speeldag.");
+  return uit;
+}
+function status(d){
+  if(!d.opst.slice(0,C().rot).flat(2).some(x=>x!=null)) return "leeg";
+  const ch=controle(d);
+  return ch.some(x=>x.lvl==="bad")?"bad":ch.some(x=>x.lvl==="warn")?"warn":"ok";
+}
+
+// ---------------------------------------------------------------- voorstel
+function voorstel(d){
+  const c=C(), r=R(), waarde=ui.opt==="st"?sterkte:(p=>p.k);
+  const pool=plan.kern.filter(id=>!d.afwezig.includes(id)).map(sp).filter(p=>p && p.k<=r.kmax);
+  if(pool.length<4) return {fout:"Te weinig beschikbare spelers in de selectie (minstens 4, binnen het maximumklassement)."};
+  const opties=[];
+  for(let ri=0; ri<c.rot; ri++) opties.push(rotOpties(pool,ri,r,waarde).sort((a,b)=>b.w-a.w));
+  if(opties.some(o=>!o.length)) return {fout:"Geen geldige rotatie mogelijk binnen de puntengrenzen met de beschikbare spelers."};
+  let best=null, bestScore=-Infinity, nodes=0; const LIM=800000;
+  const telling={}, duos=new Set(), keuze=[];
+  (function dfs(ri,som){
+    if(nodes++>LIM) return;
+    if(ri===c.rot){
+      const ids=Object.keys(telling).filter(k=>telling[k]>0);
+      if(ids.length<4||ids.length>8) return;
+      if(c.mixed){ const v=ids.filter(id=>sp(+id).g==="V").length; if(v<2||ids.length-v<2) return; }
+      const spreid=ids.reduce((a,id)=>a+Math.pow(c.mps-telling[id],2),0);
+      const score=som*100-spreid*10+ids.length;
+      if(score>bestScore){ bestScore=score; best=keuze.map(k=>k.map(x=>x.slice())); }
+      return;
+    }
+    for(const o of opties[ri]){
+      const ids=o.duo.flat();
+      if(ids.some(id=>(telling[id]||0)>=c.mps)) continue;
+      const k1=[...o.duo[0]].sort().join("+"), k2=[...o.duo[1]].sort().join("+");
+      if(duos.has(k1)||duos.has(k2)) continue;
+      ids.forEach(id=>telling[id]=(telling[id]||0)+1); duos.add(k1); duos.add(k2); keuze.push(o.duo);
+      dfs(ri+1,som+o.w);
+      ids.forEach(id=>telling[id]--); duos.delete(k1); duos.delete(k2); keuze.pop();
+    }
+  })(0,0);
+  if(!best) return {fout:"Geen geldige opstelling gevonden (duo's, geslacht of puntengrenzen)."};
+  return {opst:best, afgekapt:nodes>LIM};
+}
+function rotOpties(pool,ri,r,waarde){
+  const uit=[], n=pool.length;
+  const paren=[[[0,1],[2,3]],[[0,2],[1,3]],[[0,3],[1,2]]];
+  for(let a=0;a<n;a++)for(let b=a+1;b<n;b++)for(let c2=b+1;c2<n;c2++)for(let e=c2+1;e<n;e++){
+    const vier=[pool[a],pool[b],pool[c2],pool[e]];
+    const som=vier.reduce((s,p)=>s+p.k,0);
+    if(som>r.pmax||som<r.pmin) continue;
+    const w=vier.reduce((s,p)=>s+waarde(p),0);
+    for(const [x,y] of paren){
+      let d1=[vier[x[0]],vier[x[1]]], d2=[vier[y[0]],vier[y[1]]];
+      if(sterksteRegel(ri) && d1[0].k+d1[1].k < d2[0].k+d2[1].k) [d1,d2]=[d2,d1];
+      let duo=[d1.map(p=>p.id),d2.map(p=>p.id)];
+      if(C().mixed && ri===0){
+        const dames=duo.find(dd=>dd.every(id=>sp(id).g==="V")), heren=duo.find(dd=>dd.every(id=>sp(id).g==="M"));
+        if(!dames||!heren) continue;
+        duo=[dames,heren];
+      } else {
+        const pas=(dd,mi)=>{ const w0=slotGeslacht(ri,mi,0), w1=slotGeslacht(ri,mi,1);
+          if(!w0&&!w1) return dd;
+          if(geslachtOk(dd[0],w0)&&geslachtOk(dd[1],w1)) return dd;
+          if(geslachtOk(dd[1],w0)&&geslachtOk(dd[0],w1)) return [dd[1],dd[0]];
+          return null; };
+        const p0=pas(duo[0],0), p1=pas(duo[1],1);
+        if(!p0||!p1) continue;
+        duo=[p0,p1];
+      }
+      uit.push({duo,w});
+    }
+  }
+  return uit;
+}
+
+// ---------------------------------------------------------------- gegevens kiezen
+function lijstVoor(c){
+  if(demo) return DEMO_LIJST.categorie===c.cat ? DEMO_LIJST : null;
+  const kand=Object.values(lijsten).filter(l=>l.categorie===c.cat && l.seizoen===c.seizoen);
+  kand.sort((a,b)=>b.periode_id-a.periode_id);
+  return kand[0]||null;
+}
+function ploegenVoor(c,afd){
+  const lijst=lijstVoor(c);
+  return Object.values(ploegen).filter(p=>p.reeks===reeksNaam(c,afd) && p.seizoen===c.seizoen && (!lijst || p.periode_id===lijst.periode_id))
+    .sort((a,b)=>a.ploeg.localeCompare(b.ploeg));
+}
+function aantalPloegen(c,afd){ return ploegenVoor(c,afd).length; }
+
+function kiesPlan(){
+  const c=C(), afd=R().afd;
+  huidigeLijst=lijstVoor(c);
+  spelersMap=new Map((huidigeLijst?.spelers||[]).map(p=>[p.id,p]));
+  const pl=ploegenVoor(c,afd);
+  if(!pl.some(p=>p.ploeg_id===ui.ploegId)) ui.ploegId=pl[0]?.ploeg_id ?? null;
+  const pad = (!demo && token && ui.ploegId!=null) ? "plannen/p"+ui.ploegId : null;
+  if(pad===planPad && plan) return;
+  spelersOpen=null;
+  planPad=pad; planGeladen=false;
+  plan=leegPlan(); ui.slot=eersteSlot();
+  if(!pad){ if(demo && huidigeLijst) plan=demoPlan(); planGeladen=true; return; }
+  const gevraagd=ui.ploegId;
+  kanSchrijven=bewerkbaar.has(gevraagd);
+  rpc("club_planner_plan",{p_token:token,p_ploeg:gevraagd}).then(r=>{
+    if(ui.ploegId!==gevraagd) return;                 // intussen andere ploeg gekozen
+    planGeladen=true;
+    if(r.fout){ melding("msg","Planning niet beschikbaar: "+r.fout+"."); return; }
+    if(bezigMetBewaren || wachtend) return;
+    planVersie=r.versie||0; kanSchrijven=!!r.bewerken;
+    plan = r.plan ? normPlan(r.plan) : leegPlan();
+    render(false);
+  }).catch(e=>{ planGeladen=true; melding("msg",e.message||"Planning niet bereikbaar."); });
+}
+function normPlan(d){
+  const p=leegPlan();
+  p.kern=Array.isArray(d.kern)?d.kern.slice():[];
+  const bron=Array.isArray(d.dagen) ? Object.fromEntries(d.dagen.map((x,i)=>["p"+(i+1),x])) : (d.dagen||{});
+  Object.entries(bron).forEach(([id,x])=>{ if(!ALLE_SLOTS.includes(id)||!x) return;
+    p.dagen[id]={datum:x.datum||"",tegen:x.tegen||"",afwezig:Array.isArray(x.afwezig)?x.afwezig.slice():[],
+      opst:[0,1,2].map(r=>[0,1].map(m=>{ const duo=x.opst?.["r"+r+"m"+m]; return [0,1].map(s=>Array.isArray(duo)&&duo[s]!=null?duo[s]:null); }))};
+  });
+  return p;
+}
+function demoPlan(){
+  const p=leegPlan(); p.kern=[900,902,904,908,901,903,907,909,911];
+  p.dagen.p1.datum="2026-11-14"; p.dagen.p1.tegen="Voorbeeld: TC Tegenstrever B";
+  p.dagen.p1.opst[0]=[[900,908],[903,909]]; p.dagen.p1.opst[1]=[[908,903],[900,909]];
+  return p;
+}
+
+// ---------------------------------------------------------------- bewaren (gedeelde planning)
+let bewaarTimer=null, bezigMetBewaren=false, opnieuw=false, wachtend=false;
+function wijziging(herteken=true){
+  if(herteken) render(false);
+  if(demo || !planPad || !kanSchrijven) return;
+  clearTimeout(bewaarTimer); wachtend=true;
+  bewaarTimer=setTimeout(()=>{ wachtend=false; bewaar(); },700);
+}
+function naarOpslag(p){
+  const dagen={};
+  Object.entries(p.dagen).forEach(([id,d])=>{
+    const leeg=!d.datum&&!d.tegen&&!d.afwezig.length&&!d.opst.flat(2).some(x=>x!=null);
+    if(leeg) return;                                   // enkel ingevulde speeldagen bewaren
+    const o={}; d.opst.forEach((rot,r)=>rot.forEach((duo,m)=>{ o["r"+r+"m"+m]=duo.slice(); }));
+    dagen[id]={datum:d.datum, tegen:d.tegen, afwezig:d.afwezig.slice(), opst:o};
+  });
+  return {kern:p.kern.slice(), dagen};
+}
+async function bewaar(){
+  if(bezigMetBewaren){ opnieuw=true; return; }
+  bezigMetBewaren=true;
+  const ploeg=ui.ploegId, body=naarOpslag(plan);
+  try{
+    const r=await rpc("club_planner_bewaar",{p_token:token,p_ploeg:ploeg,p_plan:body,p_versie:planVersie});
+    if(r.ok){ if(ui.ploegId===ploeg) planVersie=r.versie; melding("msg","Opgeslagen."); }
+    else if(r.fout==="conflict"){
+      planVersie=r.versie||0; plan=r.plan?normPlan(r.plan):leegPlan(); render(false);
+      melding("msg","Iemand anders"+(r.door?" ("+r.door+")":"")+" wijzigde deze planning net. Je ziet nu de nieuwste versie; voer je laatste wijziging opnieuw in.",9000);
+    }
+    else if(r.fout==="niet aangemeld"){ afmelden(); }
+    else { kanSchrijven=false; render(false); melding("msg","Niet opgeslagen: "+r.fout+"."); }
+  }catch(e){ melding("msg","Opslaan mislukt; probeer het zo opnieuw."); }
+  finally{ bezigMetBewaren=false; if(opnieuw){ opnieuw=false; bewaar(); } }
+}
+
+// ---------------------------------------------------------------- weergave
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const datumKort=d=>d?new Date(d+"T12:00").toLocaleDateString("nl-BE",{day:"numeric",month:"short"}):"";
+function stCel(p){
+  if(typeof p.st!=="number") return `<span class="st geen" title="Geen speelsterkte gevonden">–</span>`;
+  const d=p.st-p.k, kl=d>=25?"op":d<=-25?"neer":"";
+  return `<span class="st ${kl}" title="Speelsterkte ${p.st}${p.std?" (meting "+datumKort(p.std)+")":""}">P${p.st}</span>`;
+}
+
+function renderStatus(){
+  const s=[];
+  if(demo) s.push(`<span class="pill warn">Voorbeelddata</span>`);
+  else {
+    if(huidigeLijst) s.push(`<span>Spelerslijst <b>${esc(huidigeLijst.periode)}</b> · ${huidigeLijst.spelers.length} spelers</span>`);
+    if(meta?.bijgewerkt) s.push(`<span>Bijgewerkt <b>${esc(new Date(meta.bijgewerkt).toLocaleString("nl-BE",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}))}</b></span>`);
+    if(huidigeLijst){ const m=huidigeLijst.spelers.filter(p=>typeof p.st==="number").length;
+      s.push(m?`<span>Speelsterkte voor <b>${m}</b> spelers</span>`:`<span class="pill info">Speelsterkte volgt na de eerste dagelijkse update</span>`); }
+    s.push(kanSchrijven?`<span class="pill ok">Je kan deze ploeg plannen</span>`:`<span class="pill warn">Alleen inzage</span>`);
+  }
+  $("status").innerHTML=s.join("");
+}
+
+function renderConfig(){
+  const c=C();
+  $("comp").innerHTML=Object.entries(COMP).map(([k,x])=>`<option value="${k}" ${k===ui.comp?"selected":""}>${esc(x.label)}</option>`).join("");
+  $("afd").innerHTML=c.afd.map((a,i)=>{ const n=aantalPloegen(c,a[0]); const lab=(c.seizoen==="Voorjaar"?"P"+a[0]:"Afdeling "+a[0])+(n?` · ${n} ploeg${n>1?"en":""}`:"");
+    return `<option value="${i}" ${i===ui.afdIdx?"selected":""}>${esc(lab)}</option>`}).join("");
+  const pl=ploegenVoor(c,R().afd);
+  const kort=p=>String(p.ploeg).replace(/^.*?\s(ploeg\s+\S+)$/i,(m,x)=>x.charAt(0).toUpperCase()+x.slice(1));
+  $("ploeg").innerHTML=pl.length?pl.map(p=>`<option value="${p.ploeg_id}" ${p.ploeg_id===ui.ploegId?"selected":""}>${esc(kort(p))} · kapitein ${esc(p.kapitein||"onbekend")}</option>`).join("")
+    :`<option value="">Geen BTC-ploeg in deze afdeling (simulatie, niet bewaard)</option>`;
+  $("ploeg").disabled=!pl.length;
+  const r=R();
+  $("facts").innerHTML=[["Punten per rotatie",`${r.pmin}–${r.pmax}`],["Klassement",`P${r.kmin}–P${r.kmax}`],
+    ["Formaat",`${c.rot*2} matchen, ${c.rot} rotaties`],["Per speler",`${c.mps} matchen`],["Spelers","4–8"],
+    ...(c.mixed?[["Gemengd","R1 dames + heren, R2 gemengd"]]:[])].map(([k,v])=>`<span><span class="muted">${k}</span> <b>${esc(v)}</b></span>`).join("");
+  const n=$("notice");
+  if(!huidigeLijst){ n.hidden=false; n.textContent=`Nog geen spelerslijst ${c.cat} voor het ${c.seizoen.toLowerCase()} in de opslag. Ze verschijnt na de eerstvolgende dagelijkse update zodra de club ze in ELIT heeft ingediend.`; }
+  else n.hidden=true;
+}
+
+function renderSpelers(){
+  const r=R(), zoek=$("zoek").value.trim().toLowerCase(), g=$("filtG").value, ok=$("filtOk").checked, K=plan.kern;
+  $("bronlabel").textContent=huidigeLijst?`${huidigeLijst.spelers.length} op de lijst`:"";
+  const lijst=(huidigeLijst?.spelers||[]).filter(p=>(!zoek||String(p.naam).toLowerCase().includes(zoek))&&(!g||p.g===g)&&(!ok||(p.k>=r.kmin&&p.k<=r.kmax)||K.includes(p.id)))
+    .sort((a,b)=>(K.includes(b.id)-K.includes(a.id))||sterkte(b)-sterkte(a)||String(a.naam).localeCompare(String(b.naam)));
+  const dis=(!kanSchrijven&&!demo&&planPad)?"disabled":"";
+  $("plist").innerHTML=lijst.length?lijst.map(p=>`<label class="prow ${p.k>=r.kmin&&p.k<=r.kmax?"":"off"}"><input type="checkbox" data-kern="${p.id}" ${K.includes(p.id)?"checked":""} ${dis}>
+      <span title="${esc(p.naam)}">${esc(p.naam)}</span><span class="g ${p.g}">${p.g==="V"?"D":"H"}</span><span class="kl">${esc(p.kl)}</span>${stCel(p)}</label>`).join("")
+    :`<div style="padding:12px" class="muted">${huidigeLijst?"Geen spelers voor deze filter.":"Geen spelerslijst."}</div>`;
+  const v=K.filter(id=>sp(id)?.g==="V").length;
+  $("kernkort").textContent = K.length ? `${K.length} geselecteerd${C().mixed?` (${v} D, ${K.length-v} H)`:""}` : "nog niemand geselecteerd";
+  const open = spelersOpen ?? !K.length;          // ingeklapt zodra er een selectie is, tenzij de gebruiker zelf koos
+  $("spelersBody").hidden = !open; $("spelersKop").setAttribute("aria-expanded", open);
+  $("kerninfo").textContent=(huidigeLijst?`${huidigeLijst.spelers.length} spelers op de lijst. `:"")+`Ploegselectie: ${K.length} spelers${C().mixed?` (${v} dames, ${K.length-v} heren)`:""}. Vink spelers aan om ze aan de ploeg toe te voegen.`;
+}
+
+// Gespeelde ontmoeting met spelers in ELIT: de officiële opstelling vervangt de planning
+function officieel(x){
+  if(!x || !x.gespeeld || !Array.isArray(x.opst) || !x.opst.length) return null;
+  const c=C(), opst=Array.from({length:3},()=>[[null,null],[null,null]]), res={}, klOver={};
+  x.opst.forEach(r=>{ const nr=+r.nr; if(!(nr>=1&&nr<=c.rot*2)) return;
+    const ri=(nr-1)>>1, mi=(nr-1)&1, si=(+r.pos===2)?1:0;
+    opst[ri][mi][si]=r.id;
+    // ELIT geeft de score van de winnaar; bij verlies omdraaien zodat de score altijd vanuit onze ploeg staat
+    res[nr]={w:r.w, sc:r.sc && r.w===false ? String(r.sc).replace(/(\d+)\/(\d+)/g,"$2/$1") : r.sc};
+    const k=parseInt(String(r.kl||"").replace(/\D/g,""),10); if(!isNaN(k)) klOver[r.id]=k; });
+  for(let ri=0; ri<c.rot; ri++){
+    if(c.mixed && ri===0){                    // damesdubbel op match 1, herendubbel op match 2
+      const isM=duo=>duo.every(id=>id!=null&&sp(id)?.g==="M");
+      if(isM(opst[0][0]) && !isM(opst[0][1])){ opst[0].reverse(); const a=res[1]; res[1]=res[2]; res[2]=a; }
+    }
+    opst[ri].forEach((duo,mi)=>{ const w0=slotGeslacht(ri,mi,0), w1=slotGeslacht(ri,mi,1);
+      if((w0||w1) && duo[0]!=null && duo[1]!=null && !(geslachtOk(duo[0],w0)&&geslachtOk(duo[1],w1)) && geslachtOk(duo[1],w0)&&geslachtOk(duo[0],w1)) duo.reverse(); });
+  }
+  return {datum:"", tegen:"", afwezig:[], opst, officieel:true, res, klOver};
+}
+// Gelijke stand (reglementen 2026, art. 10.2): 1 punt per ploeg; is de ontmoeting doorslaggevend
+// (poulerangschikking of eindronde), dan beslissen achtereenvolgens deze criteria.
+function beslissing(x, d){
+  const c=C(), a=R().afd;
+  const metSets = c.seizoen==="Najaar" || (c.cat==="PADEL OPEN" && a>=700) || (c.cat==="PADEL DAMES" && a>=500);
+  const sleutelNr = c.rot===3 ? 5 : 3;                   // 5e (voorjaar) of 3e wedstrijd (Mixed/Senior)
+  const crit=[];
+  if(metSets) crit.push(["setsaldo", (x.sv??0)-(x.st??0)]);
+  crit.push(["gamesaldo", (x.gv??0)-(x.gt??0)]);
+  const r=d?.officieel ? d.res?.[sleutelNr]?.w : null;
+  crit.push([`${sleutelNr}e wedstrijd`, r===true?1:r===false?-1:0]);
+  for(const [naam,v] of crit){ if(v>0) return {wij:true, op:naam}; if(v<0) return {wij:false, op:naam}; }
+  return null;
+}
+// ---------------------------------------------------------------- poule-klassement (art. 10.1-10.3)
+function pouleStand(pl){
+  const ow=pl?.poule?.ow||[], c=C(), a=R().afd;
+  const metSets = c.seizoen==="Najaar" || (c.cat==="PADEL OPEN" && a>=700) || (c.cat==="PADEL DAMES" && a>=500);
+  const T={};
+  const team=(id,naam)=>T[id]||(T[id]={id,naam:String(naam||"").replace(/\s*\([^)]*\)\s*$/,""),gesp:0,w:0,g:0,v:0,pt:0,mw:0,mv:0,sw:0,sv:0,gw:0,gv:0});
+  ow.forEach(m=>{ team(m.t,m.tn); team(m.u,m.un); });
+  const gespeeld=ow.filter(m=>m.g && m.mt!=null);
+  const telOp=(t,v,tg,s1,s2,g1,g2)=>{ t.gesp++; t.mw+=v; t.mv+=tg; t.sw+=s1; t.sv+=s2; t.gw+=g1; t.gv+=g2;
+    if(v>tg){t.w++;t.pt+=2;} else if(v<tg){t.v++;} else {t.g++;t.pt+=1;} };
+  gespeeld.forEach(m=>{ telOp(T[m.t],m.mt,m.mu,m.st,m.su,m.gt,m.gu); telOp(T[m.u],m.mu,m.mt,m.su,m.st,m.gu,m.gt); });
+  const onderling=(a,b)=>gespeeld.find(m=>(m.t===a.id&&m.u===b.id)||(m.t===b.id&&m.u===a.id));
+  // 2 ploegen gelijk: onderlinge ontmoeting, bij gelijkspel de criteria van 10.2
+  const duel=(a,b)=>{ const m=onderling(a,b); if(!m) return 0;
+    const [va,vb]=m.t===a.id?[m.mt,m.mu]:[m.mu,m.mt]; if(va!==vb) return vb-va;
+    const [sa,sb]=m.t===a.id?[m.st,m.su]:[m.su,m.st]; if(metSets && sa!==sb) return sb-sa;
+    const [ga,gb]=m.t===a.id?[m.gt,m.gu]:[m.gu,m.gt]; if(ga!==gb) return gb-ga;
+    return 0; };
+  // meer dan 2 gelijk: enkel de onderlinge ontmoetingen (10.3.2)
+  const mini=(groep)=>{ const ids=new Set(groep.map(t=>t.id)); const M={};
+    groep.forEach(t=>M[t.id]={pt:0,mw:0,sd:0,gd:0,gv:0});
+    gespeeld.filter(m=>ids.has(m.t)&&ids.has(m.u)).forEach(m=>{
+      const add=(id,v,tg,s1,s2,g1,g2)=>{ const x=M[id]; x.mw+=v; x.sd+=s1-s2; x.gd+=g1-g2; x.gv+=g2; x.pt+= v>tg?2:v===tg?1:0; };
+      add(m.t,m.mt,m.mu,m.st,m.su,m.gt,m.gu); add(m.u,m.mu,m.mt,m.su,m.st,m.gu,m.gt); });
+    return (a,b)=>{ const x=M[a.id], y=M[b.id];
+      return (y.pt-x.pt)||(y.mw-x.mw)||(metSets?(y.sd-x.sd):0)||(y.gd-x.gd)||(x.gv-y.gv); }; };
+  const rangschik=(groep)=>{
+    if(groep.length<=1) return groep;
+    if(groep.length===2){ const d=duel(groep[0],groep[1]); if(d>0) return [groep[1],groep[0]]; if(d===0) groep.forEach(t=>t.lot=true); return groep; }
+    const cmp=mini(groep); const s=groep.slice().sort(cmp); const uit=[];
+    for(let i=0;i<s.length;){ let j=i+1; while(j<s.length && cmp(s[i],s[j])===0) j++;
+      const sub=s.slice(i,j); uit.push(...(sub.length===groep.length ? (sub.forEach(t=>t.lot=true),sub) : rangschik(sub))); i=j; }
+    return uit; };
+  const lijst=Object.values(T).sort((a,b)=>b.pt-a.pt);
+  const uit=[];
+  for(let i=0;i<lijst.length;){ let j=i+1; while(j<lijst.length && lijst[j].pt===lijst[i].pt) j++; uit.push(...rangschik(lijst.slice(i,j))); i=j; }
+  return {rang:uit, gespeeld:gespeeld.length, totaal:ow.length, metSets};
+}
+function renderStand(){
+  const pl=ploegen[ui.ploegId], v=$("standView");
+  if(!pl){ v.innerHTML=`<p class="muted">Kies een ploeg om het klassement van zijn poule te zien.</p>`; return; }
+  if(!pl.poule?.ow?.length){ v.innerHTML=`<p class="muted">Het poule-klassement verschijnt na de volgende synchronisatie met de site van Tennis en Padel Vlaanderen.</p>`; return; }
+  const st=pouleStand(pl), naam=String(pl.poule.naam||"Poule").replace(/\s*-\s*plaats.*$/i,"");
+  const sd=(a,b)=>{const d=a-b; return `${a}–${b}`;};
+  const rijen=st.rang.map((t,i)=>`<tr class="${t.id===ui.ploegId?"wij":""}"><td class="n">${i+1}${t.lot?"*":""}</td><td${(!!ploegen[t.id]||/BRUSSELSE\s+T\.?\s*C/i.test(t.naam))?' style="color:var(--brand)"':""}>${esc(t.naam)}</td>
+    <td class="n">${t.gesp}</td><td class="n">${t.w}</td><td class="n">${t.g}</td><td class="n">${t.v}</td><td class="n"><b>${t.pt}</b></td>
+    <td class="n">${sd(t.mw,t.mv)}</td>${st.metSets?`<td class="n">${sd(t.sw,t.sv)}</td>`:""}<td class="n">${sd(t.gw,t.gv)}</td></tr>`).join("");
+  const ow=(pl.poule.ow||[]).slice().sort((a,b)=>String(a.d).localeCompare(String(b.d)));
+  const fmtD=d=>{const x=new Date(String(d).replace(" ","T")); return isNaN(x)?"":x.toLocaleDateString("nl-BE",{day:"numeric",month:"short"});};
+  const kort=n=>String(n||"").replace(/\s*\([^)]*\)\s*$/,"");
+  const isBTC=(id,n)=>!!ploegen[id] || /BRUSSELSE\s+T\.?\s*C/i.test(String(n||""));
+  const ploegNaam=(id,n,win)=>{ const st=[isBTC(id,n)?"color:var(--brand)":"", win?"font-weight:700":""].filter(Boolean).join(";");
+    return st?`<span style="${st}">${esc(kort(n))}</span>`:esc(kort(n)); };
+  // winnaar volgens art. 10.2: matchen, bij gelijke stand setsaldo (waar sets tellen) en gamesaldo;
+  // het laatste criterium (3e/5e wedstrijd) kennen we niet voor ontmoetingen zonder BTC
+  const winnaar=m=>{ if(!(m.g&&m.mt!=null)) return 0;
+    if(m.mt!==m.mu) return m.mt>m.mu?1:-1;
+    if(st.metSets && m.st!==m.su) return m.st>m.su?1:-1;
+    if(m.gt!==m.gu) return m.gt>m.gu?1:-1;
+    return 0; };
+  const lijst=ow.map(m=>{ const w=winnaar(m), tw=w>0, uw=w<0;
+    return `<div><span class="muted">${fmtD(m.d)}</span><span>${ploegNaam(m.t,m.tn,tw)} – ${ploegNaam(m.u,m.un,uw)}</span><span class="num">${m.g&&m.mt!=null?`${m.mt}–${m.mu}${st.metSets?` · ${m.st}–${m.su}`:""} · ${m.gt}–${m.gu}`:'<span class="muted">nog te spelen</span>'}</span></div>`;}).join("");
+  const elit=pl.poule.plaats?` Plaats volgens ELIT: <b>${pl.poule.plaats}</b>.`:"";
+  v.innerHTML=`<h3>${esc(naam)} <span class="muted" style="font-family:var(--f-body);font-size:.85rem;font-weight:600">· ${st.gespeeld} van ${st.totaal} ontmoetingen gespeeld</span></h3>
+    <div class="tablewrap"><table><thead><tr><th class="n">#</th><th>Ploeg</th><th class="n">Gesp</th><th class="n">W</th><th class="n">G</th><th class="n">V</th><th class="n">Ptn</th><th class="n">Matchen</th>${st.metSets?'<th class="n">Sets</th>':""}<th class="n">Games</th></tr></thead><tbody>${rijen}</tbody></table></div>
+    <p class="footnote">Berekend volgens art. 10 van het reglement: winst 2, gelijk 1, verlies 0 punten. Bij gelijke punten telt eerst de onderlinge ontmoeting; met meer dan 2 ploegen een mini-klassement van hun onderlinge ontmoetingen (punten, matchen${st.metSets?", sets":""}, games, minst verloren games).${st.rang.some(t=>t.lot)?" * nog gelijk: loting of beslissende wedstrijd die hier niet gekend is.":""}${elit}</p>
+    <h3 style="margin-top:6px">Ontmoetingen</h3><div class="poulelijst">${lijst}</div>`;
+}
+
+function effDag(id){ return officieel(wedstrijdenVanPloeg()[id]) || plan.dagen[id] || leegDag(); }
+function slotHeeftIets(id){ const d=effDag(id); return d && (d.opst.flat(2).some(x=>x!=null)||d.afwezig.length||d.datum||d.tegen); }
+function renderTabs(){
+  const fase=faseVan(ui.slot), w=wedstrijdenVanPloeg();
+  document.querySelectorAll("#fases [data-fase]").forEach(b=>{
+    const f=b.dataset.fase, n=FASES[f].slots.filter(([id])=>w[id]||slotHeeftIets(id)).length;
+    b.setAttribute("aria-pressed",f===fase); b.textContent=FASES[f].label+(n&&f!==fase?` (${n})`:""); });
+  const standTab = fase==="poule" ? `<button class="tab" role="tab" aria-selected="${ui.slot==="stand"}" data-slot="stand">Klassement${ploegen[ui.ploegId]?.poule?.naam?`<small>${esc(String(ploegen[ui.ploegId].poule.naam).replace(/\s*-\s*plaats.*$/i,""))}</small>`:""}</button>` : "";
+  $("tabs").innerHTML=FASES[fase].slots.map(([id,label])=>{ const d=effDag(id), st=status(d), x=w[id];
+    const sub=x?`${datumKort(String(x.datum).slice(0,10))} · ${x.tu==="thuis"?"thuis":"uit"}`:(d?.datum?datumKort(d.datum):"");
+    return `<button class="tab" role="tab" aria-selected="${id===ui.slot}" data-slot="${id}">${esc(label)}<span class="dot ${st}" title="${({ok:"In orde",warn:"Let op",bad:"Fout",leeg:"Leeg"})[st]}"></span>${sub?`<small>${esc(sub)}</small>`:""}</button>`;}).join("")+standTab;
+}
+
+function opties(ri,mi,si,huidig){
+  const w=slotGeslacht(ri,mi,si), d=dag();
+  const ids=plan.kern.filter(id=>sp(id)&&(!w||sp(id).g===w));
+  if(huidig!=null && !ids.includes(huidig)) ids.push(huidig);
+  return `<option value="">—</option>`+ids.map(id=>{const p=sp(id);
+    return `<option value="${id}" ${id===huidig?"selected":""}>${esc(p?p.naam:"speler "+id)}${p?" · "+esc(p.kl):""}${d.afwezig.includes(id)?" (afwezig)":""}</option>`}).join("");
+}
+
+function renderDag(){
+  const toonStand = ui.slot==="stand";
+  $("standView").hidden=!toonStand; $("dagView").hidden=toonStand;
+  if(toonStand){ renderStand(); return; }
+  const x=wedstrijdenVanPloeg()[ui.slot], d=effDag(ui.slot), c=C(), r=R(), ro=(!kanSchrijven&&!demo&&planPad)||d.officieel;
+  if(x){
+    const dt=new Date(String(x.datum).replace(" ","T"));
+    const wanneer=isNaN(dt)?"":dt.toLocaleDateString("nl-BE",{weekday:"short",day:"numeric",month:"long"})+" "+dt.toLocaleTimeString("nl-BE",{hour:"2-digit",minute:"2-digit"});
+    let uitslag="";
+    if(x.gespeeld && x.voor!=null){
+      const gelijk=x.voor===x.tegenp, eind=faseVan(ui.slot)!=="poule", b=gelijk?beslissing(x,d):null;
+      const wint = gelijk ? (b?b.wij:null) : x.voor>x.tegenp;
+      const kl = wint===true?"ok":wint===false?"warn":"info";
+      const detail=[x.sv!=null?`sets ${x.sv}–${x.st}`:"", x.gv!=null?`games ${x.gv}–${x.gt}`:""].filter(Boolean).join(" · ");
+      let uitleg="";
+      if(gelijk){
+        uitleg = eind
+          ? (b?`${b.wij?"Gewonnen":"Verloren"} op ${b.op}`:"Volledig gelijk: loting")
+          : `Gelijkspel, 1 punt per ploeg${b?`; bij gelijke stand in de poule ${b.wij?"in ons voordeel":"in hun voordeel"} op ${b.op}`:""}`;
+      }
+      uitslag=`<span class="pill ${kl}">${x.voor}–${x.tegenp}</span>${detail?`<span class="muted">${detail}</span>`:""}${uitleg?`<span>${esc(uitleg)}</span>`:""}`;
+    }
+    const bron=d.officieel?`<span class="pill info">Officiële opstelling uit ELIT</span>`:(x.gespeeld?`<span class="muted">Officiële opstelling nog niet beschikbaar; je planning blijft staan.</span>`:"");
+    $("matchinfo").innerHTML=`<span class="tegen">${x.tu==="thuis"?"Thuis tegen":"Uit bij"} ${esc(x.tegen||"?")}</span><span class="muted">${esc(wanneer)} · ${esc(x.ronde||"")}</span>${uitslag}${bron}`;
+    $("handmatig").hidden=true;
+  } else {
+    $("matchinfo").innerHTML=`<span class="muted">${faseVan(ui.slot)==="poule"?"Geen ontmoeting gevonden voor deze speeldag.":"Nog niet geloot. Vul datum en tegenstander zelf in om vooruit te plannen."}</span>`;
+    $("handmatig").hidden=false;
+  }
+  $("datum").value=d.datum||""; $("tegen").value=d.tegen||"";
+  $("datum").disabled=$("tegen").disabled=$("voorstel").disabled=$("wis").disabled=!!ro;
+  $("avail").innerHTML=plan.kern.length?plan.kern.map(id=>{const p=sp(id); if(!p) return "";
+    return `<button class="chip" aria-pressed="${!d.afwezig.includes(id)}" data-av="${id}" ${ro?"disabled":""}><span class="g ${p.g}">${p.g==="V"?"D":"H"}</span>${esc(p.naam)} <span class="kl">${esc(p.kl)}</span></button>`}).join("")
+    :`<span class="muted">Kies eerst spelers in de spelerslijst.</span>`;
+  let html="";
+  for(let ri=0; ri<c.rot; ri++){
+    const rot=d.opst[ri], ids=rot.flat().filter(x=>x!=null);
+    const som=ids.reduce((a,id)=>a+kOf(id,d),0), stSom=ids.reduce((a,id)=>a+sterkte(sp(id)),0);
+    const schaal=Math.max(r.pmax*1.25,som), pct=v=>Math.min(100,v/schaal*100);
+    const kl=ids.length<4?"":som>r.pmax?"bad":som<r.pmin?"warn":"ok";
+    const soort=c.mixed?(ri===0?"Dames + heren":"Gemengd"):"";
+    html+=`<div class="rot"><div class="rot-h"><h3>Rotatie ${ri+1}${soort?` <span class="muted" style="font-family:var(--f-body);font-size:.85rem;font-weight:600">· ${soort}</span>`:""}</h3>
+      <div class="gauge" aria-label="Klassementspunten rotatie ${ri+1}: ${som}, toegelaten ${r.pmin} tot ${r.pmax}">
+        <div class="gbar"><div class="gband" style="left:${pct(r.pmin)}%;width:${pct(r.pmax)-pct(r.pmin)}%"></div>${ids.length?`<div class="gmark" style="left:calc(${pct(som)}% - 1px)"></div>`:""}</div>
+        <span class="gval ${kl}">${ids.length?som:"–"} <span class="muted">/ ${r.pmin}–${r.pmax}</span></span></div>
+      ${ids.length===4?`<span class="muted" style="font-size:.8rem">sterkte ${stSom}</span>`:""}</div>`;
+    for(let mi=0; mi<2; mi++){
+      const duo=rot[mi], nr=ri*2+mi+1;
+      const res=d.officieel?d.res[nr]:null;
+      const sub=res?(res.w===true?'<span style="color:var(--brand)">gewonnen</span>':res.w===false?'<span style="color:var(--bad)">verloren</span>':"niet gespeeld")
+        :(c.mixed&&ri===0?(mi===0?"dames":"heren"):(sterksteRegel(ri)?(mi===0?"sterkste":"zwakste"):""));
+      const vol=duo[0]!=null&&duo[1]!=null;
+      html+=`<div class="match"><div class="mnr">M${nr}<small>${sub}</small></div>
+        <select id="s-${ri}-${mi}-0" data-slot="${ri},${mi},0" aria-label="Match ${nr} speler links" ${ro?"disabled":""}>${opties(ri,mi,0,duo[0])}</select>
+        <select id="s-${ri}-${mi}-1" data-slot="${ri},${mi},1" aria-label="Match ${nr} speler rechts" ${ro?"disabled":""}>${opties(ri,mi,1,duo[1])}</select>
+        <div class="dsum">${vol?`${duoKl(duo,d)}<small>${res?esc(res.sc||"–"):"st "+duoSt(duo)}</small>`:""}</div></div>`;
+    }
+    html+=`</div>`;
+  }
+  $("rots").innerHTML=html;
+  const tag={bad:"Fout",warn:"Let op",ok:"In orde"};
+  $("checks").innerHTML=controle(d).map(x=>`<li class="${x.lvl}"><span class="tag">${tag[x.lvl]}</span><span>${esc(x.txt)}</span></li>`).join("");
+  $("optSt").setAttribute("aria-pressed",ui.opt==="st"); $("optKl").setAttribute("aria-pressed",ui.opt==="kl");
+}
+
+function renderInzet(){
+  const c=C(), w=wedstrijdenVanPloeg();
+  const kol=ALLE_SLOTS.filter(id=>id.startsWith("p")||w[id]||slotHeeftIets(id));
+  const dagen=Object.fromEntries(kol.map(id=>[id,effDag(id)]));
+  // iedereen uit de selectie, plus wie officieel speelde zonder in de selectie te staan
+  const ids=[...new Set([...plan.kern, ...kol.flatMap(id=>dagen[id].officieel?dagen[id].opst.slice(0,c.rot).flat(2).filter(x=>x!=null):[])])];
+  if(!ids.length){ $("inzet").innerHTML=`<tbody><tr><td class="muted">Nog geen ploegselectie en geen gespeelde ontmoetingen.</td></tr></tbody>`; return; }
+  const kort={p1:"SD1",p2:"SD2",p3:"SD3",p4:"SD4",p5:"SD5",er32:"1/32",er16:"1/16",er8:"1/8",er4:"1/4",er2:"1/2",er1:"F",vf4:"VF 1/4",vf2:"VF 1/2",vf1:"VF F"};
+  const head=`<tr><th>Speler</th><th>Kl.</th><th>Sterkte</th><th class="n">Gespeeld</th><th class="n">Gewonnen</th><th class="n">Winst %</th><th class="n">Gepland</th>${kol.map(id=>`<th class="n" title="${esc(SLOT_LABEL[id])}${dagen[id].officieel?" (officieel)":""}">${kort[id]}</th>`).join("")}</tr>`;
+  const stats=ids.map(id=>{
+    let gesp=0, gew=0, gepl=0;
+    const cells=kol.map(sid=>{ const d=dagen[sid];
+      if(d.officieel){
+        let n=0, wn=0;
+        d.opst.slice(0,c.rot).forEach((rot,ri)=>rot.forEach((duo,mi)=>{ if(duo.includes(id)){ n++; if(d.res[ri*2+mi+1]?.w===true) wn++; } }));
+        gesp+=n; gew+=wn;
+        return `<td class="n" title="${n?`${wn} van ${n} gewonnen`:"niet gespeeld"}">${n?`<span style="color:${wn===n?"var(--ok)":wn===0?"var(--bad)":"var(--ink)"}">${wn}/${n}</span>`:'<span class="muted">·</span>'}</td>`;
+      }
+      if(d.afwezig.includes(id)) return `<td class="n"><span class="muted">afw</span></td>`;
+      const n=d.opst.slice(0,c.rot).flat(2).filter(x=>x===id).length; gepl+=n;
+      return `<td class="n" title="gepland">${n?`<span class="muted">${n}</span>`:'<span class="muted">·</span>'}</td>`;
+    }).join("");
+    return {id,gesp,gew,gepl,cells};
+  }).sort((a,b)=>b.gesp-a.gesp||b.gew-a.gew||b.gepl-a.gepl);
+  const rows=stats.map(x=>{ const s=sp(x.id);
+    return `<tr><td>${esc(s?s.naam:"speler "+x.id)}${plan.kern.includes(x.id)?"":' <span class="muted">(niet in selectie)</span>'}</td><td class="kl">${esc(s?.kl||"")}</td><td>${s?stCel(s):""}</td>
+      <td class="n">${x.gesp}</td><td class="n">${x.gew}</td><td class="n">${x.gesp?Math.round(x.gew/x.gesp*100)+"%":"–"}</td><td class="n">${x.gepl||"–"}</td>${x.cells}</tr>`;}).join("");
+  $("inzet").innerHTML=`<thead>${head}</thead><tbody>${rows}</tbody>`;
+}
+
+function render(herkies=true){
+  if(herkies) kiesPlan();
+  renderConfig(); renderStatus(); renderSpelers(); renderTabs(); renderDag(); renderInzet(); zetPanelen(); bewaarUi();
+}
+
+// ---------------------------------------------------------------- acties
+function melding(el,t,ms){ $(el).textContent=t; clearTimeout(melding[el]); melding[el]=setTimeout(()=>{$(el).textContent=""},ms||4000); }
+
+$("spelersKop").addEventListener("click",()=>{ const open=$("spelersBody").hidden; spelersOpen=open; renderSpelers(); });
+$("comp").addEventListener("change",e=>{ui.comp=e.target.value; ui.afdIdx=Math.min(ui.afdIdx,C().afd.length-1); ui.ploegId=null; render();});
+$("afd").addEventListener("change",e=>{ui.afdIdx=+e.target.value; ui.ploegId=null; render();});
+$("ploeg").addEventListener("change",e=>{ui.ploegId=+e.target.value; render();});
+$("fases").addEventListener("click",e=>{const b=e.target.closest("[data-fase]"); if(!b) return; const f=b.dataset.fase, w=wedstrijdenVanPloeg();
+  ui.slot=(FASES[f].slots.find(([id])=>w[id]&&!w[id].gespeeld)||FASES[f].slots.find(([id])=>w[id]||slotHeeftIets(id))||FASES[f].slots[0])[0]; render(false);});
+["zoek","filtG","filtOk"].forEach(id=>$(id).addEventListener("input",renderSpelers));
+$("plist").addEventListener("change",e=>{const v=e.target.dataset.kern; if(v==null) return; if(spelersOpen===null) spelersOpen=true;   // niet dichtklappen terwijl je kiest const id=+v, K=plan.kern, i=K.indexOf(id);
+  if(e.target.checked&&i<0) K.push(id); if(!e.target.checked&&i>=0) K.splice(i,1); wijziging();});
+$("tabs").addEventListener("click",e=>{const b=e.target.closest("[data-slot]"); if(!b) return; ui.slot=b.dataset.slot; render(false);});
+$("datum").addEventListener("change",e=>{dag().datum=e.target.value; wijziging();});
+$("tegen").addEventListener("input",e=>{dag().tegen=e.target.value; wijziging(false);});
+$("tegen").addEventListener("change",()=>render(false));
+$("avail").addEventListener("click",e=>{const b=e.target.closest("[data-av]"); if(!b) return; const id=+b.dataset.av, a=dag().afwezig;
+  const i=a.indexOf(id); if(i>=0) a.splice(i,1); else a.push(id); wijziging();});
+$("rots").addEventListener("change",e=>{const s=e.target.dataset.slot; if(!s) return; const [ri,mi,si]=s.split(",").map(Number);
+  dag().opst[ri][mi][si]=e.target.value===""?null:+e.target.value; const fid=e.target.id; wijziging(); $(fid)?.focus();});
+$("wis").addEventListener("click",()=>{dag().opst=leegDag().opst; wijziging(); melding("msg","Opstelling gewist.");});
+$("optSt").addEventListener("click",()=>{ui.opt="st"; render(false);});
+$("optKl").addEventListener("click",()=>{ui.opt="kl"; render(false);});
+$("voorstel").addEventListener("click",()=>{
+  const v=voorstel(dag());
+  if(v.fout){ melding("msg",v.fout); return; }
+  const o=leegDag().opst; v.opst.forEach((rot,i)=>o[i]=rot); dag().opst=o; wijziging();
+  melding("msg",(v.afgekapt?"Voorstel ingevuld (zoektocht ingekort). ":"Sterkste geldige opstelling ingevuld ")+(ui.opt==="st"?"op basis van speelsterkte.":"op basis van klassement."));
+});
+$("kopieer").addEventListener("click",()=>{
+  const d=effDag(ui.slot), c=C(), pl=ploegen[ui.ploegId];
+  const x=wedstrijdenVanPloeg()[ui.slot], datum=x?String(x.datum).slice(0,10):d.datum, tegen=x?x.tegen:d.tegen;
+  const regels=[`${pl?pl.ploeg:"Ploeg"} – ${SLOT_LABEL[ui.slot]}${datum?" ("+new Date(datum+"T12:00").toLocaleDateString("nl-BE",{weekday:"short",day:"numeric",month:"long"})+")":""}${tegen?(x&&x.tu==="uit"?" bij ":" tegen ")+tegen:""}`];
+  for(let ri=0;ri<c.rot;ri++){ regels.push(`Rotatie ${ri+1}`);
+    d.opst[ri].forEach((duo,mi)=>{ const nr=ri*2+mi+1, res=d.officieel?d.res[nr]:null;
+      regels.push(`  M${nr}: ${duo.map(id=>id!=null?naam(id):"?").join(" / ")}${res?` – ${res.w?"gewonnen":"verloren"} ${res.sc||""}`:""}`); }); }
+  const t=regels.join("\n");
+  const fallback=()=>{const ta=$("copyOut"); ta.value=t; ta.hidden=false; ta.select(); melding("msg","Kopieer de geselecteerde tekst met Ctrl+C.");};
+  try{ navigator.clipboard.writeText(t).then(()=>melding("msg","Opstelling gekopieerd."),fallback); }catch(e){ fallback(); }
+});
+
+// ---------------------------------------------------------------- clublogin (Supabase, functies met rolcontrole)
+const API="https://povgjkvmzfrhhaxfanwn.supabase.co/rest/v1/rpc/";
+const SLEUTEL="sb_publishable_LfcbY6X1DgOBFW1rH3Umnw__RdObpur";
+let token=null, bewerkbaar=new Set(), planVersie=0;
+try{ token=localStorage.getItem("btc-club-token"); }catch(e){}
+async function rpc(fn,args){
+  const r=await fetch(API+fn,{method:"POST",headers:{"apikey":SLEUTEL,"Authorization":"Bearer "+SLEUTEL,"Content-Type":"application/json"},body:JSON.stringify(args||{})});
+  if(!r.ok) throw {code:"server", message:"De server antwoordt niet ("+r.status+")."};
+  return r.json();
+}
+const slug=t=>String(t).replace(/[^A-Za-z0-9]+/g,"-");
+
+
+// ---------------------------------------------------------------- opstarten
+function startDemo(){ demo=true; kanSchrijven=false; ui.comp="nj-mixed"; ui.afdIdx=1; plan=null; planPad=undefined; render(); }
+
+function naarEigenPloeg(){
+  if(ploegenVoor(C(),R().afd).length) return;
+  for(const k of Object.keys(COMP)){ for(let i=0;i<COMP[k].afd.length;i++){
+    const oud=[ui.comp,ui.afdIdx]; ui.comp=k; ui.afdIdx=i;
+    if(ploegenVoor(C(),R().afd).length){ ui.ploegId=null; return; }
+    [ui.comp,ui.afdIdx]=oud; } }
+}
+async function laadGegevens(){
+  const r=await rpc("club_planner_data",{p_token:token});
+  if(r.fout){ if(r.fout==="niet aangemeld"){ afmelden(); return; }
+    const n=$("notice"); n.hidden=false; n.textContent="Geen toegang tot de planner: "+r.fout+"."; return; }
+  lijsten={}; (r.lijsten||[]).forEach(l=>{ lijsten["l"+l.periode_id+"-"+slug(l.categorie)]=l; });
+  ploegen={}; (r.ploegen||[]).forEach(p=>{ ploegen[p.ploeg_id]=p; });
+  bewerkbaar=new Set(r.bewerken||[]);
+  meta={bijgewerkt:new Date().toISOString(), sterkte:(r.lijsten||[]).some(l=>l.met_sterkte)};
+  naarEigenPloeg(); plan=null; planPad=undefined; render();
+}
+async function wieBenIk(){
+  const m=await rpc("club_mij",{p_token:token});
+  if(m.fout){ token=null; try{ localStorage.removeItem("btc-club-token"); }catch(e){} return false; }
+  $("wieNaam").textContent=m.naam; $("wie").hidden=false; return true;
+}
+function toonLogin(){ $("login").hidden=false; $("wie").hidden=true; $("status").innerHTML="<span>Aanmelden vereist</span>"; }
+function afmelden(){
+  if(token) rpc("club_logout",{p_token:token}).catch(()=>{});
+  token=null; try{ localStorage.removeItem("btc-club-token"); }catch(e){}
+  lijsten={}; ploegen={}; bewerkbaar=new Set(); plan=leegPlan(); planPad=undefined; render(false); toonLogin();
+}
+$("afmelden").addEventListener("click",afmelden);
+let lKeuze=null, lTimer;
+$("lzoek").addEventListener("input",()=>{ lKeuze=null; $("ldoe").disabled=true; clearTimeout(lTimer);
+  const t=$("lzoek").value.trim(); if(t.length<3){ $("lhits").innerHTML=""; return; }
+  lTimer=setTimeout(async()=>{ try{ const r=await rpc("club_zoek",{p_term:t});
+    $("lhits").innerHTML=r.length?r.map(h=>`<button class="hit" type="button" data-id="${h.id}" aria-pressed="false">${esc(h.naam)}</button>`).join(""):`<p class="msgl">Niet gevonden. Vraag een persoonlijke code aan de padelcommissie.</p>`;
+  }catch(e){ $("lhits").innerHTML=`<p class="err">${esc(e.message)}</p>`; } },250); });
+$("lhits").addEventListener("click",e=>{ const b=e.target.closest(".hit"); if(!b) return; lKeuze=+b.dataset.id;
+  $("lhits").querySelectorAll(".hit").forEach(x=>x.setAttribute("aria-pressed",String(x===b))); $("ldoe").disabled=false; $("lcode").focus(); });
+async function doeLogin(){
+  $("lfout").textContent="";
+  try{ const r=await rpc("club_login",{p_speler:lKeuze,p_code:$("lcode").value});
+    if(r.fout){ $("lfout").textContent="Aanmelden lukte niet: "+r.fout+"."; return; }
+    token=r.token; try{ localStorage.setItem("btc-club-token",token); }catch(e){}
+    $("lcode").value=""; $("login").hidden=true;
+    if(await wieBenIk()) await laadGegevens();
+  }catch(e){ $("lfout").textContent=e.message||"Aanmelden mislukt."; }
+}
+$("ldoe").addEventListener("click",doeLogin);
+$("lcode").addEventListener("keydown",e=>{ if(e.key==="Enter"&&lKeuze) doeLogin(); });
+
+async function start(){
+  plan=leegPlan(); render(false);
+  if(!token){ toonLogin(); return; }
+  try{ if(await wieBenIk()) await laadGegevens(); else toonLogin(); }
+  catch(e){ const n=$("notice"); n.hidden=false; n.textContent=e.message||"De server antwoordt niet."; }
+}
+start();
+})();
+</script>
+
+
+</body>
+</html>
