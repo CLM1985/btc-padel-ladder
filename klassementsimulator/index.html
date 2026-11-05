@@ -1,0 +1,984 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>BTC Klassementsimulator</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@600;700&family=Montserrat:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: werkblad van een wedstrijdleider — kopbalk, spelerkaart + uitkomst, daaronder tabel per niveau, wedstrijden en simulatie */
+/* Layout: werkblad van een wedstrijdleider in de BTC-huisstijl — navy kop met logo, crème ondergrond, clubgroen als accent, lime spaarzaam */
+:root {
+  --bg: #F3F1E9; --surface: #FFFFFF; --surface-2: #F8F7F1; --ink: #152B46; --muted: #55657A; --line: #DED7C8;
+  --accent: #435B28; --accent-ink: #FFFFFF; --accent-soft: #DCE4D2; --ball: #C5E75A; --navy: #152B46; --logo: #435B28;
+  --good: #3B6E22; --good-soft: #E2EDD5; --warn: #A24F31; --warn-soft: #F5E5DC; --bad: #A8231F; --bad-soft: #F6DEDC;
+  --f-display: "League Spartan", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Montserrat", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "Montserrat", system-ui, sans-serif;
+  --r: 8px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0D1826; --surface: #152B46; --surface-2: #1A3352; --ink: #F3F1E9; --muted: #AEBBCB; --line: #2A4566;
+  --accent: #C5E75A; --accent-ink: #152B46; --accent-soft: #243C2A; --ball: #C5E75A; --navy: #0A1420; --logo: #C5E75A;
+  --good: #A6D46E; --good-soft: #1E3522; --warn: #E7946F; --warn-soft: #3A2418; --bad: #F2867A; --bad-soft: #3A1A18;
+  color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0D1826; --surface: #152B46; --surface-2: #1A3352; --ink: #F3F1E9; --muted: #AEBBCB; --line: #2A4566;
+  --accent: #C5E75A; --accent-ink: #152B46; --accent-soft: #243C2A; --ball: #C5E75A; --navy: #0A1420; --logo: #C5E75A;
+  --good: #A6D46E; --good-soft: #1E3522; --warn: #E7946F; --warn-soft: #3A2418; --bad: #F2867A; --bad-soft: #3A1A18;
+  color-scheme: dark }
+
+* { box-sizing: border-box }
+:root { --logo-img: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKwAAAD6CAYAAAA85qwyAAAZqElEQVR42u2de5BsVXXGf90977nve3lrBBRBBUxQxEdUlIixFB/xdS2kTJBISBnU8oViYomiWKXlAx+JGk2UUtCgqOUjMcY3lmiMKAoKyvte4L5n5s5M90x354/zbe+6hzMzPTPdfWfmfl9VV/c53X3OPmt/e+2111p779IZZ5+AYSwXlC0Cw4Q1DBPWMExYw4Q1DBPWMExYY/mhp4Xf9APTQB9QA4aBtcB2oAJMttgomrpWCZjS8ZSusZzRXOT3nb5/4wArrd5wj0mVt1d1X5qvfFoh7JRuOKWHHwWqOu7XzWdDCRjQ/1KB+4BBNYTRg7wXK3WYsOUl0KCbUnYlYJOO9+p4vN2EReSq6UZ1vcoi3FwCq4vgdREcHU+uELOkMQM5Sl3SsOU5GsFc9+9GD1eRkppW3aeeebgTJgHAmASzDjgM2Cah1IOGLAXhlYIwTwZuBHbpeBDYKfI+DrhhmdvZq0I5y7kyl0Mjjb+Jz7RukfcfnOG+6fPqWb4ry7zrJCIvasChwLXAFxbSu7RC2GG1jGHd5PQFFPqDwEVqXWXd9+XAhz2MOCjxauBRwB864SVI3f7qBZIV4Ex1Aw1drwyc6no7qLETGOkEYctS5dVFFG5K5kOPbJkGcJ/r7KAnbLmTGra6yIFJj+y5AV2z5jo7qNErLrTdhq2pOx9ZROEmpWHHRd5SbjBiHHyYWIjScqTLwKFZwzBhDcOENUxYwzBhDcOENUzYmdBH5oMdIPO/VVhcIMIwYQ3DhDUME9YwYQ3DhDUME9YwYQ3DhN0fO8gm602STZpzYzGsYQ0T1jBMWMMwYQ0T1jBMWMMwYQ0Ttv33qeVWgRmy+I3lpGGt3Y1lRZqSxW8sB8JWrGGN5UTYRlgMzDBsRxombCfu6cZiWMMaJmw7UA/3S3t0DVj8hjWsYcIahglrGCasYcIahglrGCasYcIahglrGCasYcIahglrGCasYcIahglrGMuEsJvYlwO7BujRyzg48SVxoj7fP/Z0uXE0gVG9nwN8H7j9AAuvNsf324GzgPOBow5A+W4Cvg1cA/wemCabIl8m27Cv1sKkz8YME0GLzk3ljntyx/n36XCN6XA+kXG9rjGh91XAbmAkcKJllM44+4RW1g+o6L22QKH/EHiirvMA4D4JZggYW+LaYL3KOC2Bvwl4a5e00EckO8hmGfeICON67wsEm2uW8kJ72cYin2N1IHU19LQNstXYdy9FDVvSvRrA3XovAXuB/iWuYUdV1pLK/S7gPcBFwMUdKM8U8GjgV0GLVvWqiLhDIm05LMG/mPuVZiFwY46uuzIDuZvhXFnlTs9Ql9wrS9UkeAJwWejCxtTKxhdix7QZc63x9QvgTuB6lbVf3dllwC+Bq9pYlh8BLwDuUSVvItsf4hjgKcAp6qHWiKil+Xapc2jQ+c5oLrp//lxdx+tV3wDfVC817/2Gu2USrARcDVwgAvUAwzp/NnB5G66/U2SsAodL822TNn/tCpTn8cDN821wdmu1jufL9n6htMaoXh8DftKG679cZF2t91XAm1coWQG2LGTmtAk7f7wGOFJd8lp1qe9b5DVHgetkngwCuzRIvXQFy3HQgYPu4DQRtgns0fs1i7zmxRqANmUG9APPWuFy3NuCh+OA+mFXEtottz1kfspmGHl7oRFr2Lahr83XGwvekmZwAxkmbFs1bKMD9ZD8lg2L2YRdqrLrZZ/zPpF12iI2YZcymrml9D2+MGGXrNzqs4Q7DRN2ScutuQTC1SbsCsN0rgtfrByrufpouG5MWMOENQwT1jBMWMOENQwT1jBMWMOENQwT1jBMWMOENQwT1jBMWMOENQwT1jBMWMOENQwT1jBMWMOENQwT1jBMWMOENQwT1jBMWMOENQwT1jBMWMOENQwT1jBMWMOENYwOYQNz7/NrwhpLBlX2bZZswhpLHqttEhjLBd8C7mUBm490a2udK4BLyDabSPfcARwGbO+CrVQBNgLPBN5wEBHjKuCDZLuQbyXb27UR9mZodmEDuweprvt1v0FgkmyrUpYqYbcBv2fflj69smFGurBjyh693wj8AHgv2WbEF65gom4FXgl8TbKe1itt9lEJcu/0Fkt36l6jImyJbOvTPmBYZF5yhL2LfXu0pl3/poBVZFutdxJ1jUY3kO0gvQ24SFrnHSuQrHcAJ0kZrAo7Zvfm6jvuhNNJ9Eruh0iz7lGdNHS8JDVsvwpeCVtS1iWw3i7sC7tKFVgCDhVZPwUcDZy3wgj7GnW36yT3HaHbr+a2VurGOCYpqRHdv0S2U/lGmYN7lyJhJ0MX1NDn9BCdtqEawBY9a0MCKkuzf2IFEvaaIPOxgj1rG3MctxsjFO9ePmYvgYEjXYZhwhqGCWuYsIZhwhqGCWuYsO3E4WT+vulwz+YSeP6GKWDCMkOkiyVEVMOEnRVrwueSxW4sdcKuJgvFlm07G8vFJCgXaFdrW2NJEjamttV136YJayxlt1bJAy5juRC2wf4uJNuyBkt5ikw/+6b09rB/ErdhONJlmLCGYcIahglrmLCGYcIahglrmLCGYcIahglrmLCGYcIahglrmLCGYcIahglrmLCGYcIahglrmLCGYcIahglrmLCGwUG9LkFPaBx97NsJb5ruLZM0pTKkbUP7yDZfW2kYItuja43kPCI5l9i3NFRcNmq6CwsBTkvmR5FtJtdPtvndvO/fLcL2iSxp4YyaBFruwmIapbCR3bDKUiLb+3R6BRL2SOA2st0Gt+h50ybIaamoqSCb3ha2Pl2s/NNCgFvDlp3NhfTw3SJsVQXtCcsW7WH/TXrp8DJJUxJSWgX8ZOCjK5Cw5wFvItvfdy3ZjoP1oF0jUUptkH+jxZ0Qy2Gj5nVqSJPAzqVqEgyQLVc0HFp8bxcIu1ZCG1TDqZFtlPw24PgVSNjXA78CrpRS6NWrIQXRExpwObc6eic0bKr/ZngfWyj3ukXYQySgBrCb/ZePr3Xh/nU1ll7gLOCK3KrgKw2fBs4h27V8p17joQ7qQTNOzXGtZhsG9qmeS0FxVMg2rR5bioQ9Engu2S7aq1X4il6TdH4Q8hDgmcDpB9GA+ml6fQe4VVr3bhG0P2jW0TmuM9zCoHY27FEd9IusG4B/B+5cyKYoPV1cMv5KO2UOCJ6i11LCWcALpF0nliJhDSNiANjWgjliwhpLAs2FmoKOdBk4NGsYJqxhmLCGCWsYJqxhmLCGCWsYJqxhmLCGCWsYJqxhmLCGCWsYJqxhmLCGCWsYJqxhmLCGCWsYJqxhmLCGCWsYJqxhmLCGCWsYJqxhmLCGCWsYJqxhmLCGCWuw31qnJYvBhF1OaFgEJuxy0rBNi8GENQwT1jBhDduwJuwyQslyNGGXG2G9fdQSImw/2d6kgxbXfp6BBtm2lhVgPbBd311Htk3pGWR77B4aNiVeTbZ15Wlk21emfXYPV11MkW1z2QTuXcHySxszd2T7+UGyLcN7zdM/oka25eSg5LIWeDrwO31/GHAc8Hiy/V3fIlLeA/wC+AHwGuCV+t31ukYv2UbGlRVuF68i2w1xNbC13YTdo25vzDz9I34qofcCu4DfipCvAC4EHhR++xXg2TNc507grWQbF4+Q7TBeUY/2Y+BvVqj8dpHtLj5BB0yCwyXETeYpAM8QUfsl+GOBc0W+9+bICvA/s1zrgcAngTuAl0o5VKVd/wv49gqV4aHSsKs6QdgtMgmq5ipnAz8k27J9AngqcCPwLzP8/qnA+1u47hHAvwH/ARytHu124PxgG68k7FYvMtYJwq6Shj30ICbqfwOnAFdK0CXgTOBbs5hV75b2nA+eB9xKtj17WaQ9UsTdsYLkOaZGum7eLpkzzj6hFS9BQyO7zcCf6/OobK7RZS68CZGwHAaWExos7QBu0+cxEbUCfFGkmgkXAk8RAReKFwNfDVu0r9PrROBkyb6xDHq+ikydQyS/Q4D3Ab+RzCc6QdjVstfqgcDp83I3FYZEiuSqquj8tI77JdgeeQeeDVw1h5a8FHh4G8r2SOBmlaUcXEK9kn9PcI0tZY/ACJkLsErm1rtPDa45X4XX02LYcbtuMKEb75YbZlSC3CB3TEOvdLyqBTulMsf3deZ2uyVX07Dem6rUmoz7ieAmKum7Kd07X77p3HG8zlFzkPU84HVtIivsc3el+w+q8ith4DelekzlrOk4PedECz7lueqnR+8VYFJ10gD6Qg8wE6rSqjvC/3v0HPPOI64ce/KmVuPkybGdSDis42ndOLX0PhWqIQFXW4gULUagw0EI9VCmmo6rKvuwyl7S+VqL158WMWrM7jP8O3kLHt9mDXWIvAW9gSy18FofGmxNz1pRmUtt0MCDus5kkGWPzg+00CDqwfNRUm+duDQ83/K1Muhar9+VgrYtSYOmrmpSQhoOrT21pk5jb9CKqeWXJZieUHETauXjImmlBe2eCF2W5pxNs74YeGwHnu88aewxlX1YZVqtBtgMSmNQJk6fSDLRhvsnkvaHuq2rLCMtmgSpTgZlWo4u1LffCmHHww1X6dWnV4pYNAJpmkErJQ0626s5x2suDEiQ00GrDwVilkJjK4Veo95il5TI//ZZCHWuBlmdwhuCPHr0vleEHFMZ68EmT/U10Kb7VyXfejA1Ws2hqIorA6FhpXrrSGg2qvYJ3ehPQgRsUkKq5gYtq4FtLRSqucjvaxJIMwgoCTV1P3tzhJ2ex3OvIQsWzOQNeEEHzIA8ni830IjKnggwpF4j2uhj6m5T/kd5kamRg8FendZrWO8bmDvnoYcs+LSGLKKXlFj6b9tNgmSvpNZ1CpmD+zrgl8Cv9f5bslj6HWTBhu8Cf9ZittNiXsksGdLDJ1I+AvhP4CZpqH5p3fFgDrTi4ZicQbt+CdgI/GWXRtt/oefbAzwa+LoGZXfLk7BF5trPgI8ATwwDm8W8JoDH6bo/lltzlxrF9hb+/07g+8DH2ZcIlELa053QsFOBGIepCzy5hf+tBS4GXtThikzaNQ30konyqNBg/lE+zZ9J6/YHzVxrwQY7ouD8T4DLuugeegVZNAwR6Am5gVmU+8NUT89So10MeoCXAQ/W8WaycHOymcfn+P+r9f4Akf1HwXZtdsKGLYVo14hac6u4lu7lpE6HgV8ZuCV8f6tadFMNMJkNrdh4f1pw7qPAqV32Zz5W5BmYRzf6vjbctz93nLT28AIy+O7RYL0cXI9t17DV0HWWgQ8Dnwij8K8Ax+v776llp8SQBvAQ4HSyGHldJsO3ySJIyWn/HGm7a2XvnACcJBv4q8ANZEkldwPPlMb7IvBQdZXJP/k9slj/euB/pQFvEWHvkJbYCjxGXXly0fwS+HKwBVMEpgd4coFMPqwycQDyl6cK3Gunyk5fpbKlxnQcWWTsdn33ZLKEm2Ml/6+RJe2M61kn1PBfooa6STIdz40ZBkKE8OlhwLlFpuL1Ks/aAo9Ob86X27FBVzIPGmGU3ZvT0jtE1ETwf5ANU4TzRfb1wOdmuefb5VJ6v9w7V+v8h2b4/UXA5WRJ0heF8ynCcmnopiI+DpwDXKPnGtAzFmnhR3FgcJrGDL0F6Xr3imyXA58O320V+Yqyxt6hgdBLdd2Hk+VNxLyRcws07pTGMt+QHZ/Hp4A3Swkd8CkyKX49XhCtaIT3R85CVsgynI6Vlp0L75EQW4kgXca+uHv+WZ80A1kTPkMWzRrVgKJeQI4rybKwuoWfawAbXYx5zXSsyvqAAl/wepkwM+EkeUH6gEtaSHLqkZb++gxkhSyP94JOJP2XW/xNOee/nAp+z3pBmHQQeH3OhjxR3UfEOQWhvWs1WHhdgeBvyp27QV37u3PnTyjwAPQDTwvHt2kQsDn3u4dKq/aLvFMF4dKju0TWd+r+e9XVzrQs0lUi0PeBvy8g2LHh+EUyr+7J2ekbyab2JFwt8n+kwIY9LJcffQFwDPD5cO6fOpH039PigKZeQOJSSBiJPtOUb/Cc3Pmz9KCjsn8TYfMuo1fKRfZ7aVZCBtVoQaLJLTLk3xjO31uQcL4h3BeR7jtyT10h8t9GNn0lTd24qSBaVOvSSi9vl3cj2s07VGfVgsZ8esE1Xq+e4jEi46GyN9+msULkwYkFPuYtsnHPklZFPeJpBQPCXjL/PLPkZXSFsI0ZziXN2ygg80BBl/UuivMA8rgt509N2FhwblJd/5rc+e0FBv+4iHluLrElut2+ITdQXQO0MQ3W8s9yywwEaRcuzZE19Sa7pG13tnCNzwIf02DrTLKpOMySL/HIgvPHA3fJJr44cCY/EH2ZXhQolK6bBM05/tfMeRQ2zpBhtUUacqsEf7Mq5oHcP7LUX9Cd7C3QsKmxbCvwAa+bwXe6eZZpK8+QObET+ANZVtpPc7957hzTXhaL1wZyRBwn2QwUzGB+I/DCECI+QrZ6XT7ad+d6nwv0fLEX3VswwN6jHiaOHbYV1M1WvX4sj8QtZMGlzx8IwvYFEyBGpsq58+hB+mTn3BrOv1920yNUGTera9kuIpO7xoYCZ/0DCwhbklDLBXZWtaAhfCAMms5XV5m3lZ8YImHrZZ5EHNVB//JbyOaFMUNOx93ScA/OffdN2bBXq1FOyKwZCi5HRODTpX3vzp3/LveftjOmHuV5OdPqd7nxySlkgYxLdNxUvWw8EIStSZM1c1p1OvjkohbYqdb6ZfaPdnxLGvWTIspRGuAMFpBwW0H3f0vO7iL4SkcLJk4OFVz3mJyX4lVkUSNyZkIlrA+AXF15m+1jba6LS+RmmgnXhOysPFarPsbVUIel8fbk5FhRua9XwyRMS6/lesbr5eq7uUCBfSEcHyNt/WqZVKeLB8+TGzFv1k2pB60UBCW6svJLKacFhlSYL+Qe9nQNsiI+lBsIJQ9DUaZWpaDFDqrFTxWQrlowXf1y7j+p8Pm5c1+XbdwbTI38JMP3ahDULrxHo+rZcLOec7zAv1kK03eaITe2ERJOYg+S93KcKG36qtz5zRTn596Tk+WgBmkRnyhQGoeEc+WFpJ+2ksA9F1F3S2Nu08Dq12rtd5NFqf6ELLadJ8VfA/8nAT9ClfBFaea6tObD9YA/kwDuk41Z1m+/ot/uJksIWavu+nMS6pPUA3xePtYbJaRTCwaG15HF638S5rAlt90WsujP+mBe/JQstr95kWS9cJbUxehb/k6wLZP/dEjl/WcROaXvDek5k216c85lNaF7bpfv9jMabP5Q44tn5MYJb1Fd3KDB2z3qMYcL/L53yZb+ePAYHUO2gMgHZEMnU3KqE5MQ59KqQ6r8Ukimbobuoy4iHRumL+9QYTeGHIC6hFyWuXC7/leXRrgxZ4KsCzmvu9UwpkJubl2urVt1nV0h432TbLSqtMM98k7Uc+XuleZZr0b1A+4/5+qv5hiBz4ZUsZU5RvAnySTaqAof1DP1q4y3hYBCj2SzW9et6ZnXh1yLu2Tn94aYfjm4oQ7XvVZJ8ezRb0aCGVYLmXzH6be71ThSKHeT/nu4ynpL4M8R+v1YNwgbSXtEcEJXwvlKyIzP26TJhhkImfG9IYmlL8TG94ale9L0j7h00kYJdSBMGdkZkp2jXdonIaXyTeX8ymlQUSsoxy5p7hfn5HCKKuxTLUbtkHa+q0W3z+bQkySNl7L+6+H8qtDF9of85FUi99YwFukLOcz1YFfG6UPJz364ZLEr/CdN+78tNwiPSd3T+jyV+00tzD4Yb2HOXtts2GRnjofZpX2hYFMqXDVMYmuGB5sIS9ZUwmS3qeCsnwpztWKULYWHJ6Wt+3Xt/jAZMU3E6wsVNZ7zI68RwYdzSS+TImoatIyo4l9b4Hf+OVnE7GHq3vcw+/oGm8kiUq2Q9TMaC/SGyu4N2U4DwZ+dtGV+DlUtzAoe0jNPB22cMsAqoQFUwmzpreF8NdT7Ht13OMxymApKK2XFrdZ/89lZY/Mla6satjRH7mIlELYW5venLqQciNoIx2slqHuDzRWngEwHTdIQscZDwnb67aRa60RutmjqzuNEyMGwik1fmFdUDpohlqEZwqEDutfR3D9EnPCvGqDtlVmTpoWslslyluzqVnCNXG/3aRS/O/QwYwVT1ath6v1U6J3yM1tTz9IXGnNK9tkVtHRPmHVbDjIeCgO7NBuhFhRK7GXXh9mytTADYlD281AL+bRtJ2x/aEF5p/5wsEsHwtSNRsg8T5VbD8GBvpCInUiVUtrW6fPOoLVjhSWiD+l61WCXlkIFNIJWWaMKvjdnf6drbAgTLasaqPxmDrmNhNUN54vfKTp1l2RYD11xIlEpyCTNaRsMPduq8HlIx3t0bn3omZKt3hPGBDGJKU3kHNIzJTNvNNi8jdA4CXO21qieNshs7A1KaKLFBPq22bAHCwaC1omJx2dq0NTu8OMVwbQYLIhAHdTwytG0lEtRCl3veIgMpez557TpPm+UWTESBkwmrJeMX/CGG+UwiJiQf/i58kV+jYWvRv1ZshS/y8NAL83aMKxhme+cpmTbjQX7OpkHG+W8f7ZcQC8B/pb9Y/jMMOv2e3L614PTfzgMWCsWv21YFrBYXD3kwZZzi8Q1wxoAKR84+SkfFMK80+reR0LMP7rayrmQdPIbT7gKrGGZ56onFZkCk2FUWw0Rt9EwkS+Rc6tcNwO5+XD1sMZDWRq6mpsAyUJDlyasUc+FbEvB8V4JrrXBINNGcClNBCITHP/JFbgjEHQwrKqy26I3YVng6n3VMI+tnFvTYA/7nPG9Iloi3mAIdkyHgAi5MHN+Sn0pRP68VL8Jy3xX6Ca3PxczzFeq5v4z2gbtbtitZSxX/D8o4Kknt5jG+QAAAABJRU5ErkJggg==") }
+[hidden] { display: none !important }
+.form select, .form input[type="number"] { width: 100% }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.45 }
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 20px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 18px }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; letter-spacing: .01em }
+h1 { font-size: 1.9rem; font-weight: 700; line-height: 1 }
+h2 { font-size: 1.2rem; font-weight: 600 }
+h3 { font-size: 1rem; font-weight: 600 }
+.eyebrow { font-family: var(--f-body); text-transform: uppercase; letter-spacing: .1em; font-size: .7rem; color: var(--muted); font-weight: 600 }
+.mono, td.num, .num { font-family: var(--f-mono); font-variant-numeric: tabular-nums }
+.muted { color: var(--muted) }
+small { font-size: .82rem }
+
+header.top { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; justify-content: space-between;
+  background: var(--navy); color: #F3F1E9; border-radius: var(--r); padding: 14px 18px; border-bottom: 4px solid var(--ball) }
+header.top .brand { display: flex; align-items: center; gap: 14px }
+header.top .brand .logo { width: 44px; height: 64px; flex: none; border-radius: 4px; background: #FFFFFF; padding: 3px;
+  background-image: var(--logo-img); background-size: contain; background-repeat: no-repeat; background-position: center; background-origin: content-box }
+header.top .eyebrow { color: var(--ball); letter-spacing: .32em }
+header.top h1 { color: #FFFFFF }
+header.top .meta { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: .82rem; color: #C9D3DE }
+header.top .meta b { color: #FFFFFF; font-weight: 600 }
+header.top .status { color: #C9D3DE }
+.status { display: inline-flex; align-items: center; gap: 6px; font-size: .82rem; color: var(--muted) }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted) }
+.dot.ok { background: var(--good) } .dot.err { background: var(--bad) } .dot.busy { background: var(--warn) }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; min-width: 0 }
+.panel > header { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: baseline; justify-content: space-between; margin-bottom: 12px }
+.grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 18px }
+@media (max-width: 860px) { .grid2 { grid-template-columns: minmax(0, 1fr) } }
+
+/* zoeker */
+.picker { position: relative }
+.picker input { width: 100%; font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface-2); color: var(--ink) }
+.picker input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px }
+.results { position: absolute; z-index: 5; left: 0; right: 0; top: calc(100% + 4px); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; max-height: 320px; overflow-y: auto; box-shadow: 0 8px 24px rgb(0 0 0 / .12) }
+.results button { display: flex; width: 100%; justify-content: space-between; gap: 12px; padding: 8px 12px; border: 0; background: none; color: var(--ink); font: inherit; text-align: left; cursor: pointer }
+.results button:hover, .results button:focus-visible { background: var(--accent-soft) }
+
+/* spelerkaart */
+.pcard { display: grid; gap: 12px }
+.pname { font-family: var(--f-display); font-size: 1.5rem; font-weight: 700; line-height: 1.1 }
+.kl { display: inline-block; font-family: var(--f-display); font-weight: 700; padding: 3px 8px 1px; border-radius: 4px; background: var(--accent); color: var(--accent-ink); font-size: .95rem; letter-spacing: .02em }
+.kl.ghost { background: var(--accent-soft); color: var(--accent) }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px }
+.fact { border-top: 1px solid var(--line); padding-top: 6px }
+.fact .v { font-family: var(--f-mono); font-size: 1.05rem }
+
+/* uitkomst */
+.outcome { display: grid; grid-template-columns: 1fr 1fr; gap: 12px }
+@media (max-width: 520px) { .outcome { grid-template-columns: 1fr } }
+.ocol { border: 1px solid var(--line); border-radius: 6px; padding: 12px; background: var(--surface-2); display: grid; gap: 6px; align-content: start }
+.ocol.sim { border-color: var(--accent); background: var(--accent-soft) }
+.big { font-family: var(--f-display); font-size: 2.2rem; font-weight: 700; line-height: 1 }
+.pill { display: inline-block; font-size: .75rem; font-weight: 600; padding: 2px 8px; border-radius: 99px; letter-spacing: .02em }
+.pill.up { background: var(--good-soft); color: var(--good) } .pill.same { background: var(--surface); color: var(--muted); border: 1px solid var(--line) } .pill.down { background: var(--bad-soft); color: var(--bad) }
+.pill.warn { background: var(--warn-soft); color: var(--warn) }
+
+/* tabellen */
+.tbl { overflow-x: auto }
+table { border-collapse: collapse; width: 100%; font-size: .9rem }
+th { text-align: left; font-family: var(--f-display); font-weight: 600; font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); border-bottom: 1px solid var(--line); padding: 6px 8px; white-space: nowrap }
+td { border-bottom: 1px solid var(--line); padding: 7px 8px; vertical-align: middle }
+td.num, th.num { text-align: right }
+tr.own td:first-child { box-shadow: inset 3px 0 0 var(--ball) }
+tr.off td { color: var(--muted) }
+tr.off td.strike { text-decoration: line-through }
+tr.sim td { background: color-mix(in srgb, var(--accent-soft) 55%, transparent) }
+.wl { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; font-weight: 700; font-size: .8rem; border: 0; cursor: default; font-family: var(--f-display) }
+.wl.w { background: var(--good-soft); color: var(--good) } .wl.l { background: var(--bad-soft); color: var(--bad) }
+button.wl { cursor: pointer }
+.why { font-size: .8rem; color: var(--muted) }
+.why.bad { color: var(--bad) } .why.warn { color: var(--warn) }
+
+select, .btn, input[type="number"] { font: inherit; font-size: .88rem; padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--ink) }
+select.tiny { padding: 2px 4px; font-size: .82rem }
+.btn { cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap }
+.btn:hover { border-color: var(--accent) }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600 }
+.btn.ghost { background: none }
+.btn.danger { color: var(--bad) }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center }
+.form { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; align-items: end }
+.form label { display: grid; gap: 4px; font-size: .8rem; color: var(--muted) }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden }
+.seg button { border: 0; background: var(--surface); color: var(--ink); font: inherit; font-size: .88rem; padding: 5px 12px; cursor: pointer }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink) }
+
+.note { border-left: 3px solid var(--warn); background: var(--warn-soft); padding: 10px 12px; border-radius: 0 6px 6px 0; font-size: .88rem }
+.note.err { border-left-color: var(--bad); background: var(--bad-soft) }
+.note.info { border-left-color: var(--accent); background: var(--accent-soft) }
+.empty { padding: 18px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 6px }
+details summary { cursor: pointer; font-family: var(--f-display); font-weight: 600 }
+details[open] summary { margin-bottom: 10px }
+.rung { display: grid; grid-template-columns: 70px 56px minmax(0, 1fr) 150px; gap: 14px; align-items: center; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); margin-bottom: 8px }
+.rung.own { border-left: 4px solid var(--ball); border-radius: 0 var(--r) var(--r) 0 }
+.rung .lvl { font-family: var(--f-display); font-size: 1.35rem; font-weight: 700; line-height: 1 }
+.rung .side { text-align: right; display: grid; gap: 4px; justify-items: end }
+.rbar { position: relative; height: 14px; display: flex; margin: 4px 0 20px }
+.rbar .zs { position: absolute; inset: 0; display: flex; border-radius: 7px; overflow: hidden }
+.rbar .z { height: 100% }
+.z-down { background: color-mix(in srgb, var(--warn) 32%, transparent) }
+.z-keep { background: color-mix(in srgb, var(--line) 85%, transparent) }
+.z-up { background: color-mix(in srgb, var(--accent) 38%, transparent) }
+.rbar .tk { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--muted); transform: translateX(-1px) }
+.rbar .tl { position: absolute; top: 18px; font-size: .72rem; color: var(--muted); transform: translateX(-50%); font-variant-numeric: tabular-nums }
+.rbar .ln { position: absolute; top: 50%; height: 2px; background: var(--ink); transform: translateY(-50%) }
+.dt { position: absolute; top: 50%; width: 16px; height: 16px; border-radius: 50%; transform: translate(-50%, -50%); background: var(--accent); border: 2px solid var(--surface) }
+.dt.open { width: 12px; height: 12px; background: var(--surface); border: 2px solid var(--ink) }
+.rung .sub { font-size: .8rem; color: var(--muted) }
+.r-w { background: var(--accent) } .r-ws { background: color-mix(in srgb, var(--accent) 45%, transparent) } .r-l { background: var(--warn) } .r-ls { background: color-mix(in srgb, var(--warn) 45%, transparent) }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: .78rem; color: var(--muted); margin-top: 4px }
+.legend span { display: inline-flex; align-items: center; gap: 6px }
+.legend .sw { display: inline-block; width: 12px; height: 10px; border-radius: 2px }
+.legend .dt { position: static; transform: none; width: 11px; height: 11px }
+.legend .dt.open { width: 9px; height: 9px }
+@media (max-width: 620px) { .rung { grid-template-columns: 56px 52px minmax(0, 1fr) } .rung .barcell { grid-column: 1 / -1; grid-row: 2 } .rung .side { grid-column: 3; grid-row: 1 } }
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; font-size: .88rem }
+.rules ul { margin: 4px 0 0; padding-left: 18px }
+a { color: var(--accent) }
+@media (prefers-reduced-motion: no-preference) { .btn, .results button { transition: background .12s, border-color .12s } }
+
+/* Padelrubriek (communicatievoorstel v1): lime streep onder de titel */
+h1::after{content:"";display:block;width:28px;height:3px;background:var(--ball);border-radius:2px;margin-top:8px}
+</style>
+<style>
+/* Clublogin */
+.login{display:grid;gap:12px;max-width:520px}
+.login label{display:grid;gap:4px;font-weight:600;font-size:14px}
+.login input{font:400 15px var(--f-body);padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);width:100%}
+.login .hits{display:grid;gap:4px}
+.login .hit{text-align:left;font:500 15px var(--f-body);padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);cursor:pointer}
+.login .hit[aria-pressed=true]{border-color:var(--accent);background:var(--accent-soft)}
+.login .err{color:var(--bad);font-size:14px;margin:0}
+.wie a,.wie button{color:inherit;font:inherit;text-decoration:underline;background:none;border:0;padding:0;cursor:pointer}
+</style>
+
+</head>
+<body>
+
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <span class="logo" role="img" aria-label="Logo BTC Tennis &amp; Padel"></span>
+      <div><div class="eyebrow">BTC Wemmel · Padelcommissie</div><h1>Klassementsimulator</h1></div>
+    </div>
+    <div class="meta">
+      <span>Berekening <b>december 2026</b> (startklassement 2027)</span>
+      <span>Telvenster <b>29/6 – 29/11</b></span>
+      <span>Klacht tot <b>13/12</b></span>
+      <span class="status" id="status"><span class="dot"></span><span>Verbinden…</span></span>
+      <span class="wie" id="wie" hidden><span id="wieNaam"></span> · <a href="../">Mijn padel</a> · <button id="afmelden" type="button">Afmelden</button></span>
+    </div>
+  </header>
+
+  <section class="panel login" id="login" hidden aria-labelledby="loginTitel">
+    <header><h2 id="loginTitel">Aanmelden</h2></header>
+    <p class="muted">Meld je aan met je persoonlijke code (dezelfde als voor Mijn ladder). Je ziet je eigen klassement; kapiteins ook dat van hun ploegspelers, de commissie dat van alle interclubspelers.</p>
+    <label for="lzoek">Je naam<input id="lzoek" autocomplete="off" placeholder="Typ minstens 3 letters"></label>
+    <div class="hits" id="lhits" role="group" aria-label="Gevonden leden"></div>
+    <label for="lcode">Persoonlijke code<input id="lcode" autocomplete="one-time-code" maxlength="6" placeholder="6 tekens" style="text-transform:uppercase"></label>
+    <button class="btn" id="ldoe" type="button" disabled style="justify-self:start">Aanmelden</button>
+    <p class="err" id="lfout" role="alert"></p>
+  </section>
+
+  <section class="panel" id="pickPanel">
+    <header><h2>Speler</h2><span class="muted" id="pickHint"><small>BTC-spelers op de interclublijsten 2026 · intern, niet verder delen</small></span></header>
+    <div class="picker">
+      <input id="search" type="search" placeholder="Zoek op naam…" autocomplete="off" aria-label="Zoek speler" disabled>
+      <div class="results" id="results" hidden></div>
+    </div>
+    <div id="ownerBar" style="margin-top:10px"></div>
+    <div id="connMsg"></div>
+    <div id="manualBox" hidden>
+      <div class="note info" style="margin-top:12px">Live-gegevens zijn niet beschikbaar in deze weergave. Je kunt wel handmatig simuleren: kies geslacht en klassement en voeg wedstrijden toe.</div>
+      <div class="form" style="margin-top:12px">
+        <label for="manG">Geslacht<select id="manG"><option value="Man">Man</option><option value="Vrouw">Vrouw</option></select></label>
+        <label for="manK">Huidig klassement<select id="manK"></select></label>
+        <div><button class="btn primary" id="manGo" type="button">Start simulatie</button></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="grid2" id="main" hidden>
+    <section class="panel pcard" id="playerCard"></section>
+    <section class="panel" id="outcome"></section>
+  </div>
+
+  <section class="panel" id="levelsPanel" hidden>
+    <header><h2>Ratio per niveau</h2><small class="muted">Winstpunten ÷ (winstpunten + verliespunten − veelspeelcorrectie)</small></header>
+    <div id="ladder"></div>
+    <div class="legend"><span><i class="sw z-down"></i>dalen</span><span><i class="sw z-keep"></i>behoud</span><span><i class="sw z-up"></i>stijgen</span><span><i class="dt open"></i>nu</span><span><i class="dt"></i>met simulatie</span><span><i class="sw r-w"></i>gewonnen</span><span><i class="sw r-ws"></i>gesimuleerde winst</span><span><i class="sw r-l"></i>verloren</span><span><i class="sw r-ls"></i>gesimuleerd verlies</span><span>ring: wedstrijden op dat niveau, 9 nodig om te stijgen</span></div>
+    <details id="levelsDetail" style="margin-top:12px"><summary>Details per niveau (tabel)</summary><div class="tbl" id="levels"></div></details>
+  </section>
+
+  <section class="panel" id="playedPanel" hidden>
+    <header><h2>Gespeelde wedstrijden in het telvenster</h2><div class="row"><small class="muted">Vink uit om te zien wat een wedstrijd uitmaakt</small><button class="btn ghost" type="button" id="playedToggle" aria-expanded="true" aria-controls="played">Dichtklappen</button></div></header>
+    <div id="played"></div>
+    <script>
+    (() => {
+      const b = document.getElementById("playedToggle"), box = document.getElementById("played");
+      const zet = (open) => { box.hidden = !open; b.setAttribute("aria-expanded", String(open)); b.textContent = open ? "Dichtklappen" : "Openklappen"; };
+      let open = true; try { open = localStorage.getItem("psim:playedOpen") !== "0"; } catch (e) {}
+      zet(open);
+      b.addEventListener("click", () => { open = !open; zet(open); try { localStorage.setItem("psim:playedOpen", open ? "1" : "0"); } catch (e) {} });
+    })();
+    </script>
+  </section>
+
+  <section class="panel" id="simPanel" hidden>
+    <header><h2>Simulatie</h2><div class="row" id="presets"></div></header>
+    <div id="planned"></div>
+    <div class="form" id="addForm" style="margin-top:12px">
+      <label for="fSoort">Soort wedstrijd
+        <select id="fSoort">
+          <option value="MC_SAME">Mixed Cup · heren-/damesdubbel</option>
+          <option value="MC_MIX">Mixed Cup · gemengd</option>
+          <option value="SC">Senior Cup</option>
+          <option value="IC">Interclub Open / Dames</option>
+          <option value="PT_H">Padel Tour Heren</option>
+          <option value="PT_D">Padel Tour Dames</option>
+          <option value="PT_G">Padel Tour Gemengd</option>
+          <option value="PT_L">Padel Tour Legends</option>
+        </select></label>
+      <label for="fFase">Fase<select id="fFase"><option value="poule">Poule</option><option value="eind">Eindtabel / eindronde</option></select></label>
+      <label for="fO1" id="lO1">Tegenstander 1<select id="fO1"></select></label>
+      <label for="fO2" id="lO2">Tegenstander 2<select id="fO2"></select></label>
+      <label for="fReeks" id="lReeks" hidden>Reeks (niveau)<select id="fReeks"></select></label>
+      <label for="fN">Aantal<input id="fN" type="number" min="1" max="10" value="1"></label>
+      <div class="row">
+        <div class="seg" role="group" aria-label="Uitslag"><button type="button" id="fW" aria-pressed="true">Winst</button><button type="button" id="fL" aria-pressed="false">Verlies</button></div>
+        <button class="btn primary" type="button" id="fAdd">Toevoegen</button>
+      </div>
+    </div>
+    <div id="simList" style="margin-top:14px"></div>
+  </section>
+
+  <section class="panel">
+    <details>
+      <summary>Rekenregels (Tennis en Padel Vlaanderen, berekening december 2026)</summary>
+      <div class="rules">
+        <div><h3>Welke wedstrijden</h3><ul>
+          <li>Padel Tour, Vlaamse BPT/BK en interclub/Team Cups van 29/6 t/m 29/11/2026. Clubtornooien (zoals de padelladder) tellen niet.</li>
+          <li>Duo met meer dan 2 klassementen verschil: de wedstrijd telt voor niemand.</li>
+          <li>W.O./F.F. telt mee; in een tornooipoule als één verliespunt.</li></ul></div>
+        <div><h3>Niveau</h3><ul>
+          <li>Interclub: op het niveau van de tegenstanders (gelijk → dat niveau; 1 verschil → het hoogste; 2 verschil → het niveau ertussen).</li>
+          <li>Padel Tour: op het niveau van de reeks (vóór 13/7: niveau van de tegenstanders).</li>
+          <li>Winst telt ook op alle lagere niveaus tot je eigen niveau. Verlies telt ook op hogere niveaus waar je een ratio hebt.</li></ul></div>
+        <div><h3>Punten en factoren (heren / dames)</h3><ul>
+          <li>Poule: winst 1, verlies 1. Eindtabel: winst 1,5, verlies 0,5.</li>
+          <li>Padel Tour Heren/Dames 1 · Gemengd 0,4 / 1 · Legends 0,4.</li>
+          <li>Interclub, Senior Cup, Mixed Cup zelfde geslacht 0,8 · Mixed Cup gemengd 0,4 / 0,8.</li>
+          <li>Per 12 wedstrijden op een niveau valt 1 verliespunt weg.</li></ul></div>
+        <div><h3>Toekenning</h3><ul>
+          <li>Stijgen: minstens 9 wedstrijden op dat niveau. Dalen: minstens 5, maximaal 1 klassement.</li>
+          <li>Stijgen via een hoger niveau kan alleen als je ratio op je eigen niveau ≥ 60% is (bij ≥ 5 wedstrijden).</li>
+          <li>Het hoogste voorgestelde klassement telt.</li>
+          <li>Grenzen heren: P100/P200 stijgen &gt; 65%, P300 &gt; 75%, P400 &gt; 80%, P500 &gt; 85%, P700 &gt; 65%; dalen &lt; 30% (P200 &lt; 20%). Dames: P200 &gt; 75%, P300 &gt; 85%, P400/P500 &gt; 90%.</li></ul></div>
+      </div>
+      <p class="muted"><small>Bron: “Berekening padel startklassement 2027”, Tennis en Padel Vlaanderen. P700+ (dames) en P1000 (heren) volgen een aparte methode. De simulator is een hulpmiddel; de officiële berekening beslist.</small></p>
+    </details>
+  </section>
+</div>
+
+<script>
+(() => {
+"use strict";
+const PROJ = "povgjkvmzfrhhaxfanwn";
+const SERVER = "Supabase", TOOL = "execute_sql";
+// Testbestand buiten Claude: gegevens via de Supabase-functie met een geheime sleutel (leeg = uit).
+const REMOTE = { url: "https://povgjkvmzfrhhaxfanwn.supabase.co/rest/v1/rpc/", token: "sb_publishable_LfcbY6X1DgOBFW1rH3Umnw__RdObpur" };
+let CLUBTOKEN = null; try { CLUBTOKEN = localStorage.getItem("btc-club-token"); } catch (e) {}
+async function rpc(fn, args) {
+  const r = await fetch(REMOTE.url + fn, { method: "POST", cache: "no-store", headers: { "apikey": REMOTE.token, "Authorization": "Bearer " + REMOTE.token, "Content-Type": "application/json" }, body: JSON.stringify(args || {}) });
+  if (!r.ok) throw new Error("de server antwoordt niet (" + r.status + ")");
+  return r.json();
+}
+const ALL = [50, 100, 200, 300, 400, 500, 700, 800, 1000];
+const LAD = { Man: [100, 200, 300, 400, 500, 700, 800, 1000], Vrouw: ALL.slice() };
+const GR = {
+  Man:   { 100: [null, .65], 200: [.20, .65], 300: [.30, .75], 400: [.30, .80], 500: [.30, .85], 700: [.30, .65], 800: [.30, null], 1000: [.30, null] },
+  Vrouw: { 50: [null, .65], 100: [.20, .65], 200: [.30, .75], 300: [.30, .85], 400: [.30, .90], 500: [.30, .90], 700: [.30, null], 800: [.30, null], 1000: [.30, null] }
+};
+const SWITCH_DATE = "2026-07-13";
+
+const SQL_BULK = `with x as (select distinct speler_id id from interclub_spelerslijst where periode_id in (select periode_id from periodes where jaar = 2026)),
+ic as (
+  select s.speler_id sid, w.match_id, s.nr, w.datum::date datum, w.competitie, w.afdeling, w.ronde, s.gewonnen,
+         pl.naam partner_naam, pl.geslacht partner_geslacht, p.klassement partner_kl,
+         (select string_agg(coalesce(t.klassement, ''), ',' order by t.positie) from interclub_tegenstanders t
+          where t.match_id = s.match_id and t.soort = s.soort and t.nr = s.nr and t.ploeg_id = s.ploeg_id) tgn
+  from interclub_spelers s join x on s.speler_id = x.id
+  join wedstrijden w on w.match_id = s.match_id
+  left join interclub_spelers p on p.match_id = s.match_id and p.nr = s.nr and p.ploeg_id = s.ploeg_id and p.speler_id <> s.speler_id
+  left join leden pl on pl.speler_id = p.speler_id and pl.jaar = 2026
+  where w.gespeeld and w.datum >= '2026-06-29' and w.datum < '2026-11-30'),
+tour as (
+  select x.id sid, t.tornooi_id, tr.naam tornooi, t.reeks, t.ronde, t.winnaar,
+         coalesce((select min(pp.datum) from tornooi_planning pp where pp.tornooi_id = t.tornooi_id and pp.reeks_id = t.reeks_id and pp.volgnr = t.volgnr), tr.startdatum)::date datum,
+         (select string_agg(i || ':' || coalesce(l.padel_niveau::text, '') || ':' || coalesce(l.geslacht, ''), ',') from unnest(string_to_array(t.kant1_ids, ',')) i left join leden l on l.speler_id = i::int and l.jaar = 2026) k1,
+         (select string_agg(i || ':' || coalesce(l.padel_niveau::text, '') || ':' || coalesce(l.geslacht, ''), ',') from unnest(string_to_array(t.kant2_ids, ',')) i left join leden l on l.speler_id = i::int and l.jaar = 2026) k2
+  from tornooi_tabel t join tornooien tr on tr.tornooi_id = t.tornooi_id
+  join x on (',' || t.kant1_ids || ',' like '%,' || x.id || ',%' or ',' || t.kant2_ids || ',' like '%,' || x.id || ',%')
+  where t.reeks ilike 'PADEL%' and t.gespeeld and tr.soort = 'Officieel'
+    and tr.einddatum >= '2026-06-29' and tr.startdatum <= '2026-11-29'),
+pst as (
+  select b.speler_id sid, b.blok, b.nr, b.titel, trim(b.reeks) reeks, b.ronde, b.datum, b.tornooi_id, b.circuit, b.gewonnen, b.geldig,
+         b.tgn1_kl, b.tgn2_kl, b.wp, b.vp
+  from padelstats_berekening b join x on b.speler_id = x.id where not b.interclub),
+psic as (
+  select b.speler_id sid, b.gewonnen, b.geldig, b.circuit, b.tgn1_kl, b.tgn2_kl, b.wp, b.vp
+  from padelstats_berekening b join x on b.speler_id = x.id where b.interclub),
+psr as (select r.speler_id sid, r.niveau, r.wedstrijden, r.ratio from padelstats_ratio r join x on r.speler_id = x.id),
+gepland as (
+  select distinct s.speler_id sid, w.match_id, w.datum, w.competitie, w.afdeling, w.ronde, w.thuis_naam, w.uit_naam
+  from wedstrijden w join interclub_spelers s on s.ploeg_id in (w.thuis_ploeg_id, w.uit_ploeg_id)
+  join x on s.speler_id = x.id
+  where not w.gespeeld and w.datum >= current_date and w.datum < '2026-11-30'),
+spelers as (
+  select l.speler_id id, l.naam, l.geslacht, l.padel_niveau kl, s.speelsterkte, s.huidig, s.voorspeld, s.wedstrijden, s.sterkte_datum
+  from x join leden l on l.speler_id = x.id and l.jaar = 2026
+  left join padelstats_sterkte s on s.speler_id = x.id
+  where l.padel_niveau is not null)
+select json_build_object(
+  'spelers', coalesce((select json_agg(spelers order by naam) from spelers), '[]'::json),
+  'data', coalesce((select json_object_agg(x.id, json_build_object(
+     'ic', coalesce((select json_agg(ic order by datum, nr) from ic where ic.sid = x.id), '[]'::json),
+     'tour', coalesce((select json_agg(tour order by datum) from tour where tour.sid = x.id), '[]'::json),
+     'pstour', coalesce((select json_agg(pst order by blok, nr) from pst where pst.sid = x.id), '[]'::json),
+     'psratio', coalesce((select json_agg(psr) from psr where psr.sid = x.id), '[]'::json),
+     'psic', coalesce((select json_agg(psic) from psic where psic.sid = x.id), '[]'::json),
+     'gepland', coalesce((select json_agg(g order by datum) from gepland g where g.sid = x.id), '[]'::json)))
+   from x where exists (select 1 from spelers where spelers.id = x.id)), '{}'::json)) d`;
+const SNAP_MAX_BYTES = 200000;   // per document (limiet 256 KiB)
+const SNAP_STALE_MS = 12 * 3600e3; // eigenaar: momentopname automatisch vernieuwen na 12 u
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const nf = (x, d = 2) => (x == null || isNaN(x)) ? "–" : Number(x).toLocaleString("nl-BE", { maximumFractionDigits: d });
+const pct = (r) => r == null ? "–" : (r * 100).toLocaleString("nl-BE", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + "%";
+const P = (n) => n == null ? "?" : "P" + n;
+const klNum = (s) => { const m = String(s ?? "").match(/(\d+)/); const n = m ? +m[1] : null; return ALL.includes(n) ? n : null; };
+const fmtDate = (d) => { if (!d) return ""; const [y, m, dd] = String(d).slice(0, 10).split("-"); return `${+dd}/${+m}`; };
+
+let mcp = null, DB = null, IS_OWNER = false;
+const S = { players: [], player: null, own: null, g: "Man", played: [], planned: [], sim: [], excl: {}, ovr: {}, live: false, w: true, seq: 1 };
+
+/* ---------- opslag per speler (gemak, best effort) ---------- */
+const storeKey = () => "psim:" + (S.player ? S.player.id : "manual");
+function save() { try { localStorage.setItem(storeKey(), JSON.stringify({ sim: S.sim, excl: S.excl, ovr: S.ovr })); } catch (e) {} }
+function restore() { try { const j = JSON.parse(localStorage.getItem(storeKey()) || "null"); if (j) { S.sim = j.sim || []; S.excl = j.excl || {}; S.ovr = j.ovr || {}; S.seq = 1 + S.sim.reduce((a, m) => Math.max(a, +String(m.key).slice(1) || 0), 0); } } catch (e) {} }
+
+/* ---------- MCP ---------- */
+function setStatus(kind, text) { $("status").innerHTML = `<span class="dot ${kind}"></span><span>${esc(text)}</span>`; }
+function extractRows(res) {
+  const p = res && res.payload;
+  if (Array.isArray(p)) return p;
+  let s = typeof p === "string" ? p : (p && typeof p.result === "string" ? p.result : null);
+  if (!s) { s = (res.content || []).filter((b) => b.type === "text").map((b) => b.text).join("\n"); try { const j = JSON.parse(s); if (j && typeof j.result === "string") s = j.result; else if (Array.isArray(j)) return j; } catch (e) {} }
+  const m = s.match(/<untrusted-data-[^>]*>\s*(\[[\s\S]*\])\s*<\/untrusted-data/);
+  const body = m ? m[1] : s.slice(s.indexOf("["), s.lastIndexOf("]") + 1);
+  return JSON.parse(body);
+}
+async function sql(query, refresh) {
+  const opts = { cache: { staleTime: 5 * 60e3, gcTime: 60 * 60e3, ...(refresh ? { refresh: true } : {}) } };
+  const res = await mcp.callTool(SERVER, TOOL, { project_id: PROJ, query }, opts);
+  return extractRows(res);
+}
+function errText(e) {
+  const c = e && e.code;
+  switch (c) {
+    case "server_not_connected": return "De Supabase-connector is niet gekoppeld. Voeg Supabase toe via claude.ai → Instellingen → Connectors en laad de pagina opnieuw.";
+    case "needs_reauth": return "De Supabase-connector moet opnieuw aangemeld worden (claude.ai → Instellingen → Connectors).";
+    case "selection_required": return "Je hebt meerdere Supabase-connectors. Kies er één in de melding van claude.ai.";
+    case "approval_required": case "not_in_manifest": case "consent_required": return "Deze pagina heeft jouw toestemming nodig om Supabase te lezen.";
+    case "blocked_by_policy": return "Je organisatie blokkeert deze Supabase-tool voor jou.";
+    case "server_unavailable": return "Supabase antwoordt niet. Probeer zo dadelijk opnieuw.";
+    case "tool_error": return "De query werd geweigerd: " + (e.message || "onbekende fout");
+    default: return "Gegevens ophalen mislukt (" + (c || "onbekend") + "): " + (e && e.message ? e.message : "");
+  }
+}
+function showConnError(e, retry) {
+  setStatus("err", "Geen verbinding");
+  const needBtn = ["approval_required", "not_in_manifest", "consent_required", "server_unavailable", "upstream_error"].includes(e && e.code) || !e || !e.code;
+  $("connMsg").innerHTML = `<div class="note err" style="margin-top:12px">${esc(errText(e))}${needBtn ? ` <button class="btn" type="button" id="retryBtn">Opnieuw proberen</button>` : ""}</div>`;
+  const b = $("retryBtn"); if (b) b.onclick = () => { $("connMsg").innerHTML = ""; retry(); };
+}
+
+function enableSearch() { $("search").disabled = false; $("search").placeholder = "Zoek op naam…"; $("connMsg").innerHTML = ""; }
+const fmtStamp = (iso) => { try { return new Date(iso).toLocaleString("nl-BE", { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" }); } catch (e) { return String(iso); } };
+
+async function loadLive(refresh) {
+  setStatus("busy", "Gegevens ophalen uit Supabase…");
+  const rows = await sql(SQL_BULK, refresh);
+  const d = (rows[0] && rows[0].d) || { spelers: [], data: {} };
+  S.players = d.spelers || []; S.all = d.data || {}; S.source = "live"; S.live = true; S.stamp = new Date().toISOString();
+  setStatus("ok", `${S.players.length} spelers · live`);
+  enableSearch(); renderOwnerBar();
+}
+
+async function loadRemote() {
+  setStatus("busy", "Gegevens ophalen…");
+  const j = await rpc("club_simulator_data", { p_token: CLUBTOKEN });
+  if (!j || j.fout) throw new Error((j && j.fout) || "geen gegevens");
+  S.players = j.d.spelers || []; S.all = j.d.data || {}; S.source = "remote"; S.stamp = new Date().toISOString();
+  setStatus("ok", `${S.players.length} speler${S.players.length === 1 ? "" : "s"} · ${j.bereik}`);
+  enableSearch();
+  const ik = S.players.find((p) => p.id === j.ik) || (S.players.length === 1 ? S.players[0] : null);
+  if (ik) { $("search").value = ik.naam; loadPlayer(ik); fillFormLevels(); }
+}
+
+async function loadSnapshot() {
+  setStatus("busy", "Momentopname laden…");
+  const meta = await DB.doc("snap/meta").get();
+  if (!meta.exists) return false;
+  const m = meta.data();
+  const docs = await Promise.all(Array.from({ length: m.chunks || 0 }, (_, i) => DB.doc(`snap/c${i}`).get()));
+  const all = {};
+  for (const x of docs) if (x.exists) Object.assign(all, (x.data() || {}).data || {});
+  S.players = m.spelers || []; S.all = all; S.source = "snapshot"; S.stamp = m.bijgewerkt;
+  setStatus("ok", `Momentopname van ${fmtStamp(m.bijgewerkt)}`);
+  enableSearch(); renderOwnerBar();
+  return true;
+}
+
+async function publishSnapshot(auto) {
+  if (!DB || S.source !== "live" || !S.all) return;
+  const btn = $("pubBtn"); if (btn) btn.disabled = true;
+  setStatus("busy", "Momentopname publiceren…");
+  try {
+    const enc = new TextEncoder(), chunks = [];
+    let cur = {}, size = 0;
+    for (const [id, d] of Object.entries(S.all)) {
+      const n = enc.encode(JSON.stringify(d)).length + 20;
+      if (size + n > SNAP_MAX_BYTES && size > 0) { chunks.push(cur); cur = {}; size = 0; }
+      cur[id] = d; size += n;
+    }
+    if (size > 0) chunks.push(cur);
+    const old = await DB.doc("snap/meta").get();
+    const oldN = old.exists ? (old.data().chunks || 0) : 0;
+    for (let i = 0; i < chunks.length; i++) await DB.doc(`snap/c${i}`).set({ data: chunks[i] });
+    const stamp = new Date().toISOString();
+    await DB.doc("snap/meta").set({ bijgewerkt: stamp, chunks: chunks.length, spelers: S.players });
+    for (let i = chunks.length; i < oldN; i++) await DB.doc(`snap/c${i}`).delete();
+    S.snapStamp = stamp;
+    setStatus("ok", `${S.players.length} spelers · live · momentopname ${auto ? "automatisch " : ""}gepubliceerd`);
+  } catch (e) {
+    const c = e && e.code;
+    const msg = c === "quota_exceeded" ? "De database van de pagina is vol." : c === "resource_exhausted" ? "Te veel schrijfacties na elkaar; probeer zo dadelijk opnieuw." : "Publiceren mislukt (" + (c || "onbekend") + ").";
+    $("connMsg").innerHTML = `<div class="note err" style="margin-top:12px">${esc(msg)} Gedeelde kijkers zien nog de vorige momentopname.</div>`;
+    setStatus("err", "Momentopname niet gepubliceerd");
+  }
+  renderOwnerBar();
+}
+
+function renderOwnerBar() {
+  const box = $("ownerBar"); if (!box) return;
+  if (!IS_OWNER || !DB) { box.innerHTML = S.source === "snapshot" ? `<small class="muted">Gegevens van ${esc(fmtStamp(S.stamp))}. De pagina wordt bijgewerkt wanneer de beheerder ze opent.</small>` : ""; return; }
+  const when = S.snapStamp ? fmtStamp(S.snapStamp) : "nog nooit";
+  box.innerHTML = `<div class="row"><small class="muted">Momentopname voor gedeelde kijkers: <b>${esc(when)}</b></small>${S.source === "live" ? `<button class="btn" type="button" id="pubBtn" data-act="publish">Momentopname nu publiceren</button>` : ""}</div>`;
+}
+
+function loadPlayer(p) {
+  S.player = p; S.own = klNum(p.kl); S.g = p.geslacht === "Vrouw" ? "Vrouw" : "Man";
+  S.sim = []; S.excl = {}; S.ovr = {}; S.seq = 1; restore();
+  const d = (S.all && S.all[p.id]) || { ic: [], tour: [], gepland: [] };
+  S.played = normalize(d, p);
+  S.planned = (d.gepland || []).filter((g) => String(g.datum).slice(0, 10) >= new Date().toISOString().slice(0, 10));
+  S.psSource = (d.pstour || []).length ? "padelstats" : "btc";
+  S.psRatio = Object.fromEntries((d.psratio || []).map((x) => [x.niveau, x]));
+  showMain(); renderAll();
+}
+
+/* ---------- normalisatie ---------- */
+function tgnOf(t) {
+  const k = String(t || "").split(",").map(klNum);
+  return k.length === 2 && k.every((x) => x != null) ? { opp: k, oppKnown: true } : { opp: null, oppKnown: false };
+}
+function normalize(d, p) {
+  const out = [];
+  for (const r of d.ic || []) {
+    const comp = /mixed/i.test(r.competitie) ? "MC" : /senior/i.test(r.competitie) ? "SC" : "IC";
+    out.push({
+      key: `i${r.match_id}-${r.nr}`, bron: "ic", datum: r.datum, comp,
+      mixed: comp === "MC" && !!r.partner_geslacht && r.partner_geslacht !== p.geslacht,
+      fase: /^poule/i.test(r.ronde || "") ? "poule" : "eind", win: !!r.gewonnen,
+      label: `${r.competitie} · ${(r.afdeling || "").replace(/^PADEL\s*/i, "")}`, ronde: r.ronde,
+      partnerNaam: r.partner_naam, partnerKl: klNum(r.partner_kl), ...tgnOf(r.tgn)
+    });
+  }
+  const pst = d.pstour || [];
+  for (const r of pst) {
+    const c = String(r.reeks || "").toUpperCase().charAt(1);
+    const typ = c === "D" ? "DAMES" : (c === "G" || c === "M") ? "GEMENGD" : c === "L" ? "LEGENDS" : "HEREN";
+    out.push({
+      key: `p${r.tornooi_id || ""}-${r.blok}-${r.nr}`, bron: "tour", datum: r.datum, ptType: typ,
+      fixedLevel: ALL.includes(+r.circuit) ? +r.circuit : null, reeksLevel: ALL.includes(+r.circuit) ? +r.circuit : null,
+      invalid: r.geldig === false,
+      fase: /^poule/i.test(r.ronde || "") ? "poule" : "eind", win: !!r.gewonnen,
+      label: `${r.titel || "Tornooi"} · ${r.reeks || ""}`, ronde: r.ronde,
+      partnerNaam: null, partnerKl: null, opp: [klNum(r.tgn1_kl), klNum(r.tgn2_kl)], oppKnown: true,
+      ps: { wp: r.wp, vp: r.vp }
+    });
+  }
+  for (const r of (pst.length ? [] : d.tour || [])) {
+    const parse = (s) => String(s || "").split(",").filter(Boolean).map((x) => { const [id, kl, g] = x.split(":"); return { id: +id, kl: klNum(kl), g }; });
+    const k1 = parse(r.k1), k2 = parse(r.k2);
+    const side = k1.some((x) => x.id === +p.id) ? 1 : 2;
+    const mine = side === 1 ? k1 : k2, them = side === 1 ? k2 : k1;
+    const partner = mine.find((x) => x.id !== +p.id);
+    const m = String(r.reeks || "").match(/PADEL\s+(HEREN|DAMES|GEMENGD|OPEN|LEGENDS?)\s*(\d+)?/i);
+    const typ = m ? m[1].toUpperCase().replace("LEGEND", "LEGENDS").replace("LEGENDSS", "LEGENDS") : "HEREN";
+    out.push({
+      key: `t${r.tornooi_id}-${k2.concat(k1).map((x) => x.id).join("")}-${r.ronde}`.slice(0, 80), bron: "tour", datum: r.datum,
+      ptType: typ === "OPEN" ? "HEREN" : typ, reeksLevel: m && ALL.includes(+m[2]) ? +m[2] : null,
+      fase: /^poule/i.test(r.ronde || "") ? "poule" : "eind", win: +r.winnaar === side,
+      label: `${r.tornooi} · ${r.reeks}`, ronde: r.ronde,
+      partnerNaam: null, partnerKl: partner ? partner.kl : null,
+      opp: them.map((x) => x.kl), oppKnown: them.length === 2 && them.every((x) => x.kl != null)
+    });
+  }
+  // Interclub zonder tegenstanders uit het uitslagenblad: klassement uit de padelstats-berekening.
+  // Koppeling op uitslag + punten (factor en fase); binnen zo'n groep zijn de wedstrijden voor de
+  // berekening uitwisselbaar, dus de uitkomst is dezelfde.
+  const psic = (d.psic || []).map((x) => ({ ...x }));
+  for (const m of out) {
+    if (m.bron !== "ic" || m.oppKnown) continue;
+    const exp = points(m, S.g).pts;
+    const i = psic.findIndex((x) => !x.used && !!x.gewonnen === m.win && Math.abs((m.win ? x.wp : x.vp) - exp) < 1e-6);
+    if (i < 0) continue;
+    const x = psic[i]; x.used = true;
+    m.opp = [klNum(x.tgn1_kl), klNum(x.tgn2_kl)]; m.oppKnown = true; m.oppSrc = "padelstats";
+    if (ALL.includes(+x.circuit)) m.fixedLevel = +x.circuit;
+    if (x.geldig === false) m.invalid = true;
+  }
+  out.sort((a, b) => String(a.datum).localeCompare(String(b.datum)));
+  return out;
+}
+
+/* ---------- rekenkern ---------- */
+function idx(l) { return ALL.indexOf(l); }
+function pairLevel(a, b) {
+  if (a == null || b == null) return { level: a ?? b ?? null };
+  const ia = idx(a), ib = idx(b), d = Math.abs(ia - ib);
+  if (d === 0) return { level: a };
+  if (d === 1) return { level: Math.max(a, b) };
+  if (d === 2) return { level: ALL[Math.min(ia, ib) + 1] };
+  return { level: null, why: "Tegenstanders verschillen meer dan 2 klassementen: telt voor niemand" };
+}
+function factor(m, g) {
+  if (m.bron === "tour" || m.ptType) {
+    if (m.ptType === "LEGENDS") return .4;
+    if (m.ptType === "GEMENGD") return g === "Man" ? .4 : 1;
+    return 1;
+  }
+  if (m.comp === "MC" && m.mixed) return g === "Man" ? .4 : .8;
+  return .8;
+}
+function oppOf(m) { const o = S.ovr[m.key]; if (o) return o; if (m.opp && m.opp.length === 2) return m.opp.map((x) => x ?? S.own); return [S.own, S.own]; }
+function levelOf(m) {
+  if (m.partnerKl != null && S.own != null && Math.abs(idx(m.partnerKl) - idx(S.own)) > 2) return { level: null, why: "Duo met meer dan 2 klassementen verschil: telt voor niemand" };
+  if (m.fixedLevel) return { level: m.fixedLevel };
+  const tourByReeks = (m.bron === "tour" || m.ptType) && m.reeksLevel && String(m.datum || "9999") >= SWITCH_DATE;
+  if (tourByReeks) return { level: m.reeksLevel };
+  const [a, b] = oppOf(m);
+  return pairLevel(a, b);
+}
+function points(m, g) { const f = factor(m, g); const base = m.fase === "eind" ? (m.win ? 1.5 : .5) : 1; return { f, pts: base * f }; }
+
+function compute(matches) {
+  const own = S.own, g = S.g, lad = LAD[g], gr = GR[g];
+  const L = {}; const add = (lv, k, v) => { (L[lv] ||= { n: 0, wp: 0, vp: 0, w: 0, l: 0 }); L[lv].n++; L[lv][k] += v; L[lv][k === "wp" ? "w" : "l"]++; };
+  const rows = [], losses = [];
+  for (const m of matches) {
+    if (S.excl[m.key]) { rows.push({ m, off: true }); continue; }
+    if (m.invalid) { rows.push({ m, why: "Telt niet mee volgens padelstats", lvl: null, ...points(m, g) }); continue; }
+    const lv = levelOf(m), pt = points(m, g);
+    if (lv.level == null) { rows.push({ m, why: lv.why || "Niveau onbekend", ...pt, lvl: null }); continue; }
+    const M = lv.level;
+    if (m.win) {
+      const levels = ALL.filter((x) => x === M || (M > own && x >= own && x < M));
+      levels.forEach((x) => add(x, "wp", pt.pts));
+      rows.push({ m, ...pt, lvl: M, also: levels.filter((x) => x !== M) });
+    } else { add(M, "vp", pt.pts); losses.push({ M, pts: pt.pts, m }); rows.push({ m, ...pt, lvl: M, also: [] }); }
+  }
+  const withRatio = Object.keys(L).map(Number);
+  for (const ls of losses) {
+    const up = withRatio.filter((x) => x > ls.M);
+    up.forEach((x) => add(x, "vp", ls.pts));
+    const r = rows.find((r) => r.m === ls.m); if (r) r.also = up;
+  }
+  const levels = Object.keys(L).map(Number).sort((a, b) => a - b).map((lv) => {
+    const e = L[lv], corr = Math.min(Math.floor(e.n / 12), e.vp), den = e.wp + e.vp - corr;
+    const ratio = den > 0 ? e.wp / den : null;
+    const [down, up] = gr[lv] || [null, null];
+    let prop = lv;
+    if (ratio != null) {
+      if (up != null && ratio > up) prop = lad[lad.indexOf(lv) + 1] ?? lv;
+      else if (down != null && ratio < down) prop = lad[lad.indexOf(lv) - 1] ?? lv;
+    }
+    if (!lad.includes(lv)) prop = lv;
+    return { lv, ...e, corr, ratio, down, up, prop };
+  });
+  const ownE = levels.find((x) => x.lv === own);
+  for (const x of levels) {
+    x.valid = true; x.why = "";
+    if (x.ratio == null) { x.valid = false; x.why = "Geen ratio"; continue; }
+    if (x.prop > own) {
+      if (x.n < 9) { x.valid = false; x.why = `Stijgen vraagt 9 wedstrijden (nu ${x.n})`; }
+      else if (x.lv > own && ownE && ownE.n >= 5 && ownE.ratio < .6) { x.valid = false; x.why = `Ratio op ${P(own)} onder 60% (${pct(ownE.ratio)})`; }
+    } else if (x.prop < own) {
+      if (x.n < 5) { x.valid = false; x.why = `Dalen vraagt 5 wedstrijden (nu ${x.n})`; }
+    }
+    // marge richting stijging t.o.v. eigen klassement
+    if (x.lv >= own) {
+      const t = x.lv === own ? x.up : x.down;
+      if (t != null) {
+        x.target = t; x.needN = Math.max(0, 9 - x.n);
+        x.margin = x.wp * (1 - t) / t - (x.vp - x.corr);
+      }
+    }
+  }
+  const valid = levels.filter((x) => x.valid);
+  let final = own, from = null;
+  if (valid.length) { const best = valid.reduce((a, b) => (b.prop > a.prop ? b : a)); final = best.prop; from = best.lv; }
+  const minAllowed = lad[Math.max(0, lad.indexOf(own) - 1)];
+  if (final < minAllowed) final = minAllowed;
+  const top = (g === "Man" && final === 1000) || (g === "Vrouw" && final >= 700);
+  return { levels, rows, final, from, top };
+}
+
+/* ---------- weergave ---------- */
+function showMain() { ["main", "levelsPanel", "playedPanel", "simPanel"].forEach((id) => $(id).hidden = false); }
+function opts(sel, val) { return ALL.map((l) => `<option value="${l}"${l === val ? " selected" : ""}>${P(l)}</option>`).join(""); }
+
+function renderPlayer() {
+  const p = S.player;
+  if (!p) { $("playerCard").innerHTML = `<div class="eyebrow">Handmatige simulatie</div><div class="pname">${S.g === "Man" ? "Heer" : "Dame"} <span class="kl">${P(S.own)}</span></div><p class="muted">Geen live-gegevens: alle wedstrijden komen uit de simulatie.</p>`; return; }
+  const ps = p.speelsterkte != null;
+  $("playerCard").innerHTML = `
+    <div><div class="eyebrow">${esc(p.geslacht || "")} · lidnr ${esc(p.id)}</div>
+    <div class="pname">${esc(p.naam)} <span class="kl">${P(S.own)}</span></div></div>
+    <div class="facts">
+      <div class="fact"><div class="eyebrow">Speelsterkte</div><div class="v">${ps ? esc(p.speelsterkte) : "–"}</div></div>
+      <div class="fact"><div class="eyebrow">Padelstats-prognose</div><div class="v">${p.voorspeld != null ? `<span class="kl ghost">${P(p.voorspeld)}</span>` : "–"}</div></div>
+      <div class="fact"><div class="eyebrow">Wedstrijden (padelstats)</div><div class="v">${p.wedstrijden ?? "–"}</div></div>
+      <div class="fact"><div class="eyebrow">Stand padelstats</div><div class="v">${p.sterkte_datum ? fmtDate(p.sterkte_datum) : "–"}</div></div>
+    </div>
+    <div class="row">${S.source === "remote" ? `<button class="btn ghost" type="button" data-act="reload-remote">Gegevens vernieuwen</button>` : ""}${S.source === "live" ? `<button class="btn ghost" type="button" data-act="reload">Gegevens vernieuwen</button>` : ""}<small class="muted">Bron: ${S.source === "live" ? "live uit Supabase" : S.source === "remote" ? "live, opgehaald " + esc(fmtStamp(S.stamp)) : "momentopname van " + esc(fmtStamp(S.stamp))}</small></div>`;
+}
+
+function verdict(res) {
+  const d = res.final - S.own;
+  const cls = d > 0 ? "up" : d < 0 ? "down" : "same", txt = d > 0 ? "stijgt" : d < 0 ? "daalt" : "behoud";
+  let why = "";
+  if (d !== 0 && res.from != null) why = `via de ratio op ${P(res.from)}`;
+  else {
+    const near = res.levels.filter((x) => x.lv >= S.own && x.target != null).sort((a, b) => a.lv - b.lv);
+    const o = near[0];
+    if (o) why = o.needN > 0 ? `${P(o.lv)}: nog ${o.needN} wedstrijd${o.needN > 1 ? "en" : ""} nodig` : (o.margin > 0 ? "" : `${P(o.lv)}: ratio ${pct(o.ratio)} haalt ${pct(o.target)} niet`);
+  }
+  return `<div class="big">${P(res.final)}</div><div class="row"><span class="pill ${cls}">${txt}</span>${res.top ? `<span class="pill warn">aparte topmethode</span>` : ""}</div><small class="muted">${esc(why)}</small>`;
+}
+
+function renderAll(loading) {
+  renderPlayer();
+  const base = compute(S.played);
+  const all = S.played.concat(S.sim);
+  const simRes = compute(all);
+  $("outcome").innerHTML = `
+    <header><h2>Voorstel decemberberekening</h2><small class="muted">${loading ? "laden…" : `${S.played.length} gespeeld · ${S.sim.length} gesimuleerd`}</small></header>
+    <div class="outcome">
+      <div class="ocol"><div class="eyebrow">Alleen gespeelde wedstrijden</div>${verdict(base)}</div>
+      <div class="ocol sim"><div class="eyebrow">Met simulatie</div>${verdict(simRes)}</div>
+    </div>
+    ${S.played.some((m) => m.bron === "ic" && !m.oppKnown && !S.ovr[m.key]) ? `<div class="note" style="margin-top:12px">Het klassement van interclubtegenstanders staat niet in de database. De simulator neemt aan dat ze op ${P(S.own)} spelen. Pas het aan bij de wedstrijd als padelstats of het wedstrijdblad iets anders toont.</div>` : ""}
+    ${S.player && S.psSource === "btc" ? `<div class="note info" style="margin-top:12px">Nog geen padelstats-berekening voor deze speler: alleen officiële tornooien van BTC zelf zijn meegeteld. Tornooien bij andere clubs verschijnen na de volgende padelstats-run.</div>` : ""}`;
+  renderLevels(base, simRes);
+  renderPlayed(simRes);
+  renderPlanned();
+  renderSim(simRes);
+}
+
+function ringSvg(wP, wS, lP, lS, need) {
+  const n = wP + wS + lP + lS, tot = Math.max(need, n), r = 21, C = 2 * Math.PI * r, seg = C / tot, gap = tot > 1 ? Math.min(2.2, seg * 0.25) : 0;
+  const cls = [].concat(Array(wP).fill("var(--accent)"), Array(wS).fill("color-mix(in srgb, var(--accent) 45%, transparent)"),
+    Array(lP).fill("var(--warn)"), Array(lS).fill("color-mix(in srgb, var(--warn) 45%, transparent)"));
+  let arcs = "";
+  for (let i = 0; i < tot; i++) arcs += `<circle cx="26" cy="26" r="${r}" stroke="${cls[i] || "var(--line)"}" stroke-dasharray="${(seg - gap).toFixed(2)} ${C.toFixed(2)}" stroke-dashoffset="${(-i * seg).toFixed(2)}"/>`;
+  return `<svg width="52" height="52" viewBox="0 0 52 52" role="img" aria-label="${n} van ${need} wedstrijden"><g transform="rotate(-90 26 26)" fill="none" stroke-width="6">${arcs}</g><text x="26" y="30" text-anchor="middle" font-size="12" font-weight="600" fill="var(--ink)" font-family="var(--f-body)">${n}/${need}</text></svg>`;
+}
+
+function rungHtml(l, x, y) {
+  const own = l === S.own, [down, up] = GR[S.g][l] || [null, null];
+  const lo = down != null ? down * 100 : 0, hi = up != null ? up * 100 : 100;
+  const zones = `${down != null ? `<div class="z z-down" style="width:${lo}%"></div>` : ""}<div class="z z-keep" style="width:${hi - lo}%"></div>${up != null ? `<div class="z z-up" style="width:${100 - hi}%"></div>` : ""}`;
+  const ticks = [down, up].filter((t) => t != null).map((t) => `<div class="tk" style="left:${t * 100}%"></div><div class="tl" style="left:${t * 100}%">${Math.round(t * 100)}%</div>`).join("");
+  const now = y && y.ratio != null ? y.ratio : null, sim = x && x.ratio != null ? x.ratio : null;
+  const pos = (v) => Math.max(0, Math.min(100, v * 100)).toFixed(2);
+  let marks = "";
+  if (sim != null && now != null && Math.abs(sim - now) > 1e-9) {
+    const a = Math.min(pos(now), pos(sim)), b = Math.max(pos(now), pos(sim));
+    marks = `<div class="ln" style="left:${a}%;width:${(b - a).toFixed(2)}%"></div><div class="dt open" style="left:${pos(now)}%"></div><div class="dt" style="left:${pos(sim)}%"></div>`;
+  } else if (sim != null) marks = `<div class="dt" style="left:${pos(sim)}%"></div>`;
+  const wP = y ? y.w : 0, lP = y ? y.l : 0, wS = x ? Math.max(0, x.w - wP) : 0, lS = x ? Math.max(0, x.l - lP) : 0;
+  let chip, sub = "";
+  if (!x || x.ratio == null) { chip = `<span class="pill same">geen wedstrijden</span>`; if (l > S.own) sub = "9 wedstr. nodig"; }
+  else {
+    const dir = x.prop > S.own ? "up" : x.prop < S.own ? "down" : "same", arrow = dir === "up" ? " ↑" : dir === "down" ? " ↓" : " =";
+    chip = x.valid ? `<span class="pill ${dir}">${P(x.prop)}${arrow}</span>` : `<span class="pill same">${P(x.prop)} · telt niet</span>`;
+    if (x.target != null) {
+      const parts = []; if (x.needN > 0) parts.push(`nog ${x.needN} wedstr.`);
+      parts.push(x.margin > 0 ? `marge ${nf(x.margin)} VP` : `tekort ${nf(-x.margin)} VP`); sub = parts.join(" · ");
+    } else if (!x.valid) sub = x.why;
+  }
+  const txt = sim == null ? "geen ratio" : (now != null && Math.abs(sim - now) > 1e-9 ? `nu ${pct(now)} op ${y.n} → met simulatie <b>${pct(sim)}</b> op ${x.n}` : `<b>${pct(sim)}</b> op ${x.n} wedstr.`);
+  return `<div class="rung${own ? " own" : ""}">
+    <div><div class="lvl">${P(l)}</div>${own ? '<div class="sub">eigen niveau</div>' : ""}</div>
+    ${ringSvg(wP, wS, lP, lS, 9)}
+    <div class="barcell"><div class="rbar" role="img" aria-label="Ratio ${sim == null ? "geen" : pct(sim)} op ${P(l)}"><div class="zs">${zones}</div>${ticks}${marks}</div><div class="sub">${txt}</div></div>
+    <div class="side">${chip}<span class="sub">${esc(sub)}</span></div>
+  </div>`;
+}
+
+function renderLevels(base, res) {
+  const lv = new Set(res.levels.map((x) => x.lv)); if (S.own != null) lv.add(S.own);
+  const nxt = LAD[S.g][LAD[S.g].indexOf(S.own) + 1]; if (nxt) lv.add(nxt);
+  const list = [...lv].sort((a, b) => b - a);
+  const b = Object.fromEntries(base.levels.map((x) => [x.lv, x]));
+  const r = Object.fromEntries(res.levels.map((x) => [x.lv, x]));
+  $("ladder").innerHTML = list.map((l) => rungHtml(l, r[l], b[l])).join("");
+  const body = list.map((l) => {
+    const x = r[l], y = b[l];
+    const thr = GR[S.g][l] || [];
+    const prop = x && x.ratio != null ? `<span class="pill ${x.prop > S.own ? "up" : x.prop < S.own ? "down" : "same"}">${P(x.prop)}</span>` : "–";
+    const st = !x ? `<span class="why">geen wedstrijden</span>` : x.valid ? `<span class="why">telt mee</span>` : `<span class="why ${x.prop !== S.own ? "bad" : ""}">${esc(x.why)}</span>`;
+    let marge = "";
+    if (x && x.target != null) {
+      const parts = [];
+      if (x.needN > 0) parts.push(`nog ${x.needN} wedstr.`);
+      parts.push(x.margin > 0 ? `marge ${nf(x.margin)} VP` : `tekort ${nf(-x.margin)} VP`);
+      marge = `<span class="why ${x.margin > 0 && x.needN === 0 ? "" : "warn"}">${parts.join(" · ")}</span>`;
+    } else if (!x && l > S.own) marge = `<span class="why">9 wedstr. nodig</span>`;
+    const delta = y && x && y.ratio != null && x.ratio != null && Math.abs(y.ratio - x.ratio) > 1e-9 ? ` <small class="muted">(nu ${pct(y.ratio)})</small>` : "";
+    return `<tr class="${l === S.own ? "own" : ""}">
+      <td><b>${P(l)}</b>${l === S.own ? ' <small class="muted">eigen</small>' : ""}</td>
+      <td class="num">${x ? x.n : 0}</td><td class="num">${x ? nf(x.wp) : "0"}</td><td class="num">${x ? nf(x.vp) : "0"}</td><td class="num">${x ? nf(x.corr) : "0"}</td>
+      <td class="num"><b>${x ? pct(x.ratio) : "–"}</b>${delta}</td>
+      <td class="num"><small>${thr[0] != null ? "&lt;" + pct(thr[0]).replace(",0", "") : "–"} / ${thr[1] != null ? "&gt;" + pct(thr[1]).replace(",0", "") : "–"}</small></td>
+      <td>${prop}</td><td>${st}</td><td>${marge}</td>
+      <td class="num"><small>${S.psRatio && S.psRatio[l] ? `${pct(S.psRatio[l].ratio)} · ${S.psRatio[l].wedstrijden}w` : "–"}</small></td></tr>`;
+  }).join("");
+  $("levels").innerHTML = `<table><thead><tr><th>Niveau</th><th class="num">Wedstr.</th><th class="num">WP</th><th class="num">VP</th><th class="num">Corr.</th><th class="num">Ratio</th><th class="num">Dalen / stijgen</th><th>Voorstel</th><th>Status</th><th>Richting stijging</th><th class="num">Padelstats</th></tr></thead><tbody>${body}</tbody></table>
+  <p class="muted" style="margin:8px 0 0"><small>Met simulatie. “Marge” = hoeveel verliespunten er nog bij kunnen voor de stijgdrempel (eigen niveau) of de behoudsgrens (hoger niveau). “Padelstats” = hun ratio op gespeelde wedstrijden, ter controle.</small></p>`;
+}
+
+function matchRow(r, isSim) {
+  const m = r.m, off = !!r.off;
+  const oo = oppOf(m);
+  const tourReeks = m.fixedLevel || ((m.bron === "tour" || m.ptType) && m.reeksLevel && String(m.datum || "9999") >= SWITCH_DATE);
+  const oppCell = tourReeks
+    ? `<small>${m.bron === "ic" ? "telt op " + P(m.fixedLevel) : "reeks " + P(m.reeksLevel)}${m.opp && m.opp.length ? ` · tgn ${m.opp.map(P).join("/")}` : ""}${m.oppSrc ? " · bron padelstats" : ""}</small>`
+    : `<span class="row" style="gap:4px"><select class="tiny" data-act="opp" data-k="${esc(m.key)}" data-i="0" aria-label="Tegenstander 1">${opts(null, oo[0])}</select><select class="tiny" data-act="opp" data-k="${esc(m.key)}" data-i="1" aria-label="Tegenstander 2">${opts(null, oo[1])}</select>${m.bron === "ic" && !m.oppKnown && !S.ovr[m.key] ? ' <span class="pill warn">aanname</span>' : ""}</span>`;
+  const wl = isSim ? `<button type="button" class="wl ${m.win ? "w" : "l"}" data-act="flip" data-k="${esc(m.key)}" aria-label="Uitslag omdraaien">${m.win ? "W" : "V"}</button>` : `<span class="wl ${m.win ? "w" : "l"}">${m.win ? "W" : "V"}</span>`;
+  const fase = isSim ? `<select class="tiny" data-act="fase" data-k="${esc(m.key)}" aria-label="Fase"><option value="poule"${m.fase === "poule" ? " selected" : ""}>poule</option><option value="eind"${m.fase === "eind" ? " selected" : ""}>eindtabel</option></select>` : `<small>${m.fase === "eind" ? "eindtabel" : "poule"}</small>`;
+  const sub = m.partnerNaam ? `met ${esc(m.partnerNaam)} (${P(m.partnerKl)})` : m.partnerKl != null ? `partner ${P(m.partnerKl)}` : "";
+  const effect = off ? `<span class="why">niet meegeteld</span>` : r.lvl == null ? `<span class="why bad">${esc(r.why)}</span>` :
+    `<span class="mono">${m.win ? "+" : "−"}${nf(r.pts)} ${m.win ? "WP" : "VP"}</span> <small class="muted">op ${P(r.lvl)}${r.also && r.also.length ? " + " + r.also.map(P).join(", ") : ""} · ×${nf(r.f, 1)}${m.ps && Math.abs((m.win ? m.ps.wp : m.ps.vp) - r.pts) > 1e-6 ? ` · padelstats ${nf(m.win ? m.ps.wp : m.ps.vp)}` : ""}</small>`;
+  const ctl = isSim ? `<button class="btn ghost danger" type="button" data-act="del" data-k="${esc(m.key)}" aria-label="Verwijderen">✕</button>` : `<input type="checkbox" id="c-${esc(m.key)}" data-act="excl" data-k="${esc(m.key)}" ${off ? "" : "checked"} aria-label="Meetellen">`;
+  return `<tr class="${off ? "off" : ""} ${isSim ? "sim" : ""}"><td>${ctl}</td><td class="num"><small>${isSim ? "sim" : fmtDate(m.datum)}</small></td>
+    <td class="strike">${esc(m.label)}<br><small class="muted">${esc(m.ronde || "")}${sub ? " · " + sub : ""}</small></td>
+    <td>${fase}</td><td>${oppCell}</td><td>${wl}</td><td>${effect}</td></tr>`;
+}
+const head = `<thead><tr><th></th><th class="num">Datum</th><th>Wedstrijd</th><th>Fase</th><th>Tegenstanders</th><th>Uitslag</th><th>Effect</th></tr></thead>`;
+
+function renderPlayed(res) {
+  if (!S.player) { $("playedPanel").hidden = true; return; }
+  if (!S.played.length) { $("played").innerHTML = `<div class="empty">Geen gespeelde Padel Tour- of interclubwedstrijden gevonden tussen 29/6 en vandaag.</div>`; return; }
+  const rows = res.rows.filter((r) => S.played.includes(r.m));
+  $("played").innerHTML = `<div class="tbl"><table>${head}<tbody>${rows.map((r) => matchRow(r, false)).join("")}</tbody></table></div>`;
+}
+
+function renderPlanned() {
+  const box = $("planned");
+  if (!S.player || !S.planned.length) { box.innerHTML = S.player ? `<p class="muted" style="margin:0"><small>Geen geplande interclubontmoetingen van de ploegen van deze speler vóór 30/11.</small></p>` : ""; return; }
+  box.innerHTML = `<h3 style="margin-bottom:8px">Geplande ontmoetingen vóór 30/11</h3><div class="tbl"><table><tbody>${S.planned.map((g, i) => {
+    const mc = /mixed/i.test(g.competitie), eind = !/^poule/i.test(g.ronde || "");
+    const btns = mc
+      ? `<button class="btn" type="button" data-act="plan" data-i="${i}" data-t="MC_SAME">+ ${S.g === "Man" ? "herendubbel" : "damesdubbel"}</button><button class="btn" type="button" data-act="plan" data-i="${i}" data-t="MC_MIX">+ gemengd</button><button class="btn primary" type="button" data-act="plan" data-i="${i}" data-t="BOTH">+ beide</button>`
+      : `<button class="btn" type="button" data-act="plan" data-i="${i}" data-t="${/senior/i.test(g.competitie) ? "SC" : "IC"}">+ wedstrijd</button>`;
+    return `<tr><td class="num"><small>${fmtDate(g.datum)}</small></td><td>${esc(g.competitie)} · ${esc(g.ronde)}<br><small class="muted">${esc(g.thuis_naam)} – ${esc(g.uit_naam)}${eind ? " · eindronde" : ""}</small></td><td><div class="row">${btns}</div></td></tr>`;
+  }).join("")}</tbody></table></div>`;
+}
+
+function renderSim(res) {
+  const rows = res.rows.filter((r) => S.sim.includes(r.m));
+  $("simList").innerHTML = rows.length
+    ? `<div class="tbl"><table>${head}<tbody>${rows.map((r) => matchRow(r, true)).join("")}</tbody></table></div><div class="row" style="margin-top:8px"><button class="btn ghost danger" type="button" data-act="clear">Simulatie leegmaken</button></div>`
+    : `<div class="empty">Nog geen gesimuleerde wedstrijden. Voeg ze toe via een geplande ontmoeting, een snelkeuze of het formulier.</div>`;
+  const nxt = LAD[S.g][LAD[S.g].indexOf(S.own) + 1];
+  $("presets").innerHTML = `<button class="btn" type="button" data-act="preset" data-p="mc">Eindronde Mixed Cup (dubbel + gemengd)</button>${nxt ? `<button class="btn" type="button" data-act="preset" data-p="pt">Padel Tour ${P(nxt)}-poule (3 wedstr.)</button>` : ""}`;
+}
+
+/* ---------- simulatie bewerken ---------- */
+function mkSim(t, fase, win, o1, o2, reeks) {
+  const m = { key: "s" + (S.seq++), bron: "sim", datum: null, fase, win, opp: [o1 ?? S.own, o2 ?? S.own], partnerKl: null };
+  if (t.startsWith("PT")) { m.ptType = { PT_H: "HEREN", PT_D: "DAMES", PT_G: "GEMENGD", PT_L: "LEGENDS" }[t]; m.reeksLevel = reeks ?? S.own; m.label = `Padel Tour ${m.ptType.toLowerCase()} ${P(m.reeksLevel)}`; m.datum = "2026-11-20"; }
+  else { m.comp = t.startsWith("MC") ? "MC" : t; m.mixed = t === "MC_MIX"; m.label = t === "MC_SAME" ? `Mixed Cup · ${S.g === "Man" ? "herendubbel" : "damesdubbel"}` : t === "MC_MIX" ? "Mixed Cup · gemengd" : t === "SC" ? "Senior Cup" : "Interclub Open/Dames"; }
+  return m;
+}
+function addSim(list) { S.sim.push(...list); save(); renderAll(); }
+
+document.addEventListener("click", (ev) => {
+  const el = ev.target.closest("[data-act]"); if (!el) return;
+  const a = el.dataset.act, k = el.dataset.k;
+  if (a === "flip") { const m = S.sim.find((x) => x.key === k); if (m) { m.win = !m.win; save(); renderAll(); } }
+  else if (a === "del") { S.sim = S.sim.filter((x) => x.key !== k); delete S.ovr[k]; save(); renderAll(); }
+  else if (a === "clear") { S.sim = []; save(); renderAll(); }
+  else if (a === "reload") { const id = S.player && S.player.id; loadLive(true).then(() => { const p = S.players.find((x) => x.id === id); if (p) loadPlayer(p); }).catch((e) => showConnError(e, () => loadLive(true))); }
+  else if (a === "publish") { publishSnapshot(false); }
+  else if (a === "reload-remote") { const id = S.player && S.player.id; loadRemote().then(() => { const p = S.players.find((x) => x.id === id); if (p) loadPlayer(p); }).catch((e) => setStatus("err", String(e.message || e))); }
+  else if (a === "plan") {
+    const g = S.planned[+el.dataset.i]; const fase = /^poule/i.test(g.ronde || "") ? "poule" : "eind"; const t = el.dataset.t;
+    const list = t === "BOTH" ? [mkSim("MC_SAME", fase, true), mkSim("MC_MIX", fase, true)] : [mkSim(t, fase, true)];
+    list.forEach((m) => { m.label += ` · ${g.ronde} ${fmtDate(g.datum)}`; m.datum = String(g.datum).slice(0, 10); });
+    addSim(list);
+  }
+  else if (a === "preset") {
+    if (el.dataset.p === "mc") addSim([mkSim("MC_SAME", "eind", true), mkSim("MC_MIX", "eind", true)]);
+    else { const nxt = LAD[S.g][LAD[S.g].indexOf(S.own) + 1]; const t = S.g === "Man" ? "PT_H" : "PT_D"; addSim([1, 2, 3].map(() => mkSim(t, "poule", true, null, null, nxt))); }
+  }
+});
+document.addEventListener("change", (ev) => {
+  const el = ev.target; const a = el.dataset && el.dataset.act; if (!a) return;
+  const k = el.dataset.k;
+  if (a === "excl") { if (el.checked) delete S.excl[k]; else S.excl[k] = true; save(); renderAll(); }
+  else if (a === "fase") { const m = S.sim.find((x) => x.key === k); if (m) { m.fase = el.value; save(); renderAll(); } }
+  else if (a === "opp") {
+    const m = S.sim.find((x) => x.key === k) || S.played.find((x) => x.key === k); if (!m) return;
+    const cur = oppOf(m).slice(); cur[+el.dataset.i] = +el.value;
+    if (m.bron === "sim") m.opp = cur; else S.ovr[k] = cur;
+    save(); renderAll();
+  }
+});
+
+/* ---------- formulier ---------- */
+function syncForm() {
+  const t = $("fSoort").value, pt = t.startsWith("PT");
+  $("lReeks").hidden = !pt; $("lO1").hidden = pt; $("lO2").hidden = pt;
+}
+function fillFormLevels() {
+  $("fO1").innerHTML = opts(null, S.own); $("fO2").innerHTML = opts(null, S.own); $("fReeks").innerHTML = opts(null, S.own);
+  $("fSoort").options[0].text = `Mixed Cup · ${S.g === "Man" ? "herendubbel" : "damesdubbel"}`;
+}
+$("fSoort").addEventListener("change", syncForm);
+$("fW").addEventListener("click", () => { S.w = true; $("fW").setAttribute("aria-pressed", "true"); $("fL").setAttribute("aria-pressed", "false"); });
+$("fL").addEventListener("click", () => { S.w = false; $("fW").setAttribute("aria-pressed", "false"); $("fL").setAttribute("aria-pressed", "true"); });
+$("fAdd").addEventListener("click", () => {
+  const n = Math.max(1, Math.min(10, +$("fN").value || 1)), t = $("fSoort").value;
+  addSim(Array.from({ length: n }, () => mkSim(t, $("fFase").value, S.w, +$("fO1").value, +$("fO2").value, +$("fReeks").value)));
+});
+
+/* ---------- zoeken ---------- */
+const search = $("search"), results = $("results");
+function showResults() {
+  const q = search.value.trim().toLowerCase();
+  const list = S.players.filter((p) => !q || String(p.naam).toLowerCase().includes(q)).slice(0, 40);
+  if (!list.length) { results.innerHTML = `<div class="empty" style="border:0">Geen speler gevonden</div>`; results.hidden = false; return; }
+  results.innerHTML = list.map((p) => `<button type="button" data-id="${esc(p.id)}"><span>${esc(p.naam)}</span><span class="kl ghost">${P(klNum(p.kl))}</span></button>`).join("");
+  results.hidden = false;
+}
+search.addEventListener("input", showResults);
+search.addEventListener("focus", showResults);
+search.addEventListener("keydown", (e) => { if (e.key === "Escape") results.hidden = true; if (e.key === "Enter") { const b = results.querySelector("button"); if (b) b.click(); } });
+results.addEventListener("click", (e) => {
+  const b = e.target.closest("button[data-id]"); if (!b) return;
+  const p = S.players.find((x) => String(x.id) === b.dataset.id); if (!p) return;
+  search.value = p.naam; results.hidden = true;
+  loadPlayer(p); fillFormLevels();
+});
+document.addEventListener("click", (e) => { if (!e.target.closest(".picker")) results.hidden = true; });
+
+/* ---------- handmatig ---------- */
+$("manK").innerHTML = opts(null, 400);
+$("manGo").addEventListener("click", () => {
+  S.player = null; S.g = $("manG").value; S.own = +$("manK").value; S.played = []; S.planned = [];
+  S.sim = []; S.excl = {}; S.ovr = {}; S.seq = 1; restore();
+  showMain(); $("playedPanel").hidden = true; fillFormLevels(); renderAll();
+});
+
+/* ---------- start ---------- */
+syncForm();
+function manualMode(msg) {
+  setStatus("err", "Geen gegevens");
+  $("search").placeholder = "Gegevens niet beschikbaar";
+  $("manualBox").hidden = false; $("pickHint").innerHTML = "<small>Handmatige modus</small>";
+  if (msg) $("connMsg").innerHTML = `<div class="note info" style="margin-top:12px">${esc(msg)}</div>`;
+}
+function toonLogin() { $("login").hidden = false; $("wie").hidden = true; setStatus("", "Aanmelden vereist"); }
+function afmelden() {
+  if (CLUBTOKEN) rpc("club_logout", { p_token: CLUBTOKEN }).catch(() => {});
+  CLUBTOKEN = null; try { localStorage.removeItem("btc-club-token"); } catch (e) {}
+  location.reload();
+}
+$("afmelden").addEventListener("click", afmelden);
+async function naAanmelden() {
+  const m = await rpc("club_mij", { p_token: CLUBTOKEN });
+  if (m.fout) { CLUBTOKEN = null; try { localStorage.removeItem("btc-club-token"); } catch (e) {} toonLogin(); return; }
+  $("wieNaam").textContent = m.naam; $("wie").hidden = false; $("login").hidden = true;
+  try { await loadRemote(); }
+  catch (e) { manualMode("Gegevens niet beschikbaar: " + (e.message || e) + ". Je kunt wel handmatig simuleren."); }
+}
+let lKeuze = null, lTimer;
+$("lzoek").addEventListener("input", () => {
+  lKeuze = null; $("ldoe").disabled = true; clearTimeout(lTimer);
+  const t = $("lzoek").value.trim(); if (t.length < 3) { $("lhits").innerHTML = ""; return; }
+  lTimer = setTimeout(async () => {
+    try { const r = await rpc("club_zoek", { p_term: t });
+      $("lhits").innerHTML = r.length ? r.map((h) => `<button class="hit" type="button" data-id="${h.id}" aria-pressed="false">${esc(h.naam)}</button>`).join("") : `<p class="muted">Niet gevonden. Vraag een persoonlijke code aan de padelcommissie.</p>`;
+    } catch (e) { $("lhits").innerHTML = `<p class="err">${esc(e.message)}</p>`; }
+  }, 250);
+});
+$("lhits").addEventListener("click", (e) => { const b = e.target.closest(".hit"); if (!b) return; lKeuze = +b.dataset.id;
+  $("lhits").querySelectorAll(".hit").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); $("ldoe").disabled = false; $("lcode").focus(); });
+async function doeLogin() {
+  $("lfout").textContent = "";
+  try { const r = await rpc("club_login", { p_speler: lKeuze, p_code: $("lcode").value });
+    if (r.fout) { $("lfout").textContent = "Aanmelden lukte niet: " + r.fout + "."; return; }
+    CLUBTOKEN = r.token; try { localStorage.setItem("btc-club-token", CLUBTOKEN); } catch (e) {}
+    $("lcode").value = ""; await naAanmelden();
+  } catch (e) { $("lfout").textContent = e.message || "Aanmelden mislukt."; }
+}
+$("ldoe").addEventListener("click", doeLogin);
+$("lcode").addEventListener("keydown", (e) => { if (e.key === "Enter" && lKeuze) doeLogin(); });
+(async () => {
+  if (!CLUBTOKEN) { toonLogin(); return; }
+  try { await naAanmelden(); } catch (e) { manualMode("De server antwoordt niet. Je kunt wel handmatig simuleren."); }
+})();
+})();
+</script>
+
+
+</body>
+</html>
