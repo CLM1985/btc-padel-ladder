@@ -83,6 +83,7 @@ td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
   <nav class="links" aria-label="Snel naar">
     <a class="lk" href="ladder-inschrijving/"><b>Ladder: inschrijven</b><span>Schrijf je ploeg in voor de padelladder</span></a>
     <a class="lk" href="ladder-inschrijving/app.html"><b>Mijn ladder</b><span>Wedstrijden, agenda en stand</span></a>
+    <a class="lk" href="klassementsimulator/" id="lkSim" hidden><b>Klassementsimulator</b><span>Wat doen je uitslagen met je klassement?</span></a>
     <a class="lk" href="opstellingsplanner/" id="lkPlanner" hidden><b>Opstellingsplanner</b><span>Interclubopstellingen plannen</span></a>
     <a class="lk" href="beheer/" id="lkBeheer" hidden><b>Beheer</b><span>Codes en rollen</span></a>
   </nav>
@@ -156,7 +157,7 @@ async function login() {
 $("logout").addEventListener("click", async () => {
   try { await rpc("club_logout", { p_token: token }); } catch (e) {}
   token = null; mij = null; geladen = {}; try { localStorage.removeItem("btc-club-token"); } catch (e) {}
-  $("app").hidden = true; $("who").hidden = true; $("login").hidden = false; $("lkBeheer").hidden = true; $("lkPlanner").hidden = true;
+  $("app").hidden = true; $("who").hidden = true; $("login").hidden = false; $("lkBeheer").hidden = true; $("lkPlanner").hidden = true; $("lkSim").hidden = true;
   $("zoek").value = ""; $("hits").innerHTML = "";
 });
 
@@ -171,6 +172,7 @@ async function start() {
   $("whoRoles").innerHTML = chips.map(c => `<span class="chip">${esc(c)}</span>`).join(" ");
   $("lkBeheer").hidden = !mij.onderdelen.beheer;
   $("lkPlanner").hidden = !mij.onderdelen.ploegen;
+  $("lkSim").hidden = false;
   $("who").hidden = false; $("login").hidden = true; $("app").hidden = false;
   toon("tornooien");
 }

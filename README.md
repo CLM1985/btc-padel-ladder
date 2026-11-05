@@ -5,6 +5,7 @@
 | `/` | Mijn padel: links + na aanmelden tornooien en klassement | `https://clm1985.github.io/btc-tennis-padel/` |
 | `ladder-inschrijving/` | Ladderinschrijving (`index.html`) en Mijn ladder (`app.html`) | `…/ladder-inschrijving/` |
 | `beheer/` | Clublogin: codes, rollen, kapiteins, logboek (enkel beheerders) | `…/beheer/` |
+| `klassementsimulator/` | Klassementsimulator (iedereen met een code; bereik volgens rol) | `…/klassementsimulator/` |
 | `opstellingsplanner/` | Opstellingsplanner interclub (kapiteins, commissie, bestuur) | `…/opstellingsplanner/` |
 
 Geen enkele pagina bevat namen of gegevens: alles komt live uit Supabase `padel-interclub`
@@ -67,3 +68,8 @@ Privacy: `ladder_mijn` registreert enkel de actieve dag per speler (opvolging la
 - Kapitein: enkel eigen ploeg(en), mag plannen · commissie: alle ploegen, mag plannen · bestuur: alle ploegen, inzage.
 - Plannen in `club.opstellingen` via `club_planner_plan` / `club_planner_bewaar` met versiecontrole:
   wie op een verouderde versie bewaart, krijgt de nieuwste versie terug in plaats van te overschrijven.
+
+## Klassementsimulator (`klassementsimulator/`)
+- Zelfde login. Gegevens via `club_simulator_data` (zelfde inhoud als `simulator_bulk`, gefilterd per rol):
+  commissie alle interclubspelers 2026 · kapitein zichzelf + ploegspelers · anderen enkel zichzelf.
+- Tegenstanders enkel met klassement, zonder namen.
