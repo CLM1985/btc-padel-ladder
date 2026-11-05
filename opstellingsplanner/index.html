@@ -116,9 +116,9 @@ header.top .toast{color:var(--on-band)}
 .rots{display:grid;gap:12px}
 .rot{border:1px solid var(--line);border-radius:10px;overflow:hidden}
 .rot-h{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--sunk);border-bottom:1px solid var(--line)}
-.match{display:grid;grid-template-columns:56px minmax(0,220px) minmax(0,220px) minmax(96px,1fr);gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line)}
+.match{display:grid;grid-template-columns:56px minmax(0,1fr) minmax(0,1fr) minmax(72px,auto);gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line)}
 .match:last-child{border-bottom:0}
-.match select{width:100%}
+.match select{width:100%;min-width:0;font-size:.88rem;text-overflow:ellipsis}
 .mnr{font-family:var(--f-display);font-weight:700;font-size:1.05rem}
 .mnr small{display:block;font-family:var(--f-body);font-weight:600;font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 .dsum{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:.85rem;line-height:1.25}
@@ -777,12 +777,14 @@ function renderTabs(){
     return `<button class="tab" role="tab" aria-selected="${id===ui.slot}" data-slot="${id}">${esc(label)}<span class="dot ${st}" title="${({ok:"In orde",warn:"Let op",bad:"Fout",leeg:"Leeg"})[st]}"></span>${sub?`<small>${esc(sub)}</small>`:""}</button>`;}).join("")+standTab;
 }
 
+// Korte naam in de keuzelijsten: "Achternaam V." (voornaam staat achteraan in de ledenlijst)
+function kortNaam(n){ const t=String(n||"").trim().split(/\s+/); return t.length>1 ? t.slice(0,-1).join(" ")+" "+t[t.length-1].charAt(0)+"." : t[0]||""; }
 function opties(ri,mi,si,huidig){
   const w=slotGeslacht(ri,mi,si), d=dag();
   const ids=plan.kern.filter(id=>sp(id)&&(!w||sp(id).g===w));
   if(huidig!=null && !ids.includes(huidig)) ids.push(huidig);
   return `<option value="">—</option>`+ids.map(id=>{const p=sp(id);
-    return `<option value="${id}" ${id===huidig?"selected":""}>${esc(p?p.naam:"speler "+id)}${p?" · "+esc(p.kl):""}${d.afwezig.includes(id)?" (afwezig)":""}</option>`}).join("");
+    return `<option value="${id}" ${id===huidig?"selected":""}>${esc(p?kortNaam(p.naam):"speler "+id)}${p?" · "+esc(p.kl):""}${d.afwezig.includes(id)?" (afwezig)":""}</option>`}).join("");
 }
 
 function renderDag(){
