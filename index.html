@@ -3,6 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#152B46">
+<link rel="icon" type="image/png" sizes="48x48" href="app/favicon-48.png">
+<link rel="apple-touch-icon" href="app/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="BTC Padel">
+<script>if("serviceWorker" in navigator)addEventListener("load",function(){navigator.serviceWorker.register("sw.js",{scope:"./"}).catch(function(){})});</script>
 <meta name="robots" content="noindex">
 <title>Mijn BTC Padel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -42,6 +51,13 @@ header .wrap > div:nth-child(2){flex:1;min-width:0}
 .hit[aria-pressed=true]{border-color:var(--accent);outline:1px solid var(--accent)}
 .doe{justify-self:start;font:700 15px "League Spartan","Arial Narrow",Arial,sans-serif;letter-spacing:.06em;text-transform:uppercase;background:var(--accent);color:var(--surface);border:0;border-radius:8px;padding:10px 16px;cursor:pointer}
 .doe[disabled]{opacity:.45;cursor:default}
+.app{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--lime);border-radius:10px;padding:14px 16px;display:grid;gap:8px}
+.app .kop{display:flex;gap:12px;align-items:center}
+.app img{width:44px;height:44px;border-radius:10px;flex:none}
+.app .kop b{font-size:16px}.app p{margin:0;font-size:14px;color:var(--muted)}
+.app ol{margin:0;padding-left:20px;font-size:14px;display:grid;gap:2px}
+.app .knoppen{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.app .later{background:none;border:0;padding:0;font:600 14px "Montserrat",system-ui,sans-serif;color:var(--muted);text-decoration:underline;cursor:pointer}
 .err{color:#A5432A;font-size:14px;margin:0;min-height:1em}
 @media (prefers-color-scheme:dark){.err{color:#E58B6C}}
 @media (max-width:560px){header .wrap{flex-wrap:wrap}.wie{text-align:left;justify-items:start;width:100%}}
@@ -92,6 +108,11 @@ header .wrap > div:nth-child(2){flex:1;min-width:0}
   </nav>
   </div>
   </div>
+  <section class="app" id="app" hidden aria-labelledby="appTitel">
+    <div class="kop"><img src="app/apple-touch-icon.png" alt=""><div><b id="appTitel">BTC Padel als app</b><p>Zet de clubsite op je beginscherm: opent met één tik, zonder adresbalk.</p></div></div>
+    <div id="appUitleg"></div>
+    <div class="knoppen"><button class="doe" type="button" id="appInstalleer" hidden>Installeren</button><button class="later" type="button" id="appLater">Niet nu</button></div>
+  </section>
   <p class="note" id="laden">Laden…</p>
 </div></main>
 <script>
@@ -108,7 +129,7 @@ async function rpc(fn,args){
 // Na aanmelden terug naar de pagina waar je vandaan kwam (enkel pagina's van deze site)
 function terug(){
   const t=new URLSearchParams(location.search).get("terug")||"";
-  return /^(ladder-inschrijving|tornooien|opstellingsplanner|klassementsimulator|beheer)\/([a-z-]+\.html)?(#[A-Za-z0-9-]*)?$/.test(t)?t:null;
+  return /^(ladder-inschrijving|tornooien|lessen|opstellingsplanner|klassementsimulator|beheer)\/([a-z-]+\.html)?(#[A-Za-z0-9-]*)?$/.test(t)?t:null;
 }
 function toonLogin(){ $("login").hidden=false; $("publiek").hidden=false; $("menu").hidden=true; $("wie").hidden=true; $("laden").hidden=true; }
 async function toonMenu(){
@@ -123,6 +144,29 @@ async function toonMenu(){
   if(m.onderdelen&&m.onderdelen.hoofdcoach) $("lkLessenUitleg").textContent="Inschrijven, lesmomenten en het overzicht van alle coaches";
   $("login").hidden=true; $("publiek").hidden=true; $("menu").hidden=false; $("laden").hidden=true;
 }
+// App installeren: uitleg tonen zolang de site niet als app geopend is
+(function(){
+  const standalone=matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+  let later=0; try{later=+localStorage.getItem("btc-app-later")||0;}catch(e){}
+  if(standalone||Date.now()-later<30*864e5) return;
+  const ua=navigator.userAgent, ios=/iPhone|iPad|iPod/.test(ua)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+  const safari=ios&&!/CriOS|FxiOS|EdgiOS/.test(ua);
+  let prompt=null;
+  const toon=()=>{ $("app").hidden=false; };
+  if(ios){
+    $("appUitleg").innerHTML=safari
+      ?`<ol><li>Tik onderaan op <b>Deel</b> (vierkant met pijl omhoog).</li><li>Kies <b>Zet op beginscherm</b>.</li><li>Open de app en meld één keer opnieuw aan met je code.</li></ol>`
+      :`<p>Op iPhone kan dit enkel in <b>Safari</b>: open deze pagina in Safari en kies daar <b>Deel → Zet op beginscherm</b>.</p>`;
+    toon();
+  } else {
+    $("appUitleg").innerHTML=`<p>Of via het menu van je browser: <b>App installeren</b> of <b>Toevoegen aan startscherm</b>.</p>`;
+    addEventListener("beforeinstallprompt",e=>{ e.preventDefault(); prompt=e; $("appInstalleer").hidden=false; toon(); });
+    if(/Android/.test(ua)) toon();
+  }
+  $("appInstalleer").addEventListener("click",async()=>{ if(!prompt) return; prompt.prompt(); const k=await prompt.userChoice; prompt=null; if(k.outcome==="accepted") $("app").hidden=true; });
+  $("appLater").addEventListener("click",()=>{ try{localStorage.setItem("btc-app-later",String(Date.now()));}catch(e){} $("app").hidden=true; });
+  addEventListener("appinstalled",()=>{ $("app").hidden=true; });
+})();
 $("afmelden").addEventListener("click",async()=>{
   const c=lees("btc-club-token"), l=lees("ladder_token");
   zet("btc-club-token",null); zet("ladder_token",null);
