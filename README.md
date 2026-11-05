@@ -1,4 +1,25 @@
-# BTC Padel Ladder – inschrijving
+# BTC Wemmel – tennis & padel (GitHub Pages)
+
+| Map | Pagina | Link |
+|---|---|---|
+| `/` | Startpagina met links | `https://clm1985.github.io/btc-tennis-padel/` |
+| `ladder-inschrijving/` | Ladderinschrijving (`index.html`) en Mijn ladder (`app.html`) | `…/ladder-inschrijving/` |
+| `beheer/` | Clublogin: codes, rollen, kapiteins, logboek (enkel beheerders) | `…/beheer/` |
+
+Geen enkele pagina bevat namen of gegevens: alles komt live uit Supabase `padel-interclub`
+via publieke functies die zelf sessie en rol controleren. De publieke sleutel in de pagina's
+geeft enkel toegang tot die functies; tabellen en schema's zijn afgeschermd.
+
+## Clublogin (`beheer/`, schema `club`)
+- Eén code per lid (6 tekens), gedeeld met Mijn ladder. Sessie 60 dagen; 5 foute codes = 15 min geblokkeerd.
+- Rollen: commissie, bestuur, wedstrijdleider, beheerder (handmatig); kapitein automatisch uit de interclubploegen.
+- Functies: `club_zoek`, `club_login`, `club_logout`, `club_mij`, `club_beheer_zoek`, `club_beheer_code`,
+  `club_beheer_rol`, `club_beheer_kapiteins`, `club_beheer_koppel`, `club_beheer_logboek`.
+- Werkt pas na vrijgave in de database (`11_club_vrijgeven.sql` in het project).
+
+---
+
+## Ladder – inschrijving (`ladder-inschrijving/`)
 
 Inschrijvingsformulier voor de padelladder van BTC Wemmel (Ladderreglement v1.2).
 Eén HTML-pagina op GitHub Pages; bevat geen namen of gegevens. Alles komt live uit Supabase
@@ -16,7 +37,7 @@ niet twee keer in dezelfde ladder · maximaal 2 ladders per speler.
 - Simulatie (niets opgeslagen): `?simulatie=1`
 - De publieke sleutel in `index.html` en `app.html` geeft enkel toegang tot de publieke ladderfuncties hieronder en hierboven; de tabellen zelf zijn afgeschermd.
 
-## Mijn ladder (`app.html`)
+### Mijn ladder (`ladder-inschrijving/app.html`)
 
 Schermen na aanmelding (naam zoeken + persoonlijke code van 6 tekens; 5 foute pogingen = 15 minuten geblokkeerd).
 Sessie van 60 dagen, enkel als willekeurig token in de browser (de database bewaart enkel de hash).
