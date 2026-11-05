@@ -454,7 +454,12 @@ function voorstel(d){
   if(pool.length<4) return {fout:"Te weinig beschikbare spelers in de selectie (minstens 4, binnen het maximumklassement)."};
   const opties=[];
   for(let ri=0; ri<c.rot; ri++) opties.push(rotOpties(pool,ri,r,waarde).sort((a,b)=>b.w-a.w));
-  if(opties.some(o=>!o.length)) return {fout:"Geen geldige rotatie mogelijk binnen de puntengrenzen met de beschikbare spelers."};
+  if(opties.some(o=>!o.length)){
+    const ks=pool.map(p=>p.k).sort((a,b)=>a-b), laag=ks.slice(0,4).reduce((a,b)=>a+b,0), hoog=ks.slice(-4).reduce((a,b)=>a+b,0);
+    if(laag>r.pmax) return {fout:`Geen geldige opstelling: de 4 laagst geklasseerde spelers in je selectie tellen samen al ${laag} punten, en het maximum in deze afdeling is ${r.pmax}. Voeg spelers met een lager klassement toe aan de selectie.`};
+    if(hoog<r.pmin) return {fout:`Geen geldige opstelling: de 4 hoogst geklasseerde spelers in je selectie tellen samen maar ${hoog} punten, en het minimum in deze afdeling is ${r.pmin}. Voeg spelers met een hoger klassement toe aan de selectie.`};
+    return {fout:`Geen geldige rotatie mogelijk: elke rotatie van 4 spelers moet samen tussen ${r.pmin} en ${r.pmax} punten tellen${C().mixed?", met de juiste verdeling dames/heren":""}. Pas de selectie aan.`};
+  }
   let best=null, bestScore=-Infinity, nodes=0; const LIM=800000;
   const telling={}, duos=new Set(), keuze=[];
   (function dfs(ri,som){
@@ -913,7 +918,7 @@ $("optSt").addEventListener("click",()=>{ui.opt="st"; render(false);});
 $("optKl").addEventListener("click",()=>{ui.opt="kl"; render(false);});
 $("voorstel").addEventListener("click",()=>{
   const v=voorstel(dag());
-  if(v.fout){ melding("msg",v.fout); return; }
+  if(v.fout){ melding("msg",v.fout,15000); return; }
   const o=leegDag().opst; v.opst.forEach((rot,i)=>o[i]=rot); dag().opst=o; wijziging();
   melding("msg",(v.afgekapt?"Voorstel ingevuld (zoektocht ingekort). ":"Sterkste geldige opstelling ingevuld ")+(ui.opt==="st"?"op basis van speelsterkte.":"op basis van klassement."));
 });
