@@ -2,7 +2,7 @@
 
 | Map | Pagina | Link |
 |---|---|---|
-| `/` | Mijn padel: links + na aanmelden tornooien en klassement | `https://clm1985.github.io/btc-tennis-padel/` |
+| `/` | Mijn padel: startpagina met links naar alle clubpagina's | `https://clm1985.github.io/btc-tennis-padel/` |
 | `ladder-inschrijving/` | Ladderinschrijving (`index.html`) en Mijn ladder (`app.html`) | `…/ladder-inschrijving/` |
 | `beheer/` | Clublogin: codes, rollen, kapiteins, logboek (enkel beheerders) | `…/beheer/` |
 | `klassementsimulator/` | Klassementsimulator (iedereen met een code; bereik volgens rol) | `…/klassementsimulator/` |
@@ -19,14 +19,18 @@ geeft enkel toegang tot die functies; tabellen en schema's zijn afgeschermd.
   `club_beheer_rol`, `club_beheer_kapiteins`, `club_beheer_koppel`, `club_beheer_logboek`.
 - Vrijgegeven op 5/11/2026.
 
-## Mijn padel (`/`, fase 2)
-- Zelfde login als beheer en Mijn ladder (sessie gedeeld via `btc-club-token`).
-- `club_tornooien`, `club_tornooi`: enkel padeltornooien. Commissie en bestuur zien alle tornooien;
-  anderen enkel tornooien waarin ze speelden, volledig en met namen van externe spelers (beslissing B2).
-- `club_klassement`: commissie alle leden; kapitein zichzelf + spelers van zijn ploeg(en)
-  (effectieve opstellingen interclub); anderen enkel zichzelf.
+## Mijn padel (`/`)
+- Startpagina met links naar ladder, tornooien, interclub en beheer. Het klassementsoverzicht is op 5/11/2026
+  van de site gehaald (beslissing CLM); `club_tornooien`, `club_tornooi` en `club_klassement` zijn niet meer aanroepbaar.
 
----
+## Tornooien (`tornooien/`)
+- Lijst van alle interne BTC-padeltornooien (`club_tornooien_lijst`) voor wie aangemeld is: naam, datum, aantal reeksen.
+- Detail per tornooi in de lay-out van het tornooirapport (poules, berekende stand, volledige bracket, overzicht reeksen).
+  Het model wordt in de pagina opgebouwd uit de ruwe rijen van `club_tornooi_rapport`, met dezelfde rekenregels als
+  `scraper/tornooi_rapport.py` (pariteit getest op W21 en Padelladder-finaleweekend).
+- Toegang tot de details: commissie en bestuur alle tornooien; anderen enkel tornooien waaraan ze deelnamen (B2).
+  Jeugdreeksen worden niet doorgegeven.
+- Links per tornooi en reeks: `tornooien/#t<tornooi-ID>-<reeks>`.
 
 ## Ladder – inschrijving (`ladder-inschrijving/`)
 
