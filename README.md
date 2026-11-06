@@ -20,6 +20,14 @@ geeft enkel toegang tot die functies; tabellen en schema's zijn afgeschermd.
   `club_beheer_rol`, `club_beheer_kapiteins`, `club_beheer_koppel`, `club_beheer_logboek`.
 - Vrijgegeven op 5/11/2026.
 
+## Bekijk als rol (voorbeeldmodus, enkel beheerders)
+- Startpagina, blok "Bekijk de app als…": lid, kapitein, trainer, hoofdcoach, commissie of bestuur. Daarna toont elke pagina
+  een groene balk met "Voorbeeld stoppen".
+- De rol hangt aan de sessie (`club.sessies.voorbeeld_rol`); `club.sessie()` maakt de transactie dan alleen-lezen en
+  `club.heeft()` geeft voor de eigen speler enkel de voorbeeldrol(len). Aan/uit via `club_voorbeeld(p_token, p_rol)`, gelogd.
+- Beperking: de kalender (Mijn padel, interclub) toont de eigen ploegen nog als kapitein als de beheerder ook kapitein is.
+- Script: `sql/01_Governance_Clublogin_voorbeeldrol.sql`.
+
 ## Mijn padel (`/`) – één login
 - De startpagina is de enige aanmeldpagina (`club_zoek`, `club_login`). Na aanmelden verschijnen de links volgens de rol
   (`club_mij.onderdelen`): opstellingsplanner enkel voor kapitein/commissie/bestuur, beheer enkel voor beheerders.

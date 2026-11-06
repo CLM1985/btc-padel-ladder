@@ -65,6 +65,8 @@ header .wrap > div:nth-child(2){flex:1;min-width:0}
 .wg-kop{display:flex;gap:10px;align-items:center;margin:0;color:var(--fg);font-size:17px;letter-spacing:.04em}
 .inst-deel{display:grid;gap:8px;border-top:1px solid var(--line);padding-top:14px}
 .inst-deel .knoppen{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.voorbeeld{background:var(--surface);border:1px dashed var(--accent);border-radius:10px;padding:14px 16px;display:grid;gap:8px}
+.vb-keuze{display:flex;flex-wrap:wrap;gap:8px}.vb-keuze .kies-d[aria-checked=true]{border-color:var(--accent);outline:2px solid var(--accent)}
 .inst-titel{margin:0;font-weight:600;font-size:15px;color:var(--fg)}
 .inst-uitleg{margin:0;font-size:14px;color:var(--muted)}
 .chips-d{display:flex;gap:8px;flex-wrap:wrap}
@@ -127,6 +129,20 @@ a.wk.thuis{background:#DCE4D2;border-color:var(--accent)}
   </nav>
   </div>
   <div id="menu" hidden style="display:contents">
+  <section class="voorbeeld" id="vbBlok" hidden aria-labelledby="vbTitel">
+    <p class="inst-titel" id="vbTitel">Bekijk de app als…</p>
+    <p class="inst-uitleg">Enkel voor beheerders. Je ziet wat iemand met die rol ziet, met je eigen gegevens. Opslaan staat uit zolang het voorbeeld loopt.</p>
+    <div class="vb-keuze" id="vbKeuze" role="radiogroup" aria-labelledby="vbTitel">
+      <button type="button" class="kies-d" data-rol="" role="radio">Mezelf</button>
+      <button type="button" class="kies-d" data-rol="lid" role="radio">Lid</button>
+      <button type="button" class="kies-d" data-rol="kapitein" role="radio">Kapitein</button>
+      <button type="button" class="kies-d" data-rol="trainer" role="radio">Trainer</button>
+      <button type="button" class="kies-d" data-rol="hoofdcoach" role="radio">Hoofdcoach</button>
+      <button type="button" class="kies-d" data-rol="commissie" role="radio">Commissie</button>
+      <button type="button" class="kies-d" data-rol="bestuur" role="radio">Bestuur</button>
+    </div>
+    <p class="err" id="vbFout" role="alert"></p>
+  </section>
   <section class="week" id="week" aria-labelledby="weekTitel">
     <div class="week-kop"><h2 id="weekTitel">Mijn padel</h2><span class="week-sub" id="weekSub">komende 7 dagen</span><a class="week-inst" href="#instellingen" aria-label="Instellingen"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.8v2.6M12 18.6v2.6M2.8 12h2.6M18.6 12h2.6M5.5 5.5l1.8 1.8M16.7 16.7l1.8 1.8M5.5 18.5l1.8-1.8M16.7 7.3l1.8-1.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="6.2" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></a></div>
     <div id="weekTe" hidden><p class="week-groep">Te doen</p><div class="week-lijst" id="weekTeLijst"></div></div>
@@ -210,6 +226,8 @@ a.wk.thuis{background:#DCE4D2;border-color:var(--accent)}
   </section>
   <p class="note" id="laden">Laden…</p>
 </div></main>
+<script>window.BTC_START=1;</script>
+<script src="toegang.js"></script>
 <script>
 const API="https://povgjkvmzfrhhaxfanwn.supabase.co/rest/v1/rpc/", KEY="sb_publishable_LfcbY6X1DgOBFW1rH3Umnw__RdObpur";
 const $=id=>document.getElementById(id);
@@ -233,6 +251,7 @@ async function toonMenu(){
   if(m.fout){ zet("btc-club-token",null); zet("ladder_token",null); toonLogin(); return; }
   const t=terug(); if(t){ location.replace(t); return; }
   $("wieNaam").textContent=m.naam; $("wie").hidden=false;
+  toonVoorbeeld(m);
   $("lkPlanner").hidden=!(m.onderdelen&&m.onderdelen.ploegen);
   $("lkInterclub").hidden=!(m.onderdelen&&m.onderdelen.interclub);
   $("blokBeheer").hidden=!(m.onderdelen&&m.onderdelen.beheer);
@@ -242,6 +261,21 @@ async function toonMenu(){
   toonMeld().catch(()=>{});
   toonWeek(tok).catch(()=>{ $("week").hidden=true; });
 }
+// Bekijk als rol (enkel echte beheerders; de database bepaalt wat elke rol ziet en blokkeert opslaan)
+function toonVoorbeeld(m){
+  const rol=m.voorbeeld||"";
+  zet("btc-voorbeeld",rol||null);
+  if(window.BTC&&BTC.voorbeeldBalk) BTC.voorbeeldBalk(rol||null);
+  $("vbBlok").hidden=!m.kan_voorbeeld;
+  $("vbKeuze").querySelectorAll("button").forEach(b=>b.setAttribute("aria-checked",String(b.dataset.rol===rol)));
+}
+$("vbKeuze").addEventListener("click",async e=>{
+  const b=e.target.closest("button"); if(!b) return; $("vbFout").textContent="";
+  try{ const r=await rpc("club_voorbeeld",{p_token:lees("btc-club-token"),p_rol:b.dataset.rol||null});
+    if(r.fout){ $("vbFout").textContent="Lukt niet: "+r.fout+"."; return; }
+    location.reload();
+  }catch(err){ $("vbFout").textContent="Lukt niet: "+err.message+"."; }
+});
 // Mijn padel: komende 7 dagen + openstaande acties (één functie in de database)
 const SOORT={interclub:"Interclub",les:"Les",ladder:"Ladder"};
 function wkKaart(x){
@@ -370,7 +404,7 @@ $("meldTest").addEventListener("click",async()=>{
 })();
 $("afmelden").addEventListener("click",async()=>{
   const c=lees("btc-club-token"), l=lees("ladder_token");
-  zet("btc-club-token",null); zet("ladder_token",null);
+  zet("btc-club-token",null); zet("ladder_token",null); zet("btc-voorbeeld",null); if(window.BTC&&BTC.voorbeeldBalk) BTC.voorbeeldBalk(null);
   try{ await Promise.all([c&&rpc("club_logout",{p_token:c}), l&&rpc("ladder_logout",{p_token:l})]); }catch(e){}
   history.replaceState(null,"",location.pathname); toonLogin();
 });
