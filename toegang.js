@@ -162,7 +162,7 @@
   function dagenTekst(d) { return d === 7 ? "komende week" : d === 14 ? "komende 2 weken" : d === 30 ? "komende maand" : "komende " + d + " dagen"; }
   function esc(t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function link(u) { if (!u) return "#"; return /^(https?:|\/|#|\.\.\/)/.test(u) ? u : "../" + u; }
-  var SOORT = { interclub: "Interclub", les: "Les", ladder: "Ladder" };
+  var SOORT = { interclub: "Interclub", les: "Les", ladder: "Ladder", commissie: "Commissie" };
   function wk(x) {
     var dag = "", uur = "";
     if (x.wanneer) { var d = new Date(x.wanneer); dag = d.toLocaleDateString("nl-BE", { weekday: "short" }).replace(".", ""); uur = d.toLocaleDateString("nl-BE", { day: "numeric", month: "numeric" }) + " " + x.wanneer.slice(11, 16); }
