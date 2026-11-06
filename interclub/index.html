@@ -150,6 +150,46 @@ dl.sum dt{color:var(--muted)} dl.sum dd{margin:0;min-width:0;overflow-wrap:anywh
 .wed .rechts{display:flex;flex-direction:column;align-items:end;gap:4px}
 .wed .score{font:700 18px var(--display);font-variant-numeric:tabular-nums}
 .wed .score.w{color:var(--turf)} .wed .score.v{color:var(--err)}
+.week{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.week-kop{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.week-kop h2{font:700 20px var(--display);letter-spacing:.04em;text-transform:uppercase;margin:0}
+.week-kop span{font-size:13px;color:var(--muted)}
+.raster{display:grid;grid-template-columns:repeat(var(--n,3),minmax(0,1fr));gap:12px;align-items:start}
+.dag{display:flex;flex-direction:column;gap:8px;min-width:0}
+.dag-titel{font:700 14px var(--display);letter-spacing:.06em;text-transform:uppercase;padding-bottom:6px;border-bottom:2px solid var(--line)}
+.dag.vandaag .dag-titel{border-bottom-color:var(--court);color:var(--court)}
+.dag .leeg{font-size:13px;color:var(--muted);font-style:italic;margin:0}
+.kw{border:1px solid var(--line);border-left:4px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--surface);display:flex;flex-direction:column;gap:2px;min-width:0}
+.kw.thuis{border-left-color:var(--accent)}
+.kw.mijn{background:var(--court-soft);border-color:var(--court)}
+.kw.thuis.mijn{border-left-color:var(--accent)}
+.kw .r1{display:flex;align-items:center;gap:6px}
+.kw .uur{font:700 16px var(--display);font-variant-numeric:tabular-nums;flex:1}
+.kw .logo{width:18px;height:26px;object-fit:contain;background:#fff;border-radius:3px;padding:1px}
+.kw b{font-size:14px;line-height:1.3;overflow-wrap:anywhere}
+.kw .det{font-size:12px;color:var(--muted)}
+.kw button.ghost{align-self:flex-start;font-size:12px;padding:3px 8px;margin-top:4px}
+details.later>summary{cursor:pointer;list-style:none;display:inline-flex;gap:8px;align-items:baseline;font:600 14px var(--body);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 16px}
+details.later>summary::-webkit-details-marker{display:none}
+details.later>summary::before{content:"▸";transition:transform .15s}
+details.later[open]>summary::before{transform:rotate(90deg)}
+details.later>summary span{color:var(--muted);font-weight:500}
+details.later>div{display:flex;flex-direction:column;gap:14px;margin-top:14px}
+.uitslagen{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px 12px}
+.uitslagen .wed+.wed{margin-top:0}
+.meters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.meter{display:flex;flex-direction:column;align-items:center;gap:2px;border:1px solid var(--line);border-radius:10px;padding:12px 8px;text-align:center}
+.meter b{font:700 14px var(--display);letter-spacing:.06em;text-transform:uppercase}
+.meter svg{width:100%;max-width:200px;height:auto}
+.meter .pct{font:700 26px var(--display);fill:var(--ink)}
+.meter .cijfers{font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
+.meter .leg{font-size:12px;color:var(--muted)}
+.uitslagen .wed{border-left:4px solid var(--line)}
+.uitslagen .wed.thuis{background:var(--surface);border-color:var(--line);border-left-color:var(--accent)}
+.uitslagen .wed.mijn{background:var(--court-soft);border-color:var(--court)}
+.uitslagen .wed.thuis.mijn{border-left-color:var(--accent)}
+.week .geen-week{display:none;font-size:13px;color:var(--muted);font-style:italic;margin:0}
+@media (max-width:700px){.raster{grid-template-columns:1fr}.dag.geen{display:none}.meters{grid-template-columns:1fr}.week .geen-week{display:block}}
 @media (max-width:520px){.wed{grid-template-columns:3.6em 1fr}.wed .rechts{grid-column:2;align-items:start;flex-direction:row;gap:10px}}
 .bewaard{font-size:12px;color:var(--turf);min-height:1em}
 footer{font-size:13px;color:var(--muted);text-align:center}
@@ -164,6 +204,7 @@ footer{font-size:13px;color:var(--muted);text-align:center}
 <main><div class="wrap">
   <nav class="tabs" role="tablist" aria-label="Onderdelen">
     <button type="button" role="tab" id="tabKal" aria-selected="false" aria-controls="paneKal">Kalender</button>
+    <button type="button" role="tab" id="tabRes" aria-selected="false" aria-controls="paneRes">Resultaten</button>
     <button type="button" role="tab" id="tabIn" aria-selected="true" aria-controls="paneIn">Voorjaarsinterclub</button>
     <button type="button" role="tab" id="tabMijn" aria-selected="false" aria-controls="paneMijn">Mijn ploegen</button>
     <button type="button" role="tab" id="tabOv" aria-selected="false" aria-controls="paneOv" hidden>Overzicht</button>
@@ -246,9 +287,22 @@ footer{font-size:13px;color:var(--muted);text-align:center}
         <label class="chip"><input type="radio" name="kalFilter" value="alle" checked><span>Alle BTC-ploegen</span></label>
         <label class="chip"><input type="radio" name="kalFilter" value="mijn"><span>Mijn ploegen</span></label>
       </div>
-      <div class="legende"><span><i></i>Thuiswedstrijd op BTC</span><span><i class="mijn"></i>Mijn ploeg</span></div>
+      <div class="legende"><span><i class="mijn"></i>Thuiswedstrijd op BTC</span><span><i></i>Mijn ploeg</span></div>
       <div id="kalLijst" style="display:flex;flex-direction:column;gap:14px"></div>
-      <p class="hint">Komende padelinterclubwedstrijden en uitslagen van de voorbije 3 weken, automatisch bijgewerkt van Tennis en Padel Vlaanderen. Zet een wedstrijd in je agenda met "In agenda".</p>
+      <p class="hint">Komende padelinterclubwedstrijden per week (maandag tot zondag), automatisch bijgewerkt van Tennis en Padel Vlaanderen. Vrijdag, zaterdag en zondag staan er altijd; een andere dag verschijnt enkel als er dan gespeeld wordt. Zet een wedstrijd in je agenda met "In agenda".</p>
+    </div>
+  </div>
+
+  <!-- ===================== Resultaten ===================== -->
+  <div id="paneRes" role="tabpanel" aria-labelledby="tabRes" hidden>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="chips" role="group" aria-label="Filter">
+        <label class="chip"><input type="radio" name="resFilter" value="alle" checked><span>Alle BTC-ploegen</span></label>
+        <label class="chip"><input type="radio" name="resFilter" value="mijn"><span>Mijn ploegen</span></label>
+      </div>
+      <div class="legende"><span><i class="mijn"></i>Thuiswedstrijd op BTC</span><span><i></i>Mijn ploeg</span></div>
+      <div id="resLijst" style="display:flex;flex-direction:column;gap:14px"></div>
+      <p class="hint">Uitslagen van de laatste week waarin gespeeld werd, en de totalen van de lopende interclubperiode. Bron: Tennis en Padel Vlaanderen.</p>
     </div>
   </div>
 
@@ -306,6 +360,9 @@ footer{font-size:13px;color:var(--muted);text-align:center}
   }
   const euro = n => new Intl.NumberFormat("nl-BE",{style:"currency",currency:"EUR"}).format(n);
   const datum = d => new Date(String(d).slice(0,10)+"T12:00:00").toLocaleDateString("nl-BE",{day:"numeric",month:"long",year:"numeric"});
+  // "PADEL GEMENGD - 2 ploeg B" -> "Gemengd 2B" (zelfde regel als club.ploeg_kort in de database)
+  const ploegKort = p => { const m = /^PADEL\s+(.+?)\s+-\s+(\d+)\s+ploeg\s+(\S+)$/i.exec(p || "");
+    return m ? m[1].toLowerCase().replace(/(^|\s)\S/g, c => c.toUpperCase()) + " " + m[2] + m[3] : (p || ""); };
   const reeksNaam = r => r.afdeling == null ? "" : /^\d{2,}$/.test(r.afdeling) ? "P" + r.afdeling : "Reeks " + r.afdeling;
   const veiligeLink = u => /^https:\/\//i.test(String(u||"")) ? u : null;
   const catKey = r => r.competitie + "|" + r.categorie;
@@ -313,14 +370,15 @@ footer{font-size:13px;color:var(--muted);text-align:center}
   const huidigeReeks = () => { const r = document.querySelector("input[name=reeks]:checked"); return r ? r.value : null; };
 
   /* ---------- Tabs ---------- */
-  const TABS = [["tabKal","paneKal"],["tabIn","paneIn"],["tabMijn","paneMijn"],["tabOv","paneOv"]];
+  const TABS = [["tabKal","paneKal"],["tabRes","paneRes"],["tabIn","paneIn"],["tabMijn","paneMijn"],["tabOv","paneOv"]];
   function toonTab(id){
     TABS.forEach(([t,p]) => { $(t).setAttribute("aria-selected", String(t===id)); $(p).hidden = t!==id; });
-    const naam = {tabKal:"#kalender", tabIn:"#inschrijven", tabMijn:"#mijn", tabOv:"#overzicht"}[id];
+    const naam = {tabKal:"#kalender", tabRes:"#resultaten", tabIn:"#inschrijven", tabMijn:"#mijn", tabOv:"#overzicht"}[id];
     history.replaceState(null, "", location.pathname + naam);
     if(id==="tabMijn") toonMijn();
     if(id==="tabOv") laadOverzicht();
     if(id==="tabKal") laadKalender();
+    if(id==="tabRes") laadResultaten();
   }
   TABS.forEach(([t]) => $(t).addEventListener("click", () => toonTab(t)));
 
@@ -626,7 +684,7 @@ footer{font-size:13px;color:var(--muted);text-align:center}
     const p = n => String(n).padStart(2,"0");
     const e = eind.getFullYear()+p(eind.getMonth()+1)+p(eind.getDate())+"T"+p(eind.getHours())+p(eind.getMinutes())+"00";
     const tekst = s => String(s||"").replace(/[\\,;]/g, c => "\\" + c);
-    const titel = "Interclub " + w.ploeg + (w.thuis_uit==="thuis" ? " – " : " @ ") + w.tegenstander;
+    const titel = "Interclub " + ploegKort(w.ploeg) + (w.thuis_uit==="thuis" ? " – " : " @ ") + w.tegenstander;
     const inhoud = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//BTC Padel//Interclub//NL","BEGIN:VEVENT",
       "UID:btc-ic-" + w.match_id + "-" + w.ploeg_id + "@btc-padel","DTSTAMP:" + new Date().toISOString().replace(/[-:]/g,"").slice(0,15) + "Z",
       "DTSTART:" + t, "DTEND:" + e, "SUMMARY:" + tekst(titel),
@@ -643,37 +701,125 @@ footer{font-size:13px;color:var(--muted);text-align:center}
     }
     toonKalender();
   }
+  const isoDag = d => { const p = n => String(n).padStart(2,"0"); return d.getFullYear() + "-" + p(d.getMonth()+1) + "-" + p(d.getDate()); };
+  const plusDagen = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+  const maandag = d => { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); return plusDagen(x, -((x.getDay() + 6) % 7)); };
+  const kortDag = d => d.toLocaleDateString("nl-BE",{weekday:"short"}).replace(".","") + " " + d.getDate() + "/" + (d.getMonth()+1);
+  const langDag = d => d.toLocaleDateString("nl-BE",{weekday:"short",day:"numeric",month:"long"}).replace(".","");
+  const thuisLogo = (w, kl) => w.thuis_uit==="thuis" ? el("img",{class:kl,src:"../app/logo-btc.jpg",alt:"Thuis op BTC Wemmel",width:"18",height:"26"}) : null;
+  const titelVan = w => ploegKort(w.ploeg) + (w.thuis_uit==="thuis" ? " – " : " @ ") + w.tegenstander;
+
+  // Eén weekraster: vr, za en zo altijd; een andere dag enkel als er die dag gespeeld wordt.
+  function weekRaster(titel, ma, items){
+    const vandaag = isoDag(new Date());
+    const perDag = {};
+    items.forEach(w => (perDag[String(w.datum).slice(0,10)] ||= []).push(w));
+    const dagen = [];
+    for(let i = 0; i < 7; i++){ const d = plusDagen(ma, i), k = isoDag(d); if(i >= 4 || perDag[k]) dagen.push([d, k]); }
+    const raster = el("div",{class:"raster",style:"--n:" + dagen.length});
+    dagen.forEach(([d, k]) => {
+      const lijst = (perDag[k] || []).sort((x, y) => String(x.datum).localeCompare(String(y.datum)) || x.ploeg.localeCompare(y.ploeg));
+      const kol = el("div",{class:"dag" + (k===vandaag ? " vandaag" : "") + (lijst.length ? "" : " geen")},
+        el("div",{class:"dag-titel",text:(k===vandaag ? "Vandaag · " : "") + kortDag(d)}));
+      if(!lijst.length) kol.appendChild(el("p",{class:"leeg",text:"Geen wedstrijden"}));
+      lijst.forEach(w => {
+        const b = el("button",{type:"button",class:"ghost",text:"In agenda"}); b.addEventListener("click", () => ics(w));
+        kol.appendChild(el("div",{class:"kw" + (w.mijn ? " mijn" : "") + (w.thuis_uit==="thuis" ? " thuis" : "")},
+          el("div",{class:"r1"}, el("span",{class:"uur",text:uurFmt(w.datum)}), thuisLogo(w, "logo")),
+          el("b",{text:titelVan(w)}),
+          el("span",{class:"det",text:[w.thuis_uit==="thuis" ? null : "Uit", w.ronde, w.kapitein ? "kapitein " + w.kapitein : null].filter(Boolean).join(" · ")}),
+          b));
+      });
+      raster.appendChild(kol);
+    });
+    return el("section",{class:"week"},
+      el("div",{class:"week-kop"}, el("h2",{text:titel}), el("span",{text:langDag(ma) + " – " + langDag(plusDagen(ma, 6))})),
+      items.length ? null : el("p",{class:"geen-week",text:"Geen wedstrijden deze week."}),
+      raster);
+  }
   function toonKalender(){
     const box = $("kalLijst"); box.textContent = "";
     const enkelMijn = document.querySelector("input[name=kalFilter]:checked").value==="mijn";
-    const lijst = kal.wedstrijden.filter(w => !enkelMijn || w.mijn);
-    const komend = lijst.filter(w => !w.gespeeld), gespeeld = lijst.filter(w => w.gespeeld).reverse();
-    if(!lijst.length){ box.appendChild(el("p",{class:"notice",text:enkelMijn ? "Geen wedstrijden van jouw ploegen in deze periode. Je ploeg verschijnt hier zodra je in de interclub gespeeld hebt of kapitein bent." : "Geen padelinterclubwedstrijden gepland. De kalender verschijnt zodra Tennis en Padel Vlaanderen de reeksen publiceert."})); return; }
-    function blok(titel, items, metScore){
-      if(!items.length) return;
-      box.appendChild(el("h2",{class:"dag-kop",text:titel}));
-      let dag = null, groep = null;
-      items.forEach(w => {
-        const d = String(w.datum).slice(0,10);
-        if(d!==dag){ dag = d; groep = el("div",{}); groep.appendChild(el("p",{class:"hint",style:"font-weight:600;margin:4px 0 6px",text:dagFmt(w.datum)})); box.appendChild(groep); }
-        const rechts = el("div",{class:"rechts"});
-        if(metScore && w.matchen_voor != null){
-          const k = w.matchen_voor > w.matchen_tegen ? "w" : w.matchen_voor < w.matchen_tegen ? "v" : "";
-          rechts.appendChild(el("span",{class:"score " + k,text:w.matchen_voor + "–" + w.matchen_tegen}));
-        } else if(!metScore){
-          const b = el("button",{type:"button",class:"ghost",text:"In agenda"}); b.addEventListener("click", () => ics(w)); rechts.appendChild(b);
-        }
-        const thuis = w.thuis_uit==="thuis";
-        groep.appendChild(el("div",{class:"wed" + (w.mijn ? " mijn" : "") + (thuis ? " thuis" : "")},
-          el("span",{class:"uur",text:uurFmt(w.datum)}),
-          el("div",{class:"ploegen"}, el("b",{}, thuis ? el("img",{class:"logo",src:"../app/logo-btc.jpg",alt:"Thuis op BTC Wemmel",width:"22",height:"32"}) : null, w.ploeg + (thuis ? " – " : " @ ") + w.tegenstander),
-            el("span",{text:[w.thuis_uit==="thuis" ? "Thuis" : "Uit", w.afdeling, w.ronde, w.kapitein ? "kapitein " + w.kapitein : null].filter(Boolean).join(" · ")})),
-          rechts));
-      });
+    const komend = kal.wedstrijden.filter(w => !w.gespeeld && (!enkelMijn || w.mijn));
+    const ma0 = maandag(new Date()), ma1 = plusDagen(ma0, 7), ma2 = plusDagen(ma0, 14);
+    const inWeek = (ma, w) => { const k = String(w.datum).slice(0,10); return k >= isoDag(ma) && k < isoDag(plusDagen(ma, 7)); };
+    box.appendChild(weekRaster("Deze week", ma0, komend.filter(w => inWeek(ma0, w))));
+    box.appendChild(weekRaster("Volgende week", ma1, komend.filter(w => inWeek(ma1, w))));
+    const later = komend.filter(w => String(w.datum).slice(0,10) >= isoDag(ma2));
+    if(later.length){
+      const det = el("details",{class:"later"},
+        el("summary",{}, "Later ", el("span",{text:later.length + (later.length===1 ? " wedstrijd" : " wedstrijden") + " vanaf " + kortDag(new Date(String(later[0].datum).slice(0,10) + "T12:00"))})));
+      const binnen = el("div",{});
+      const weken = [...new Set(later.map(w => isoDag(maandag(new Date(String(w.datum).slice(0,10) + "T12:00")))))].sort();
+      weken.forEach(k => { const ma = new Date(k + "T00:00"); binnen.appendChild(weekRaster("Week van " + kortDag(ma), ma, later.filter(w => inWeek(ma, w)))); });
+      det.appendChild(binnen); box.appendChild(det);
+    } else if(!komend.length){
+      box.appendChild(el("p",{class:"notice",text:enkelMijn ? "Geen komende wedstrijden van jouw ploegen. Je ploeg verschijnt hier zodra je in de interclub gespeeld hebt of kapitein bent." : "Geen padelinterclubwedstrijden gepland. De kalender verschijnt zodra Tennis en Padel Vlaanderen de reeksen publiceert."}));
     }
-    blok("Komende wedstrijden", komend, false);
-    blok("Uitslagen", gespeeld, true);
   }
+
+  /* ---------- Resultaten ---------- */
+  let res = null;
+  async function laadResultaten(){
+    const box = $("resLijst");
+    if(!res){ box.textContent = ""; box.appendChild(el("p",{class:"notice",text:"Laden…"}));
+      try{ res = await rpc("club_ic_resultaten", {p_token:TOKEN}); if(res.fout) throw new Error(res.fout); }
+      catch(e){ res = null; if(e.message!=="niet aangemeld"){ box.textContent = ""; box.appendChild(el("p",{class:"notice","data-kind":"err",text:"Laden lukte niet: " + e.message})); } return; }
+    }
+    toonResultaten();
+  }
+  const SVGNS = "http://www.w3.org/2000/svg";
+  function svgEl(tag, attrs){ const n = document.createElementNS(SVGNS, tag); for(const k in attrs) n.setAttribute(k, attrs[k]); return n; }
+  // Halve-cirkelmeter: delen = [[aantal, kleur], ...]; het percentage is het aandeel van het eerste deel.
+  function meter(titel, delen, cijfers, legende){
+    const L = Math.PI * 70, tot = delen.reduce((a, d) => a + d[0], 0);
+    const boog = "M 10 82 A 70 70 0 0 1 150 82";
+    const svg = svgEl("svg",{viewBox:"0 0 160 92",role:"img","aria-label":titel + ": " + cijfers});
+    svg.appendChild(svgEl("path",{d:boog,fill:"none",stroke:"var(--line)","stroke-width":"16"}));
+    let start = 0;
+    if(tot) delen.forEach(([n, kl]) => { const len = L * n / tot; if(len > 0) svg.appendChild(svgEl("path",{d:boog,fill:"none",stroke:kl,"stroke-width":"16","stroke-dasharray":len.toFixed(2) + " 999","stroke-dashoffset":(-start).toFixed(2)})); start += len; });
+    const t = svgEl("text",{x:"80",y:"74","text-anchor":"middle",class:"pct"}); t.textContent = tot ? Math.round(100 * delen[0][0] / tot) + "%" : "–"; svg.appendChild(t);
+    return el("div",{class:"meter"}, el("b",{text:titel}), svg, el("span",{class:"cijfers",text:cijfers}), el("span",{class:"leg",text:legende}));
+  }
+  function meters(titel, sub, lijst){
+    const som = k => lijst.reduce((a, w) => a + (Number(w[k]) || 0), 0);
+    const W = lijst.filter(w => w.matchen_voor > w.matchen_tegen).length, V = lijst.filter(w => w.matchen_voor < w.matchen_tegen).length, G = lijst.length - W - V;
+    const groen = "var(--turf)", rood = "var(--err)", beige = "#C9B98A";
+    const twee = (t, a, b, woord) => meter(t, [[a, groen], [b, rood]], a.toLocaleString("nl-BE") + " – " + b.toLocaleString("nl-BE"), woord + " gewonnen – verloren");
+    return el("section",{class:"week"},
+      el("div",{class:"week-kop"}, el("h2",{text:titel}), el("span",{text:sub})),
+      el("div",{class:"meters"},
+        meter("Ontmoetingen", [[W, groen], [G, beige], [V, rood]], W + " W · " + G + " G · " + V + " V", "winst · gelijk · verlies"),
+        twee("Sets", som("sets_voor"), som("sets_tegen"), "sets"),
+        twee("Games", som("games_voor"), som("games_tegen"), "games")));
+  }
+  function toonResultaten(){
+    const box = $("resLijst"); box.textContent = "";
+    const enkelMijn = document.querySelector("input[name=resFilter]:checked").value==="mijn";
+    const alle = res.wedstrijden.filter(w => !enkelMijn || w.mijn);
+    if(!alle.length){ box.appendChild(el("p",{class:"notice",text:enkelMijn ? "Nog geen uitslagen van jouw ploegen in deze interclubperiode." : "Nog geen uitslagen in deze interclubperiode."})); return; }
+    const dagVan = w => new Date(String(w.datum).slice(0,10) + "T12:00");
+    const ma = maandag(dagVan(alle[0])), van = isoDag(ma), tot = isoDag(plusDagen(ma, 7));
+    const week = alle.filter(w => { const k = String(w.datum).slice(0,10); return k >= van && k < tot; })
+                     .sort((x, y) => String(x.datum).localeCompare(String(y.datum)) || x.ploeg.localeCompare(y.ploeg));
+    const eerste = dagVan(week[0]), laatste = dagVan(week[week.length - 1]);
+    const lijst = el("div",{class:"uitslagen"});
+    week.forEach(w => {
+      const k = w.matchen_voor > w.matchen_tegen ? "w" : w.matchen_voor < w.matchen_tegen ? "v" : "";
+      lijst.appendChild(el("div",{class:"wed" + (w.mijn ? " mijn" : "") + (w.thuis_uit==="thuis" ? " thuis" : "")},
+        el("span",{class:"uur",style:"font-size:14px",text:kortDag(dagVan(w))}),
+        el("div",{class:"ploegen"}, el("b",{}, thuisLogo(w, "logo"), titelVan(w)), el("span",{text:[w.thuis_uit==="thuis" ? null : "Uit", w.ronde].filter(Boolean).join(" · ")})),
+        el("div",{class:"rechts"}, el("span",{class:"score " + k,text:w.matchen_voor + "–" + w.matchen_tegen}))));
+    });
+    const periode = eerste.getTime()===laatste.getTime() ? langDag(eerste) : langDag(eerste) + " – " + langDag(laatste);
+    box.appendChild(el("section",{class:"week"},
+      el("div",{class:"week-kop"}, el("h2",{text:"Laatste speelweek"}), el("span",{text:periode + " · " + week.length + (week.length===1 ? " ontmoeting" : " ontmoetingen")})),
+      lijst));
+    const wie = enkelMijn ? "Mijn ploegen" : "BTC";
+    box.appendChild(meters(wie + " die week", enkelMijn ? "jouw ploegen samen" : "alle BTC-ploegen samen", week));
+    box.appendChild(meters(wie + " dit seizoen", (res.periode || "lopende periode") + " · " + alle.length + " ontmoetingen", alle));
+  }
+  document.querySelectorAll("input[name=resFilter]").forEach(i => i.addEventListener("change", () => res && toonResultaten()));
   document.querySelectorAll("input[name=kalFilter]").forEach(i => i.addEventListener("change", () => kal && toonKalender()));
 
   /* ---------- Overzicht (commissie en bestuur) ---------- */
@@ -793,7 +939,7 @@ footer{font-size:13px;color:var(--muted);text-align:center}
         toonPeriode(periodes[0]); bouwVelden(); vulContact();
       }
       const h = location.hash;
-      toonTab(h==="#mijn" ? "tabMijn" : (h==="#overzicht" && data.beheer) ? "tabOv" : h==="#kalender" ? "tabKal"
+      toonTab(h==="#mijn" ? "tabMijn" : (h==="#overzicht" && data.beheer) ? "tabOv" : h==="#kalender" ? "tabKal" : h==="#resultaten" ? "tabRes"
             : h==="#inschrijven" ? "tabIn" : periodes.length ? "tabIn" : "tabKal");
     }catch(err){
       if(err.message==="niet aangemeld") return;
