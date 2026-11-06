@@ -167,7 +167,7 @@
     var dag = "", uur = "";
     if (x.wanneer) { var d = new Date(x.wanneer); dag = d.toLocaleDateString("nl-BE", { weekday: "short" }).replace(".", ""); uur = d.toLocaleDateString("nl-BE", { day: "numeric", month: "numeric" }) + " " + x.wanneer.slice(11, 16); }
     return '<a class="btc-wk' + (x.thuis ? " thuis" : "") + '" href="' + esc(link(x.url)) + '"><div class="btc-dag"><b>' + esc(dag || "—") + "</b><span>" + esc(uur) + "</span></div>" +
-      '<div class="btc-soort">' + esc(SOORT[x.soort] || x.soort) + '</div><div class="btc-tt">' + esc(x.titel) + "</div>" +
+      '<div class="btc-soort">' + esc(SOORT[x.soort] || x.soort) + '</div><div class="btc-tt">' + (x.thuis ? '<img src="../app/logo-btc.jpg" alt="Thuis op BTC">' : "") + esc(x.titel) + "</div>" +
       (x.detail ? '<div class="btc-dt">' + esc(x.detail) + "</div>" : "") + (x.actie ? '<span class="btc-actie">' + esc(x.actie) + "</span>" : "") + "</a>";
   }
   function laadWeek() {
@@ -208,7 +208,7 @@
       ".btc-dag{grid-row:1/span 3;text-align:center;line-height:1.1}.btc-dag b{display:block;font:800 13px 'League Spartan','Arial Narrow',Arial,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--btc-groen)}" +
       ".btc-dag span{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}" +
       ".btc-soort{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}" +
-      ".btc-tt{font-weight:600;font-size:15px;line-height:1.3}.btc-dt{font-size:13px;color:var(--muted)}" +
+      ".btc-tt{font-weight:600;font-size:15px;line-height:1.3}.btc-tt img{width:16px;height:23px;object-fit:contain;background:#fff;border-radius:3px;padding:1px;vertical-align:-5px;margin-right:6px}.btc-dt{font-size:13px;color:var(--muted)}" +
       ".btc-actie{grid-column:2;justify-self:start;margin-top:4px;font:700 13px 'League Spartan','Arial Narrow',Arial,sans-serif;letter-spacing:.06em;text-transform:uppercase;background:var(--btc-groen);color:var(--btc-op-groen);border-radius:6px;padding:5px 10px}" +
       "@media (prefers-reduced-motion:reduce){.btc-knop svg{transition:none}}";
     var st = document.createElement("style"); st.textContent = css; document.head.appendChild(st);
