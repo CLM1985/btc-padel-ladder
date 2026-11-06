@@ -65,7 +65,7 @@ a{color:var(--title2)}
   body.aangemeld .kol-rboven .weergave{margin:0}
   body.aangemeld .kol-rboven>section:not([hidden]):last-of-type{flex:1 1 auto}
   body.aangemeld .kol-rboven:has(#app[hidden]) #instellingen{flex:1 1 auto}
-  body.aangemeld #app{align-content:start}
+  body.aangemeld #app,body.aangemeld #instellingen{align-content:start}
   body.aangemeld .kol-ronder{grid-column:3;grid-row:2;align-self:start;display:flex;flex-direction:column;gap:16px;min-width:0}
   body.aangemeld .beheer{display:grid;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
   body.aangemeld .beheer h2{margin:0;color:var(--fg);font-size:16px;letter-spacing:.04em;text-transform:none}
@@ -78,9 +78,11 @@ a{color:var(--title2)}
   body.aangemeld .kl-knop:hover{color:var(--fg);background:var(--band)}
   body.aangemeld .kl-knop:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
   body.aangemeld .kl-knop svg{width:16px;height:16px;transition:transform .15s}
-  body.aangemeld [data-kl].dicht .kl-knop svg{transform:rotate(-90deg)}
+  body.aangemeld [data-kl].dicht>.kl-kop>.kl-knop svg{transform:rotate(-90deg)}
   body.aangemeld [data-kl].dicht>:not(.kl-kop){display:none!important}
   body.aangemeld [data-kl].dicht{flex:0 0 auto!important}
+  body.aangemeld [data-kl].dicht>.kl-kop .inst-uitleg{display:none}
+  body.aangemeld .inst-deel>.kl-kop{cursor:pointer}
 }
 @media (min-width:1024px) and (prefers-reduced-motion:reduce){ .kl-knop svg{transition:none} }
 header .wrap > div:nth-child(2){flex:1;min-width:0}
@@ -219,8 +221,8 @@ a.wk.thuis{background:#DCE4D2;border-color:var(--accent)}
   <div class="kol kol-rboven">
   <section class="weergave" id="instellingen" aria-labelledby="instTitel" data-kl="instellingen">
     <h2 id="instTitel" class="wg-kop kl-kop"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.8v2.6M12 18.6v2.6M2.8 12h2.6M18.6 12h2.6M5.5 5.5l1.8 1.8M16.7 16.7l1.8 1.8M5.5 18.5l1.8-1.8M16.7 7.3l1.8-1.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="6.2" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>Instellingen</h2>
-    <div class="inst-deel" id="instDagen" hidden>
-      <p class="inst-titel" id="dagenTitel">Overzicht Mijn padel</p>
+    <div class="inst-deel" id="instDagen" hidden data-kl="inst-dagen">
+      <p class="inst-titel kl-kop" id="dagenTitel">Overzicht Mijn padel</p>
       <p class="inst-uitleg">Hoeveel dagen vooruit wil je zien?</p>
       <div class="chips-d" role="radiogroup" aria-labelledby="dagenTitel" id="dagen">
         <button type="button" class="kies-d" data-dagen="3" role="radio">3 dagen</button>
@@ -229,8 +231,8 @@ a.wk.thuis{background:#DCE4D2;border-color:var(--accent)}
         <button type="button" class="kies-d" data-dagen="30" role="radio">1 maand</button>
       </div>
     </div>
-    <div class="inst-deel" id="agenda" hidden>
-      <p class="inst-titel">Agenda koppelen</p>
+    <div class="inst-deel" id="agenda" hidden data-kl="inst-agenda">
+      <p class="inst-titel kl-kop">Agenda koppelen</p>
       <p class="inst-uitleg">Zet je interclub, lessen en ladderwedstrijden automatisch in je eigen agenda (Apple, Google, Outlook). Wijzigingen in de app komen vanzelf mee; Google ververst enkele keren per dag.</p>
       <div class="knoppen" id="agendaUit"><button class="doe" type="button" id="agendaMaak">Agenda koppelen</button></div>
       <div id="agendaAan" hidden style="display:grid;gap:8px">
@@ -245,8 +247,8 @@ a.wk.thuis{background:#DCE4D2;border-color:var(--accent)}
       </div>
       <p class="err" id="agendaFout" role="alert"></p>
     </div>
-    <div class="inst-deel" id="meld" hidden aria-labelledby="meldTitel">
-    <div><p class="inst-titel" id="meldTitel">Meldingen op dit toestel</p><p class="inst-uitleg" id="meldUitleg">Krijg een melding als er iets voor jou gebeurt: een les ingepland of bevestigd, een plaats vrijgekomen, een tegenstander die een datum voorstelt of een uitslag invoert.</p></div>
+    <div class="inst-deel" id="meld" hidden aria-labelledby="meldTitel" data-kl="inst-meld">
+    <div class="kl-kop"><p class="inst-titel" id="meldTitel">Meldingen op dit toestel</p><p class="inst-uitleg" id="meldUitleg">Krijg een melding als er iets voor jou gebeurt: een les ingepland of bevestigd, een plaats vrijgekomen, een tegenstander die een datum voorstelt of een uitslag invoert.</p></div>
     <p id="meldStatus" style="font-weight:600;color:var(--fg)"></p>
     <div class="knoppen"><button class="doe" type="button" id="meldAan" hidden>Meldingen aanzetten</button><button class="later" type="button" id="meldTest" hidden>Stuur een testmelding</button><button class="later" type="button" id="meldUit" hidden>Meldingen uitzetten</button></div>
     <p class="err" id="meldFout" role="alert"></p>
@@ -328,16 +330,18 @@ async function toonMenu(){
 }
 // Inklapbare kaarten op pc (Mijn padel, Clubkalender, Instellingen, app, Beheer, Bekijk als). Toestand per toestel.
 (function(){
-  const STANDAARD_DICHT=["beheer","voorbeeld"];
-  let dicht; try{ dicht=JSON.parse(localStorage.getItem("btc-dicht")||"null"); }catch(e){ dicht=null; }
-  if(!Array.isArray(dicht)) dicht=STANDAARD_DICHT.slice();
+  // Standaard dicht: Beheer, Bekijk als en de drie onderdelen binnen Instellingen. Daarna onthoudt elk toestel de keuze per kaart.
+  const STANDAARD_DICHT=["beheer","voorbeeld","inst-dagen","inst-agenda","inst-meld"];
+  let staat={}; try{ staat=JSON.parse(localStorage.getItem("btc-kl")||"null")||{}; }catch(e){ staat={}; }
+  try{ const oud=JSON.parse(localStorage.getItem("btc-dicht")||"null"); if(Array.isArray(oud)&&!Object.keys(staat).length) ["week","kalender","instellingen","app","beheer","voorbeeld"].forEach(x=>staat[x]=oud.includes(x)); }catch(e){}
+  const isDicht=id=>(id in staat)?!!staat[id]:STANDAARD_DICHT.includes(id);
   const pijl='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>';
   document.querySelectorAll("[data-kl]").forEach(k=>{
     const id=k.dataset.kl, kop=k.querySelector(":scope>.kl-kop"); if(!kop) return;
     const titel=(k.querySelector("h2,.inst-titel,b")||kop).textContent.trim();
     const b=document.createElement("button"); b.type="button"; b.className="kl-knop"; b.innerHTML=pijl;
-    const zetStaat=()=>{ const d=dicht.includes(id); k.classList.toggle("dicht",d); b.setAttribute("aria-expanded",String(!d)); b.setAttribute("aria-label",(d?"Openklappen: ":"Dichtklappen: ")+titel); };
-    b.addEventListener("click",()=>{ dicht=dicht.includes(id)?dicht.filter(x=>x!==id):dicht.concat(id); try{localStorage.setItem("btc-dicht",JSON.stringify(dicht));}catch(e){} zetStaat(); });
+    const zetStaat=()=>{ const d=isDicht(id); k.classList.toggle("dicht",d); b.setAttribute("aria-expanded",String(!d)); b.setAttribute("aria-label",(d?"Openklappen: ":"Dichtklappen: ")+titel); };
+    b.addEventListener("click",e=>{ e.stopPropagation(); staat[id]=!isDicht(id); try{localStorage.setItem("btc-kl",JSON.stringify(staat));}catch(e){} zetStaat(); });
     kop.appendChild(b); zetStaat();
   });
 })();
