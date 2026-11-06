@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<script src="../thema.js"></script>
+<script src="../toegang.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#152B46">
+<link rel="icon" type="image/png" sizes="48x48" href="../app/favicon-48.png">
+<link rel="apple-touch-icon" href="../app/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="BTC Padel">
+<script>if("serviceWorker" in navigator)addEventListener("load",function(){navigator.serviceWorker.register("../sw.js",{scope:"../"}).catch(function(){})});</script>
+<meta name="robots" content="noindex">
+<title>BTC Padelcommissie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@500;600;700&family=Montserrat:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --bg:#F3F1E9; --surface:#FFFFFF; --sunk:#FAF9F4; --ink:#152B46; --muted:#5A6676; --line:#E2DED2;
+  --accent:#435B28; --accent-soft:#DCE4D2; --brand:#435B28; --lime:#C5E75A; --on-lime:#152B46;
+  --band:#152B46; --on-band:#FFFFFF; --on-band-muted:#C9D3DE;
+  --ok:#435B28; --ok-soft:#DCE4D2; --warn:#9A6410; --warn-soft:#F4E8CF; --bad:#A5432A; --bad-soft:#F3DED6;
+  --dame:#B65A3A; --heer:#152B46; --info-soft:#DFE7EE;
+  --f-display:"League Spartan","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Montserrat",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"Montserrat",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0E1A2A; --surface:#15263B; --sunk:#112033; --ink:#F3F1E9; --muted:#A3B1C1; --line:#2A3D55;
+  --accent:#C5E75A; --accent-soft:#2A3A22; --brand:#B5D677; --lime:#C5E75A; --on-lime:#152B46;
+  --band:#152B46; --on-band:#F3F1E9; --on-band-muted:#A9B7C6;
+  --ok:#B5D677; --ok-soft:#26341F; --warn:#E4B45A; --warn-soft:#3A2F1A; --bad:#E58B6C; --bad-soft:#3D2620;
+  --dame:#E39A7C; --heer:#A9C3E0; --info-soft:#1E3149; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1A2A; --surface:#15263B; --sunk:#112033; --ink:#F3F1E9; --muted:#A3B1C1; --line:#2A3D55;
+  --accent:#C5E75A; --accent-soft:#2A3A22; --brand:#B5D677; --lime:#C5E75A; --on-lime:#152B46;
+  --band:#152B46; --on-band:#F3F1E9; --on-band-muted:#A9B7C6;
+  --ok:#B5D677; --ok-soft:#26341F; --warn:#E4B45A; --warn-soft:#3A2F1A; --bad:#E58B6C; --bad-soft:#3D2620;
+  --dame:#E39A7C; --heer:#A9C3E0; --info-soft:#1E3149; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14.5px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+.wrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{font-family:var(--f-display);font-weight:700;letter-spacing:0;margin:0;text-wrap:balance}
+h1{font-size:clamp(1.55rem,6vw,2.1rem);line-height:1;overflow-wrap:anywhere}
+h2{font-size:1.35rem}
+h3{font-size:1.1rem;font-weight:600}
+.lbl{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.muted{color:var(--muted)}
+button,select,input,textarea{font:inherit;color:inherit}
+select,input[type=text],input[type=date],textarea{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 8px;min-width:0}
+textarea{width:100%;font-family:var(--f-mono);font-size:.8rem}
+button{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:6px 12px;cursor:pointer;font-weight:600}
+button:hover:not(:disabled){border-color:var(--accent)}
+button:disabled{opacity:.5;cursor:not-allowed}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+button.primary:hover:not(:disabled){border-color:var(--lime);box-shadow:inset 0 -3px 0 var(--lime)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+header.top{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;justify-content:space-between;
+  background:var(--band);color:var(--on-band);border-radius:12px;padding:16px 20px;border-bottom:4px solid var(--lime);
+  --ink:var(--on-band); --muted:var(--on-band-muted)}
+.merk{display:flex;align-items:center;gap:14px;min-width:0}
+.merk > div{min-width:0}
+.logo{width:40px;height:58px;flex:none;background:var(--lime);
+  -webkit-mask:url(data:image/png;base64,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) center/contain no-repeat;mask:url(data:image/png;base64,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) center/contain no-repeat}
+.eyebrow{font-family:var(--f-display);font-weight:600;font-size:.78rem;letter-spacing:.42em;text-transform:uppercase;color:var(--lime)}
+header.top button{background:var(--lime);border-color:var(--lime);color:var(--on-lime)}
+header.top .toast{color:var(--on-band)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.tab{border:0;border-bottom:3px solid transparent;border-radius:0;background:none;padding:8px 12px;font-family:var(--f-display);font-size:1.05rem;font-weight:600}
+.tab[aria-selected=true]{border-bottom-color:var(--lime);color:var(--ink);font-weight:700}
+.tab .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:6px;vertical-align:middle}
+h1::after{content:"";display:block;width:28px;height:3px;background:var(--lime);border-radius:2px;margin-top:8px}
+.wie{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--on-band)}
+.wie a{color:var(--lime)}
+</style>
+<style>
+/* Padelcommissie */
+body{margin:0}
+header.top .wie button{background:none;border:0;padding:0;color:var(--on-band);text-decoration:underline;font-weight:600;box-shadow:none}
+.melding{margin:0;font-size:.88rem}.melding:empty{display:none}
+.melding.fout{color:var(--bad)}.melding.ok{color:var(--ok)}
+.lijn{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.leeg{padding:18px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:8px}
+.pill{display:inline-block;border-radius:999px;padding:2px 9px;font-size:.76rem;font-weight:700;background:var(--info-soft);color:var(--ink);white-space:nowrap}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}.pill.warn{background:var(--warn-soft);color:var(--warn)}.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.k-beslissing{--c:var(--accent);--cb:var(--accent-soft)}
+.k-info,.k-afspraak{--c:#5E7286;--cb:var(--info-soft)}
+.k-rvb{--c:var(--warn);--cb:var(--warn-soft)}
+.cgrid{display:grid;grid-template-columns:260px minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:820px){.cgrid{grid-template-columns:minmax(0,1fr)}}
+.verglijst{display:flex;flex-direction:column;gap:8px}
+.verg{text-align:left;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--surface);display:flex;flex-direction:column;gap:2px;font-weight:400}
+.verg[aria-pressed=true]{border:2px solid var(--accent);padding:7px 9px;background:var(--ok-soft)}
+.verg .r{display:flex;justify-content:space-between;gap:6px;align-items:center}
+.verg small{color:var(--muted)}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:560px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--sunk)}
+.kpi b{display:block;font-family:var(--f-display);font-size:1.4rem;line-height:1.1}
+.kpi span{font-size:.78rem;color:var(--muted)}
+.balk{display:flex;height:10px;border-radius:999px;overflow:hidden;border:1px solid var(--line)}
+.balk span{display:block;background:var(--c);border-right:2px solid var(--surface)}
+.balk span:last-child{border-right:0}
+.punt{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--c);border-radius:12px}
+.punt>summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:4px 10px;align-items:baseline;padding:12px 14px}
+.punt>summary::-webkit-details-marker{display:none}
+.punt .nr{font-family:var(--f-display);font-weight:700;font-size:1.6rem;line-height:1;color:var(--c)}
+.punt .titel{font-family:var(--f-display);font-weight:700;font-size:1.15rem}
+.punt .meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.punt .soort{font-size:.74rem;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--cb);color:var(--c)}
+.punt .tag{font-size:.74rem;border:1px solid var(--line);border-radius:4px;padding:0 6px}
+.punt .klok{font-size:.78rem;color:var(--muted);white-space:nowrap}
+.punt .body{padding:0 14px 14px 54px;display:flex;flex-direction:column;gap:8px}
+@media (max-width:560px){.punt .body{padding-left:14px}.punt>summary{grid-template-columns:26px minmax(0,1fr)}.punt .klok{grid-column:2}}
+.blok{border-radius:8px;padding:8px 10px;font-size:.9rem}
+.blok .lbl{display:block;margin-bottom:2px}
+.blok ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:3px}
+.blok.voor{background:var(--sunk);border:1px solid var(--line)}
+.blok.dec{background:var(--warn-soft)}
+.blok.besl{background:var(--ok-soft)}
+.blok.besl .lbl{color:var(--ok)}
+.blok.vraag{border-left:3px solid #7446B0;background:#EFE8F8;border-radius:0 8px 8px 0}
+.blok.vraag .lbl{color:#7446B0}
+:root[data-theme=dark] .blok.vraag{background:#2E2A55}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .blok.vraag{background:#2E2A55}}
+.acties{display:flex;flex-direction:column;gap:6px}
+.actie{display:grid;grid-template-columns:minmax(0,1fr) 110px 90px 120px;gap:8px;align-items:center;border:1px solid var(--line);border-left:4px solid var(--line);border-radius:10px;padding:7px 10px;background:var(--surface);font-size:.88rem}
+.actie.s-open{border-left-color:var(--warn)}.actie.s-bij_rvb{border-left-color:#9A6F12}.actie.s-klaar{border-left-color:var(--ok);opacity:.75}.actie.s-vervallen{opacity:.55}
+.actie.laat{border-left-color:var(--bad);background:var(--bad-soft)}
+.actie .bron{display:block;font-size:.75rem;color:var(--muted)}
+.actie .dl.laat{color:var(--bad);font-weight:700}
+.actie select{font-size:.8rem;padding:3px 6px}
+@media (max-width:640px){.actie{grid-template-columns:minmax(0,1fr) auto}.actie .eig{grid-column:1}.actie .dl{grid-column:2;grid-row:1}}
+.filters{display:flex;flex-wrap:wrap;gap:6px}
+.filters button[aria-pressed=true]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.bev{border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;background:var(--sunk)}
+.bev textarea{width:100%;min-height:60px;border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--surface);font-family:var(--f-body);font-size:.88rem}
+.namen{display:flex;flex-wrap:wrap;gap:6px;font-size:.82rem}
+.namen span{border-radius:999px;padding:2px 10px;background:var(--surface);border:1px solid var(--line)}
+.namen span.ja{background:var(--ok-soft);border-color:var(--ok-soft)}
+.namen span.nee{background:var(--bad-soft);border-color:var(--bad-soft)}
+.besl{display:flex;flex-direction:column;gap:8px}
+.bs{border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--surface);display:flex;flex-direction:column;gap:2px}
+.bs .r{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.bs b{font-family:var(--f-display);color:var(--accent)}
+input[type=search]{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="merk">
+      <span class="logo" role="img" aria-label="BTC Wemmel"></span>
+      <div><div class="eyebrow">BTC Wemmel · padel</div><h1>Padelcommissie</h1></div>
+    </div>
+    <div class="wie" id="wie"><span id="wieNaam"></span> · <a href="../">Mijn padel</a> · <button type="button" id="afmelden">Afmelden</button></div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Padelcommissie">
+    <button class="tab" role="tab" data-tab="vergaderingen" aria-selected="true">Vergaderingen</button>
+    <button class="tab" role="tab" data-tab="acties" aria-selected="false" id="tabActies">Actiepunten</button>
+    <button class="tab" role="tab" data-tab="beslissingen" aria-selected="false">Beslissingen</button>
+  </nav>
+  <p class="melding" id="melding" role="status"></p>
+
+  <section id="v-vergaderingen">
+    <div class="cgrid">
+      <section class="panel" aria-labelledby="vlTitel">
+        <div class="lbl" id="vlTitel">Vergaderingen</div>
+        <div class="verglijst" id="vLijst"></div>
+      </section>
+      <div id="vDetail" style="display:flex;flex-direction:column;gap:12px;min-width:0"></div>
+    </div>
+  </section>
+
+  <section id="v-acties" hidden>
+    <section class="panel">
+      <div class="lijn" style="justify-content:space-between"><h2>Actiepunten</h2>
+        <div class="filters" id="aFilters">
+          <button type="button" data-f="mijn" aria-pressed="true">Mijn acties</button>
+          <button type="button" data-f="open" aria-pressed="false">Alle open</button>
+          <button type="button" data-f="laat" aria-pressed="false">Te laat</button>
+          <button type="button" data-f="alle" aria-pressed="false">Alle</button>
+        </div></div>
+      <div class="acties" id="aLijst"></div>
+      <div class="muted" style="font-size:.8rem">De eigenaar of de voorzitter past de status aan. Een open actie van jou staat ook in Mijn padel.</div>
+    </section>
+  </section>
+
+  <section id="v-beslissingen" hidden>
+    <section class="panel">
+      <h2>Beslissingen</h2>
+      <input type="search" id="bZoek" placeholder="Zoek in beslissingen…" aria-label="Zoek in beslissingen">
+      <div class="besl" id="bLijst"></div>
+    </section>
+  </section>
+</div>
+
+<script>
+(() => {
+const API = "https://povgjkvmzfrhhaxfanwn.supabase.co/rest/v1/rpc/", KEY = "sb_publishable_LfcbY6X1DgOBFW1rH3Umnw__RdObpur";
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const TOKEN = BTC.token;
+const DAG = ["zo", "ma", "di", "wo", "do", "vr", "za"];
+const STATUS_V = { gepland: ["Gepland", ""], ontwerp: ["Verslag: ontwerp", "warn"], ter_bevestiging: ["Ter bevestiging", "warn"], goedgekeurd: ["Goedgekeurd", "ok"] };
+const STATUS_A = { open: "open", bij_rvb: "bij de RvB", klaar: "klaar", vervallen: "vervallen" };
+const SOORT = { beslissing: "Beslissing", info: "Info", rvb: "Naar de RvB", afspraak: "Afspraak" };
+let D = null, V = null, VID = null, TAB = "vergaderingen", FILTER = "mijn";
+
+async function rpc(fn, args) {
+  const r = await fetch(API + fn, { method: "POST", cache: "no-store", headers: { apikey: KEY, Authorization: "Bearer " + KEY, "Content-Type": "application/json" }, body: JSON.stringify({ p_token: TOKEN, ...(args || {}) }) });
+  if (!r.ok) throw new Error("de server antwoordt niet (" + r.status + ")");
+  const j = await r.json();
+  if (j && j.fout === "niet aangemeld") { BTC.naarLogin(); throw new Error("niet aangemeld"); }
+  return j;
+}
+function melding(t, soort) { const m = $("melding"); m.textContent = t || ""; m.className = "melding " + (soort || ""); }
+const dt = (s) => new Date(String(s).replace(" ", "T"));
+const datumLang = (s) => { const x = dt(s); return `${DAG[x.getDay()]} ${x.getDate()}/${x.getMonth() + 1}/${x.getFullYear()}`; };
+const uur = (s) => { const x = dt(s); return `${x.getHours()}u${String(x.getMinutes()).padStart(2, "0")}`; };
+const dKort = (s) => { const x = new Date(s + "T12:00"); return `${x.getDate()}/${x.getMonth() + 1}`; };
+const vandaag = () => { const x = new Date(); return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`; };
+const isLaat = (a) => a.deadline && a.deadline < vandaag() && ["open", "bij_rvb"].includes(a.status);
+const lijst = (xs) => `<ul>${xs.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>`;
+
+async function laad() {
+  D = await rpc("club_comm_data");
+  if (D.fout) { melding(D.fout === "enkel voor de padelcommissie" ? "Deze pagina is enkel voor de leden van de padelcommissie." : D.fout, "fout"); document.querySelectorAll("section[id^=v-]").forEach((s) => { s.hidden = true; }); return; }
+  const ik = (D.leden || []).find((l) => l.id === D.ik); $("wieNaam").textContent = ik ? ik.naam : "";
+  const mijn = (D.acties || []).filter((a) => a.eigenaar === D.ik && ["open", "bij_rvb"].includes(a.status)).length;
+  $("tabActies").textContent = mijn ? `Actiepunten · ${mijn} van jou` : "Actiepunten";
+  tekenLijst(); tekenActies(); tekenBesl();
+  const h = location.hash;
+  if (/^#v\d+$/.test(h)) VID = +h.slice(2);
+  if (!VID && D.vergaderingen.length) { const recent = D.vergaderingen.find((v) => v.status !== "gepland") || D.vergaderingen[0]; VID = recent.id; }
+  if (VID) await laadVergadering(VID);
+  if (h === "#acties") kiesTab("acties"); else if (h === "#beslissingen") kiesTab("beslissingen");
+}
+function kiesTab(t) {
+  TAB = t; document.querySelectorAll("[data-tab]").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === t)));
+  ["vergaderingen", "acties", "beslissingen"].forEach((k) => { $("v-" + k).hidden = k !== t; }); melding("");
+}
+
+/* ---------------------------------------------------------------- vergaderingen */
+function tekenLijst() {
+  const L = D.vergaderingen || [];
+  $("vLijst").innerHTML = L.length ? L.map((v) => { const st = STATUS_V[v.status] || [v.status, ""];
+    return `<button type="button" class="verg" data-verg="${v.id}" aria-pressed="${v.id === VID}"><span class="r"><b>${esc(datumLang(v.datum))}</b><span class="pill ${st[1]}">${esc(v.status === "ontwerp" ? "ontwerp" : st[0].toLowerCase())}</span></span>
+      <small>${esc(v.code)} · ${v.punten} punten · ${v.open} van ${v.acties} acties open</small>
+      ${v.status === "ter_bevestiging" ? `<small>${v.bevestigd} van ${(D.leden || []).length} bevestigd${v.ik_bevestigd ? " · jij ✓" : ""}</small>` : ""}</button>`; }).join("")
+    : `<div class="leeg">Nog geen vergaderingen.</div>`;
+}
+async function laadVergadering(id) {
+  VID = id; tekenLijst();
+  V = await rpc("club_comm_vergadering", { p_id: id });
+  if (V.fout) { melding(V.fout, "fout"); return; }
+  tekenVergadering();
+}
+function tekenVergadering() {
+  const st = STATUS_V[V.status] || [V.status, ""], P = V.punten || [];
+  const nBesl = P.filter((p) => ["beslissing", "rvb"].includes(p.soort)).length;
+  const alleActies = P.flatMap((p) => p.acties || []), open = alleActies.filter((a) => ["open", "bij_rvb"].includes(a.status)).length;
+  const vragen = P.reduce((n, p) => n + (p.open_vragen || []).length, 0);
+  const totMin = P.reduce((n, p) => n + p.minuten, 0) || 1;
+  const begin = dt(V.datum); let t = begin.getHours() * 60 + begin.getMinutes();
+  const klok = (m) => `${Math.floor(m / 60)}u${String(m % 60).padStart(2, "0")}`;
+  const kop = `<section class="panel">
+    <div class="lijn" style="justify-content:space-between;align-items:flex-start">
+      <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+        <span class="lbl">BTC-PC-${esc(V.code)} · ${esc(datumLang(V.datum))} · ${uur(V.datum)}${V.plaats ? " · " + esc(V.plaats) : ""}</span>
+        <h2>${esc(V.titel)}</h2>
+        ${V.doel ? `<span style="font-size:.88rem">${esc(V.doel)}</span>` : ""}
+        <span class="muted" style="font-size:.82rem">Aanwezig ${V.aanwezig.length}/${V.aanwezig.length + V.afwezig.length}: ${V.aanwezig.map(esc).join(", ")}${V.afwezig.length ? ` · verontschuldigd: ${V.afwezig.map(esc).join(", ")}` : ""}</span>
+      </div>
+      <span class="pill ${st[1]}">${st[0]}</span>
+    </div>
+    <div class="kpis"><div class="kpi"><b>${P.length}</b><span>agendapunten · ${totMin} min</span></div><div class="kpi"><b>${nBesl}</b><span>beslispunten</span></div><div class="kpi"><b>${open}/${alleActies.length}</b><span>acties open</span></div><div class="kpi"><b>${vragen}</b><span>open vragen</span></div></div>
+    <div class="balk" aria-hidden="true">${P.map((p) => `<span class="k-${p.soort}" style="width:${(p.minuten / totMin) * 100}%" title="${p.nr}. ${esc(p.titel)}"></span>`).join("")}</div>
+    ${bevestigBlok()}
+  </section>`;
+  const punten = P.map((p) => { const van = t; t += p.minuten;
+    return `<details class="punt k-${p.soort}">
+      <summary><span class="nr">${p.nr}</span><div><span class="titel">${esc(p.titel)}</span><div class="meta"><span class="soort">${SOORT[p.soort] || p.soort}</span>${p.wie ? `<span class="tag">${esc(p.wie)}</span>` : ""}${p.bijlage ? `<span class="tag">bijlage: ${esc(p.bijlage)}</span>` : ""}${(p.acties || []).length ? `<span class="tag">${p.acties.length} ${p.acties.length === 1 ? "actie" : "acties"}</span>` : ""}${(p.open_vragen || []).length ? `<span class="tag">${p.open_vragen.length} open ${p.open_vragen.length === 1 ? "vraag" : "vragen"}</span>` : ""}</div></div>
+        <span class="klok">${klok(van)} · ${p.minuten} min</span></summary>
+      <div class="body">
+        ${(p.voorbereiding || []).length ? `<div class="blok voor"><span class="lbl">Voorbereiding</span>${lijst(p.voorbereiding)}</div>` : ""}
+        ${(p.te_beslissen || []).length ? `<div class="blok dec"><span class="lbl">Te beslissen</span>${lijst(p.te_beslissen)}</div>` : ""}
+        ${(p.besluit || []).length ? `<div class="blok besl"><span class="lbl">Besluit</span>${lijst(p.besluit)}</div>` : V.status === "gepland" ? "" : `<div class="blok voor"><span class="lbl">Besluit</span><span class="muted">Nog niet in het verslag.</span></div>`}
+        ${(p.acties || []).length ? `<div class="acties">${p.acties.map((a) => actieRij(a, false)).join("")}</div>` : ""}
+        ${(p.open_vragen || []).length ? `<div class="blok vraag"><span class="lbl">${p.soort === "rvb" ? "Naar de RvB" : "Open vragen"}</span>${lijst(p.open_vragen)}</div>` : ""}
+      </div></details>`; }).join("");
+  $("vDetail").innerHTML = kop + punten;
+}
+function bevestigBlok() {
+  const nog = V.nog_te_bevestigen || [], B = V.bevestigingen || [], mijn = B.find((b) => b.ik);
+  const namen = `<div class="namen">${B.map((b) => `<span class="${b.akkoord ? "ja" : "nee"}" title="${esc(b.opmerking || "")}">${esc(b.naam)} ${b.akkoord ? "✓" : "· opmerking"}</span>`).join("")}${nog.filter((n) => !B.some((b) => b.naam === n)).map((n) => `<span>${esc(n)} · nog niet</span>`).join("")}</div>`;
+  const opm = B.filter((b) => !b.akkoord && b.opmerking).map((b) => `<div style="font-size:.85rem"><b>${esc(b.naam)}:</b> ${esc(b.opmerking)}</div>`).join("");
+  let blok = "";
+  if (V.status === "ter_bevestiging") {
+    blok = `<div class="bev"><div class="lbl">Bevestiging door de commissie</div>${namen}${opm}
+      ${mijn && mijn.akkoord ? `<span class="muted" style="font-size:.85rem">Jij bevestigde dit verslag.</span>` : `<textarea id="bevOpm" maxlength="500" placeholder="Opmerking (enkel nodig als er iets aangepast moet worden)">${esc(mijn && mijn.opmerking || "")}</textarea>
+      <div class="lijn"><button type="button" class="primary" data-bev="1">Ik bevestig het verslag</button><button type="button" data-bev="0">Opmerking doorgeven</button></div>`}
+    </div>`;
+  } else if (V.status === "goedgekeurd") {
+    blok = `<div class="muted" style="font-size:.85rem">Goedgekeurd door ${esc(V.goedgekeurd_door || "de voorzitter")}${V.goedgekeurd_op ? " op " + new Date(V.goedgekeurd_op).toLocaleDateString("nl-BE") : ""}.</div>`;
+  } else if (V.status === "ontwerp") {
+    blok = `<div class="muted" style="font-size:.85rem">Ontwerpverslag: nog niet voorgelegd aan de commissie.</div>`;
+  }
+  if (D.voorzitter) {
+    const k = [];
+    if (V.status === "ontwerp") k.push(`<button type="button" class="primary" data-vstatus="ter_bevestiging">Voorleggen ter bevestiging</button>`);
+    if (V.status === "ter_bevestiging") { k.push(`<button type="button" class="primary" data-vstatus="goedgekeurd">Verslag goedkeuren</button>`); k.push(`<button type="button" data-vstatus="ontwerp">Terug naar ontwerp</button>`); }
+    if (V.status === "goedgekeurd") k.push(`<button type="button" data-vstatus="ontwerp">Goedkeuring intrekken</button>`);
+    if (k.length) blok += `<div class="lijn"><span class="lbl">Voorzitter</span>${k.join("")}</div>`;
+  }
+  return blok;
+}
+
+/* ---------------------------------------------------------------- acties */
+function actieRij(a, metBron) {
+  const laat = isLaat(a);
+  const dl = a.deadline ? dKort(a.deadline) : (a.deadline_tekst || "—");
+  const st = a.mag ? `<select data-actie="${a.id}" aria-label="Status">${Object.entries(STATUS_A).map(([k, n]) => `<option value="${k}" ${k === a.status ? "selected" : ""}>${n}</option>`).join("")}</select>` : `<span class="pill">${STATUS_A[a.status]}</span>`;
+  return `<div class="actie s-${a.status} ${laat ? "laat" : ""}"><span>${esc(a.omschrijving)}${metBron ? `<span class="bron">${esc(a.code)}${a.punt_nr ? ` · punt ${a.punt_nr}${a.punt ? " · " + esc(a.punt) : ""}` : ""}</span>` : ""}</span>
+    <span class="eig" style="font-weight:600">${esc(a.eigenaar_naam)}</span><span class="dl ${laat ? "laat" : ""}">${esc(dl)}${laat ? " · te laat" : ""}</span>${st}</div>`;
+}
+function tekenActies() {
+  let L = D.acties || [];
+  if (FILTER === "mijn") L = L.filter((a) => a.eigenaar === D.ik && ["open", "bij_rvb"].includes(a.status));
+  else if (FILTER === "open") L = L.filter((a) => ["open", "bij_rvb"].includes(a.status));
+  else if (FILTER === "laat") L = L.filter(isLaat);
+  $("aLijst").innerHTML = L.length ? L.map((a) => actieRij(a, true)).join("") : `<div class="leeg">${FILTER === "mijn" ? "Je hebt geen open acties." : "Geen acties in deze selectie."}</div>`;
+}
+
+/* ---------------------------------------------------------------- beslissingen */
+function tekenBesl() {
+  const q = $("bZoek").value.trim().toLowerCase();
+  const L = (D.beslissingen || []).filter((b) => !q || (b.tekst + " " + b.code).toLowerCase().includes(q));
+  $("bLijst").innerHTML = L.length ? L.map((b) => `<div class="bs"><div class="r"><b>${esc(b.code)}</b><span class="muted" style="font-size:.8rem">${new Date(b.datum + "T12:00").toLocaleDateString("nl-BE")}${b.vergadering ? ` · ${esc(b.vergadering)}${b.punt_nr ? " punt " + b.punt_nr : ""}` : ""}</span><span style="flex:1"></span><span class="pill ${b.niveau === "rvb" ? "warn" : "ok"}">${b.niveau === "rvb" ? "RvB" : "Commissie"}</span></div><span>${esc(b.tekst)}</span></div>`).join("")
+    : `<div class="leeg">Geen beslissingen gevonden.</div>`;
+}
+
+/* ---------------------------------------------------------------- acties op de pagina */
+document.addEventListener("click", async (e) => {
+  const tab = e.target.closest("[data-tab]"); if (tab) { kiesTab(tab.dataset.tab); return; }
+  const vg = e.target.closest("[data-verg]"); if (vg) { history.replaceState(null, "", "#v" + vg.dataset.verg); laadVergadering(+vg.dataset.verg).catch((err) => melding(err.message, "fout")); return; }
+  const f = e.target.closest("[data-f]"); if (f) { FILTER = f.dataset.f; document.querySelectorAll("#aFilters button").forEach((b) => b.setAttribute("aria-pressed", String(b === f))); tekenActies(); return; }
+  const bev = e.target.closest("[data-bev]");
+  if (bev) {
+    const ok = bev.dataset.bev === "1", opm = $("bevOpm") ? $("bevOpm").value : "";
+    bev.disabled = true;
+    try { const j = await rpc("club_comm_bevestig", { p_id: VID, p_akkoord: ok, p_opmerking: opm });
+      if (j.fout) { melding(j.fout, "fout"); return; }
+      melding(ok ? "Bedankt, je bevestigde het verslag." : "Je opmerking is doorgegeven aan de voorzitter.", "ok"); await laad();
+    } catch (err) { melding(err.message, "fout"); } finally { bev.disabled = false; }
+    return;
+  }
+  const vs = e.target.closest("[data-vstatus]");
+  if (vs) {
+    if (vs.dataset.zeker !== "1") { vs.dataset.zeker = "1"; vs.textContent = "Zeker? Klik opnieuw"; return; }
+    const j = await rpc("club_comm_status", { p_id: VID, p_status: vs.dataset.vstatus });
+    if (j.fout) { melding("Lukt niet: " + j.fout + ".", "fout"); await laadVergadering(VID); return; }
+    melding(vs.dataset.vstatus === "ter_bevestiging" ? "Verslag voorgelegd: de commissieleden krijgen een melding." : vs.dataset.vstatus === "goedgekeurd" ? "Verslag goedgekeurd." : "Verslag terug in ontwerp.", "ok"); await laad();
+  }
+});
+document.addEventListener("change", async (e) => {
+  const s = e.target.closest("select[data-actie]"); if (!s) return;
+  s.disabled = true;
+  try { const j = await rpc("club_comm_actie", { p_id: +s.dataset.actie, p_status: s.value });
+    if (j.fout) { melding(j.fout, "fout"); } else { melding("Status aangepast.", "ok"); }
+    await laad();
+  } catch (err) { melding(err.message, "fout"); } finally { s.disabled = false; }
+});
+$("bZoek").addEventListener("input", () => D && tekenBesl());
+$("afmelden").addEventListener("click", () => BTC.afmelden());
+laad().catch((err) => melding("Laden lukte niet: " + (err.message || err), "fout"));
+})();
+</script>
+</body>
+</html>
