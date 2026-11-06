@@ -6,6 +6,7 @@
 | `ladder-inschrijving/` | Ladderinschrijving (`index.html`) en Mijn ladder (`app.html`) | `…/ladder-inschrijving/` |
 | `beheer/` | Clublogin: codes, rollen, kapiteins, logboek (enkel beheerders) | `…/beheer/` |
 | `klassementsimulator/` | Klassementsimulator (iedereen met een code; bereik volgens rol) | `…/klassementsimulator/` |
+| `interclub/` | Interclub: kalender en uitslagen, ploeg inschrijven, mijn ploegen, overzicht voor commissie en bestuur | `…/interclub/` |
 | `opstellingsplanner/` | Opstellingsplanner interclub (kapiteins, commissie, bestuur) | `…/opstellingsplanner/` |
 
 Geen enkele pagina bevat namen of gegevens: alles komt live uit Supabase `padel-interclub`
@@ -93,3 +94,11 @@ Privacy: `ladder_mijn` registreert enkel de actieve dag per speler (opvolging la
 - Zelfde login. Gegevens via `club_simulator_data` (zelfde inhoud als `simulator_bulk`, gefilterd per rol):
   commissie alle interclubspelers 2026 · kapitein zichzelf + ploegspelers · anderen enkel zichzelf.
 - Tegenstanders enkel met klassement, zonder namen.
+
+## Interclub (`interclub/`)
+- Achter de clublogin. Script: `03_Competitie_Interclubinschrijving_app.sql` (padelcommissie-project).
+- **Kalender**: komende padelinterclubwedstrijden van alle BTC-ploegen en uitslagen van de voorbije 3 weken; filter "Mijn ploegen"; per wedstrijd een agenda-bestand (.ics).
+- **Inschrijven**: zelfde controles als het publieke formulier (`btc-padel-inschrijving`), maar de kapitein is altijd het aangemelde lid en de ledenzoeker werkt enkel met sessie. Teamgenoten met meldingen aan krijgen een pushmelding.
+- **Overzicht** (commissie, bestuur): alle inschrijvingen (app en publiek formulier), status, betaalstatus en interne notitie zetten (gelogd), CSV-export.
+- Functies: `club_ic_data`, `club_ic_zoek_lid`, `club_ic_inschrijven`, `club_ic_kalender`, `club_ic_overzicht`, `club_ic_status`; `club_mij.onderdelen.interclub`.
+- De link op de startpagina verschijnt pas na het uitvoeren van het SQL-script (`club_mij` met `interclub`).

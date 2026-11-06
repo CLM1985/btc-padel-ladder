@@ -1,0 +1,786 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<script src="../toegang.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#152B46">
+<link rel="icon" type="image/png" sizes="48x48" href="../app/favicon-48.png">
+<link rel="apple-touch-icon" href="../app/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="BTC Padel">
+<script>if("serviceWorker" in navigator)addEventListener("load",function(){navigator.serviceWorker.register("../sw.js",{scope:"../"}).catch(function(){})});</script>
+<meta name="robots" content="noindex">
+<title>Interclub inschrijven</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@600;700;800&family=Montserrat:wght@400;600;700&display=swap">
+<style>
+/* Layout: zelfde stappenformulier als het publieke formulier (wedstrijdblad), nu achter de clublogin;
+   tabs: inschrijven · mijn ploegen · overzicht (commissie en bestuur) */
+:root{
+  --bg:#F3F1E9; --surface:#FFFFFF; --ink:#152B46; --muted:#55657A; --line:#E2DCCD;
+  --court:#435B28; --court-soft:#DCE4D2; --turf:#3B6E1F; --turf-soft:#DCE4D2; --warn:#9A6200; --warn-soft:#F6ECD6; --err:#B65A3A; --err-soft:#F6E3DB;
+  --accent:#C5E75A; --band:#DFE7EE;
+  --display:"League Spartan","Arial Narrow",Arial,sans-serif;
+  --body:"Montserrat","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0E1D30; --surface:#152B46; --ink:#F3F1E9; --muted:#AEB9C6; --line:#2B4466;
+  --court:#C5E75A; --court-soft:#24402B; --turf:#C5E75A; --turf-soft:#24402B; --warn:#F0B860; --warn-soft:#3A2E14; --err:#F0957A; --err-soft:#3A2420;
+  --band:#1B3554; color-scheme:dark;}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--body)}
+.wrap{max-width:720px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{background:var(--band)}
+header .wrap{display:flex;gap:12px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;padding-block:18px 20px}
+.eyebrow{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--court);margin:0 0 6px;font-weight:600}
+.eyebrow a{color:inherit;text-decoration:none}
+h1{font:800 clamp(28px,6vw,38px)/1 var(--display);margin:0;text-transform:uppercase}
+h1::after{content:"";display:block;width:28px;height:3px;background:var(--accent);border-radius:2px;margin-top:8px}
+.wie{font-size:14px;display:grid;gap:2px;justify-items:end}
+.wie button{background:none;border:0;padding:0;font:600 14px var(--body);color:var(--court);text-decoration:underline;cursor:pointer}
+main .wrap{display:flex;flex-direction:column;gap:16px;padding-block:20px 48px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tabs button{font:700 15px var(--display);letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px;border-radius:8px;cursor:pointer}
+.tabs button[aria-selected=true]{background:var(--court);border-color:var(--court);color:var(--surface)}
+.notice{border:1px solid var(--line);border-left:4px solid var(--warn);background:var(--surface);padding:10px 14px;border-radius:6px;font-size:14px}
+.notice[data-kind=err]{border-left-color:var(--err);background:var(--err-soft)}
+.notice[data-kind=ok]{border-left-color:var(--turf)}
+section.step{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.step h2{margin:0;font:700 22px/1.1 var(--display);display:flex;gap:10px;align-items:baseline}
+.step h2 .n{font:700 15px/1 var(--display);color:var(--court);border:2px solid var(--court);border-radius:50%;width:26px;height:26px;display:inline-grid;place-items:center;flex:none}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:520px){.grid2{grid-template-columns:1fr}}
+.f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.f>label,.lbl{font-weight:600;font-size:14px}
+.opt{font-weight:400;color:var(--muted)}
+input[type=text],input[type=email],input[type=tel],textarea,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:9px 11px;width:100%}
+input[readonly]{background:var(--surface)}
+textarea{min-height:76px;resize:vertical}
+input:focus-visible,textarea:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible,.chip input:focus-visible+span,.reeks input:focus-visible+span{outline:3px solid var(--court);outline-offset:2px}
+[aria-invalid=true]{border-color:var(--err)!important}
+.hint{font-size:13px;color:var(--muted);margin:0}
+fieldset{border:0;margin:0;padding:0;min-width:0;display:flex;flex-direction:column;gap:8px}
+legend{font-weight:600;font-size:14px;padding:0;margin-bottom:6px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{position:relative}
+.chip input,.reeks input{position:absolute;opacity:0;pointer-events:none}
+.chip span{display:inline-block;padding:7px 14px;border:1px solid var(--line);border-radius:999px;cursor:pointer;font-weight:600;font-size:14px;background:var(--bg)}
+.chip input:checked+span{background:var(--court);border-color:var(--court);color:var(--surface)}
+.reeksen{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
+.reeks{position:relative;display:block}
+.reeks>span{display:flex;flex-direction:column;gap:2px;height:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;cursor:pointer;background:var(--bg)}
+.reeks b{font:700 20px/1.1 var(--display)}
+.reeks .dag{font-weight:700;font-size:14px;color:var(--court)}
+.reeks small{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+.reeks input:checked+span{border-color:var(--court);background:var(--court-soft);box-shadow:inset 0 0 0 1px var(--court)}
+.keuze{border:1px solid var(--court);background:var(--court-soft);border-radius:8px;padding:10px 12px;font-size:15px}
+.kap{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline}
+.kap b{font-size:17px}
+.lid{position:relative}
+.lid .rij{display:flex;gap:6px;align-items:stretch}
+.lid .rij input{flex:1;min-width:0}
+.badge{font-size:12px;font-weight:700;border-radius:999px;padding:2px 8px;align-self:flex-start}
+.badge.ok{background:var(--turf-soft);color:var(--turf)}
+.badge.man{background:var(--warn-soft);color:var(--warn)}
+.badge.nok{background:var(--err-soft);color:var(--err)}
+.lijst{position:absolute;z-index:5;left:0;right:0;top:100%;margin:4px 0 0;padding:4px;list-style:none;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.12);max-height:280px;overflow:auto}
+.lijst li{padding:8px 10px;border-radius:6px;cursor:pointer;font-size:15px}
+.lijst li[aria-selected=true],.lijst li:hover{background:var(--court-soft)}
+.lijst li.man{color:var(--muted);font-size:14px;border-top:1px solid var(--line);margin-top:4px;border-radius:0 0 6px 6px}
+.lijst li.info{cursor:default;color:var(--muted);font-size:14px}
+.lijst li.info:hover{background:none}
+.lijst li .kl{color:var(--muted);font-variant-numeric:tabular-nums}
+.lijst li.nee{cursor:not-allowed;color:var(--muted)}
+.lijst li.nee:hover{background:none}
+.lijst li.nee .why{display:block;font-size:12px;color:var(--err)}
+.team{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:520px){.team{grid-template-columns:1fr}}
+.actions{display:flex;flex-direction:column;gap:10px}
+button.primary,a.btn{appearance:none;border:0;border-radius:8px;background:var(--court);color:var(--surface);font:700 18px/1 var(--display);letter-spacing:.04em;text-transform:uppercase;padding:14px 18px;cursor:pointer;text-align:center;text-decoration:none;display:inline-block}
+button.primary[disabled]{opacity:.55;cursor:progress}
+a.btn.pay{background:var(--turf)}
+button.ghost{appearance:none;background:var(--surface);border:1px solid var(--line);border-radius:6px;color:var(--ink);font:600 14px var(--body);padding:6px 10px;cursor:pointer}
+.err{color:var(--err);font-size:14px;margin:0}
+.ref code{font:700 28px/1 var(--display);letter-spacing:.06em;background:var(--court-soft);color:var(--court);padding:8px 12px;border-radius:6px;user-select:all}
+.ref{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+dl.sum{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:0;font-size:15px}
+dl.sum dt{color:var(--muted)} dl.sum dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.kaart{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.kaart .kop{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline}
+.kaart .kop b{font:700 19px/1.1 var(--display)}
+.kaart code{font:700 15px var(--display);letter-spacing:.05em;color:var(--court)}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:12px;font-weight:700;border-radius:999px;padding:2px 9px;background:var(--bg);border:1px solid var(--line)}
+.tag.ok{background:var(--turf-soft);color:var(--turf);border-color:transparent}
+.tag.open{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.tag.weg{background:var(--err-soft);color:var(--err);border-color:transparent}
+.spelers{font-size:14px;color:var(--muted);margin:0}
+.ov-kop{display:flex;gap:10px;flex-wrap:wrap;align-items:end;justify-content:space-between}
+.ov-kop .f{min-width:200px}
+.telling{display:flex;gap:14px;flex-wrap:wrap;font-size:14px;color:var(--muted)}
+.telling b{color:var(--ink);font-variant-numeric:tabular-nums}
+.ov-velden{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (max-width:520px){.ov-velden{grid-template-columns:1fr}}
+.dag-kop{font:700 15px var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+.wed{display:grid;grid-template-columns:4.2em 1fr auto;gap:4px 12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.wed+.wed{margin-top:8px}
+.wed.mijn{border-left:4px solid var(--accent)}
+.wed .uur{font:700 18px var(--display);font-variant-numeric:tabular-nums}
+.wed .ploegen b{display:block}
+.wed .ploegen span{font-size:13px;color:var(--muted)}
+.wed .rechts{display:flex;flex-direction:column;align-items:end;gap:4px}
+.wed .score{font:700 18px var(--display);font-variant-numeric:tabular-nums}
+.wed .score.w{color:var(--turf)} .wed .score.v{color:var(--err)}
+@media (max-width:520px){.wed{grid-template-columns:3.6em 1fr}.wed .rechts{grid-column:2;align-items:start;flex-direction:row;gap:10px}}
+.bewaard{font-size:12px;color:var(--turf);min-height:1em}
+footer{font-size:13px;color:var(--muted);text-align:center}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div><p class="eyebrow"><a href="../">← Mijn padel</a></p><h1>Interclub</h1></div>
+  <div class="wie"><span id="wieNaam"></span><button type="button" id="afmelden">Afmelden</button></div>
+</div></header>
+<main><div class="wrap">
+  <nav class="tabs" role="tablist" aria-label="Onderdelen">
+    <button type="button" role="tab" id="tabKal" aria-selected="false" aria-controls="paneKal">Kalender</button>
+    <button type="button" role="tab" id="tabIn" aria-selected="true" aria-controls="paneIn">Inschrijven</button>
+    <button type="button" role="tab" id="tabMijn" aria-selected="false" aria-controls="paneMijn">Mijn ploegen</button>
+    <button type="button" role="tab" id="tabOv" aria-selected="false" aria-controls="paneOv" hidden>Overzicht</button>
+  </nav>
+  <div id="laden" class="notice">Laden…</div>
+  <div id="fout" class="notice" data-kind="err" hidden></div>
+
+  <!-- ===================== Inschrijven ===================== -->
+  <div id="paneIn" role="tabpanel" aria-labelledby="tabIn" hidden>
+  <form id="form" novalidate autocomplete="off">
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div id="periodeInfo" class="notice" hidden></div>
+
+      <section class="step" id="stapPeriode" hidden>
+        <h2><span class="n">0</span>Competitie</h2>
+        <fieldset><legend>Voor welke interclub schrijf je in?</legend><div class="chips" id="periodes"></div></fieldset>
+      </section>
+
+      <section class="step">
+        <h2><span class="n">1</span>Reeks en speelmoment</h2>
+        <fieldset id="fsCat"><legend>Categorie</legend><div class="chips" id="categorieen"></div></fieldset>
+        <fieldset id="fsReeks" hidden>
+          <legend>Niveau <span class="hint" style="font-weight:400">· punten = som van de spelers per rotatie</span></legend>
+          <div class="reeksen" id="reeksen"></div>
+        </fieldset>
+        <div class="keuze" id="keuze" hidden aria-live="polite"></div>
+      </section>
+
+      <section class="step">
+        <h2><span class="n">2</span>Kapitein</h2>
+        <div class="kap"><span class="lbl">Kapitein:</span> <b id="kapNaam"></b> <span class="badge" id="kapBadge" hidden></span></div>
+        <p class="hint">Je schrijft de ploeg in als kapitein. Een andere kapitein? Laat die zelf aanmelden en inschrijven.</p>
+        <div class="grid2">
+          <div class="f"><label for="email">E-mailadres</label><input type="email" id="email" autocomplete="email" maxlength="120" required></div>
+          <div class="f"><label for="gsm">Gsm <span class="opt">(optioneel)</span></label><input type="tel" id="gsm" autocomplete="tel" maxlength="30"></div>
+        </div>
+        <fieldset id="fsLeider">
+          <legend>Heb je de opleiding Interclubleider (Tennis en Padel Vlaanderen) gevolgd?</legend>
+          <div class="chips">
+            <label class="chip"><input type="radio" name="leider" id="leiderJa" value="ja"><span>Ja</span></label>
+            <label class="chip"><input type="radio" name="leider" id="leiderNee" value="nee"><span>Nee</span></label>
+          </div>
+        </fieldset>
+      </section>
+
+      <section class="step">
+        <h2><span class="n">3</span>Teamgenoten</h2>
+        <p class="hint">Zoek elke speler in de ledenlijst. Je kan enkel spelers kiezen die volgens het reglement speelgerechtigd zijn in de gekozen reeks (klassement en categorie). Staat iemand er niet in, kies dan "manueel invullen". Minstens 5 teamgenoten naast jezelf, maximaal 7. Teamgenoten met meldingen aan krijgen bericht dat ze ingeschreven zijn.</p>
+        <div class="team" id="team"></div>
+        <div class="notice" id="rotatieInfo" hidden aria-live="polite"></div>
+        <div class="f"><label for="opmerking">Opmerking <span class="opt">(optioneel)</span></label><textarea id="opmerking" maxlength="500" placeholder="Bv. ploeg van vorig seizoen, nieuwe leden in de ploeg"></textarea></div>
+      </section>
+
+      <div class="actions">
+        <p class="err" id="formFout" role="alert" hidden></p>
+        <button type="submit" class="primary" id="verzend">Ploeg inschrijven</button>
+        <p class="hint">Je gegevens worden enkel gebruikt door de padelcommissie van BTC Wemmel voor de inschrijving bij Tennis en Padel Vlaanderen.</p>
+      </div>
+    </div>
+  </form>
+
+  <section class="step" id="klaar" hidden aria-live="polite">
+    <h2><span class="n">✓</span>Inschrijving ontvangen</h2>
+    <div class="ref"><code id="refCode"></code><button type="button" class="ghost" id="kopieer">Kopieer referentie</button></div>
+    <p class="hint">Vermeld deze referentie bij de betaling en in mails over deze ploeg. Je vindt ze ook bij Mijn ploegen.</p>
+    <dl class="sum" id="samenvatting"></dl>
+    <div id="betaal" hidden class="actions">
+      <p id="betaalTekst" style="margin:0"></p>
+      <a class="btn pay" id="betaalLink" href="#" target="_blank" rel="noopener">Betaal inschrijvingsgeld</a>
+    </div>
+    <p class="hint" id="geenBetaling" hidden>Over het inschrijvingsgeld krijg je later bericht van de padelcommissie.</p>
+    <button type="button" class="ghost" id="nogEen">Nog een ploeg inschrijven</button>
+  </section>
+  </div>
+
+  <!-- ===================== Kalender ===================== -->
+  <div id="paneKal" role="tabpanel" aria-labelledby="tabKal" hidden>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="chips" role="group" aria-label="Filter">
+        <label class="chip"><input type="radio" name="kalFilter" value="alle" checked><span>Alle BTC-ploegen</span></label>
+        <label class="chip"><input type="radio" name="kalFilter" value="mijn"><span>Mijn ploegen</span></label>
+      </div>
+      <div id="kalLijst" style="display:flex;flex-direction:column;gap:14px"></div>
+      <p class="hint">Komende padelinterclubwedstrijden en uitslagen van de voorbije 3 weken, automatisch bijgewerkt van Tennis en Padel Vlaanderen. Zet een wedstrijd in je agenda met "In agenda".</p>
+    </div>
+  </div>
+
+  <!-- ===================== Mijn ploegen ===================== -->
+  <div id="paneMijn" role="tabpanel" aria-labelledby="tabMijn" hidden>
+    <div id="mijnLijst" style="display:flex;flex-direction:column;gap:12px"></div>
+  </div>
+
+  <!-- ===================== Overzicht (commissie en bestuur) ===================== -->
+  <div id="paneOv" role="tabpanel" aria-labelledby="tabOv" hidden>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="ov-kop">
+        <div class="f"><label for="ovPeriode">Interclub</label><select id="ovPeriode"></select></div>
+        <button type="button" class="ghost" id="ovCsv">Download als CSV</button>
+      </div>
+      <div class="telling" id="ovTelling"></div>
+      <p class="hint">Inschrijvingen via de app én via het publieke formulier. Status en notities worden bewaard zodra je ze wijzigt en staan in het logboek.</p>
+      <div id="ovLijst" style="display:flex;flex-direction:column;gap:12px"></div>
+    </div>
+  </div>
+
+  <footer>Padelcommissie BTC Wemmel</footer>
+</div></main>
+
+<script>
+(function(){
+  "use strict";
+  const API = "https://povgjkvmzfrhhaxfanwn.supabase.co/rest/v1/rpc/";
+  const KEY = "sb_publishable_LfcbY6X1DgOBFW1rH3Umnw__RdObpur"; // publieke sleutel: enkel toegang tot functies die zelf de sessie controleren
+  const TOKEN = window.BTC && window.BTC.token;
+  const MIN_TEAM = 5, MAX_TEAM = 7;
+  const CAT_NAAM = {"PADEL OPEN":"Open","PADEL DAMES":"Dames","PADEL GEMENGD":"Gemengd","PADEL OPEN 40":"Open 40+","PADEL DAMES 40":"Dames 40+"};
+  const STATUS = ["nieuw","bevestigd","ingeschreven bij TV","geannuleerd"];
+  const BETAAL = ["open","betaald","vrijgesteld","geannuleerd"];
+  const $ = id => document.getElementById(id);
+  let data = null, periode = null, gekozenCat = null, team = [], kapitein = {speler_id:null, naam:"", ongeldig:null, klassement:null};
+
+  async function rpc(fn, body, signal){
+    const ctrl = new AbortController(); const t = setTimeout(()=>ctrl.abort(), 15000);
+    if(signal) signal.addEventListener("abort", ()=>ctrl.abort());
+    try{
+      const r = await fetch(API + fn, {method:"POST", cache:"no-store", signal:ctrl.signal,
+        headers:{"apikey":KEY,"Authorization":"Bearer "+KEY,"Content-Type":"application/json"}, body: JSON.stringify(body||{})});
+      const d = await r.json().catch(()=>null);
+      if(!r.ok) throw new Error((d && (d.message||d.hint)) || ("Fout " + r.status));
+      if(d && !Array.isArray(d) && d.fout === "niet aangemeld"){ window.BTC.naarLogin(); throw new Error("niet aangemeld"); }
+      return d;
+    } finally { clearTimeout(t); }
+  }
+  function el(tag, attrs, ...kids){
+    const e = document.createElement(tag);
+    for(const k in (attrs||{})){ if(k==="text") e.textContent = attrs[k]; else e.setAttribute(k, attrs[k]); }
+    kids.forEach(c => c && e.appendChild(typeof c === "string" ? document.createTextNode(c) : c));
+    return e;
+  }
+  const euro = n => new Intl.NumberFormat("nl-BE",{style:"currency",currency:"EUR"}).format(n);
+  const datum = d => new Date(String(d).slice(0,10)+"T12:00:00").toLocaleDateString("nl-BE",{day:"numeric",month:"long",year:"numeric"});
+  const reeksNaam = r => /^\d{2,}$/.test(r.afdeling) ? "P" + r.afdeling : "Reeks " + r.afdeling;
+  const catKey = r => r.competitie + "|" + r.categorie;
+  const punten = k => { const m = /(\d+)/.exec(k||""); return m ? parseInt(m[1],10) : null; };
+  const huidigeReeks = () => { const r = document.querySelector("input[name=reeks]:checked"); return r ? r.value : null; };
+
+  /* ---------- Tabs ---------- */
+  const TABS = [["tabKal","paneKal"],["tabIn","paneIn"],["tabMijn","paneMijn"],["tabOv","paneOv"]];
+  function toonTab(id){
+    TABS.forEach(([t,p]) => { $(t).setAttribute("aria-selected", String(t===id)); $(p).hidden = t!==id; });
+    const naam = {tabKal:"#kalender", tabIn:"#inschrijven", tabMijn:"#mijn", tabOv:"#overzicht"}[id];
+    history.replaceState(null, "", location.pathname + naam);
+    if(id==="tabMijn") toonMijn();
+    if(id==="tabOv") laadOverzicht();
+    if(id==="tabKal") laadKalender();
+  }
+  TABS.forEach(([t]) => $(t).addEventListener("click", () => toonTab(t)));
+
+  /* ---------- Ledenzoeker (teamgenoten) ---------- */
+  function ledenVeld(id, label, verplicht){
+    const st = { id:id, speler_id:null, naam:"", modus:"zoek", klassement:null, ongeldig:null };
+    const wrap = el("div",{class:"f lid"});
+    const lab = el("label",{for:id}, label + " "); if(!verplicht) lab.appendChild(el("span",{class:"opt",text:"(optioneel)"}));
+    const inp = el("input",{type:"text",id:id,maxlength:"80",autocomplete:"off",role:"combobox","aria-autocomplete":"list","aria-expanded":"false","aria-controls":id+"-lijst",placeholder:"Typ minstens 3 letters van de naam"});
+    const wis = el("button",{type:"button",class:"ghost",hidden:"",text:"Wijzig"});
+    const badge = el("span",{class:"badge",hidden:""});
+    const lijst = el("ul",{class:"lijst",id:id+"-lijst",role:"listbox",hidden:""});
+    wrap.append(lab, el("div",{class:"rij"}, inp, wis), badge, lijst);
+    let timer = null, ctrl = null, items = [], actief = -1;
+    function sluit(){ lijst.hidden = true; inp.setAttribute("aria-expanded","false"); actief = -1; }
+    function toonStatus(){
+      if(st.modus!=="lid") return;
+      badge.hidden = false;
+      if(st.ongeldig){ badge.className = "badge nok"; badge.textContent = "Niet speelgerechtigd in deze reeks: " + st.ongeldig; }
+      else { badge.className = "badge ok"; badge.textContent = "Lid " + periode.leden_jaar + (st.klassement ? " · " + st.klassement : ""); }
+    }
+    st.markeer = (ok, reden, kl) => { st.ongeldig = ok ? null : (reden || "niet speelgerechtigd"); if(kl) st.klassement = kl; toonStatus(); };
+    function zet(modus, naam, sid, kl){
+      st.modus = modus; st.naam = naam; st.speler_id = sid; st.klassement = kl || null; st.ongeldig = null;
+      inp.value = naam; inp.removeAttribute("aria-invalid");
+      if(modus==="lid"){ inp.readOnly = true; wis.hidden = false; toonStatus(); }
+      else if(modus==="manueel"){ inp.readOnly = false; wis.hidden = false; badge.hidden = false; badge.className = "badge man"; badge.textContent = "Manueel ingevuld, wordt nagekeken"; inp.placeholder = "Naam + voornaam"; }
+      else { inp.readOnly = false; wis.hidden = true; badge.hidden = true; inp.placeholder = "Typ minstens 3 letters van de naam"; }
+      sluit(); rotatieCheck();
+    }
+    function manOptie(q){
+      const man = el("li",{role:"option",class:"man",id:id+"-om","aria-selected":"false",text:"Niet gevonden? “" + q + "” manueel invullen"});
+      man.addEventListener("mousedown", e => { e.preventDefault(); zet("manueel", inp.value.trim(), null); inp.focus(); });
+      return man;
+    }
+    function toon(res, q){
+      lijst.textContent = ""; items = [];
+      if(res.length===0) lijst.appendChild(el("li",{class:"info",text:"Geen lid gevonden met “" + q + "”."}));
+      res.forEach((r,i) => {
+        const kl = r.klassement ? el("span",{class:"kl",text:" · " + r.klassement}) : null;
+        if(r.speler_id === kapitein.speler_id){
+          lijst.appendChild(el("li",{class:"nee","aria-disabled":"true"}, r.naam, kl, el("span",{class:"why",text:"Jij bent de kapitein"}))); return;
+        }
+        if(!r.speelgerechtigd){
+          lijst.appendChild(el("li",{class:"nee","aria-disabled":"true"}, r.naam, kl, el("span",{class:"why",text:"Niet speelgerechtigd: " + (r.reden||"")}))); return;
+        }
+        const li = el("li",{role:"option",id:id+"-o"+i,"aria-selected":"false"}, r.naam, kl);
+        li.addEventListener("mousedown", e => { e.preventDefault(); zet("lid", r.naam, r.speler_id, r.klassement); st.markeer(true, null, r.klassement); });
+        lijst.appendChild(li); items.push(li);
+      });
+      const man = manOptie(q); lijst.appendChild(man); items.push(man);
+      lijst.hidden = false; inp.setAttribute("aria-expanded","true");
+    }
+    inp.addEventListener("input", () => {
+      if(st.modus==="manueel"){ st.naam = inp.value.trim(); return; }
+      st.modus = "zoek"; st.speler_id = null; st.naam = inp.value.trim();
+      clearTimeout(timer); if(ctrl) ctrl.abort();
+      const q = inp.value.trim();
+      if(q.replace(/\s/g,"").length < 3){ sluit(); return; }
+      if(!huidigeReeks()){
+        lijst.textContent = ""; items = [];
+        lijst.appendChild(el("li",{class:"info",text:"Kies eerst een reeks bovenaan. Dan zie je meteen wie speelgerechtigd is."}));
+        lijst.hidden = false; inp.setAttribute("aria-expanded","true"); return;
+      }
+      timer = setTimeout(async () => {
+        ctrl = new AbortController();
+        try{
+          const res = await rpc("club_ic_zoek_lid", {p_token:TOKEN, p_periode_id:periode.id, p_zoek:q, p_reeks:huidigeReeks()}, ctrl.signal);
+          if(inp.value.trim()===q) toon(Array.isArray(res) ? res : [], q);
+        }catch(e){
+          if(e.name!=="AbortError"){ lijst.textContent = ""; items = []; lijst.appendChild(el("li",{class:"info",text:"Zoeken lukt niet. Kies manueel invullen."})); const man = manOptie(q); lijst.appendChild(man); items.push(man); lijst.hidden = false; }
+        }
+      }, 250);
+    });
+    inp.addEventListener("keydown", e => {
+      if(lijst.hidden || !items.length) return;
+      if(e.key==="ArrowDown"||e.key==="ArrowUp"){
+        e.preventDefault();
+        actief = (actief + (e.key==="ArrowDown"?1:-1) + items.length) % items.length;
+        items.forEach((li,i)=>li.setAttribute("aria-selected", i===actief ? "true":"false"));
+        inp.setAttribute("aria-activedescendant", items[actief].id||""); items[actief].scrollIntoView({block:"nearest"});
+      } else if(e.key==="Enter" && actief>=0){ e.preventDefault(); items[actief].dispatchEvent(new MouseEvent("mousedown")); }
+      else if(e.key==="Escape"){ sluit(); }
+    });
+    inp.addEventListener("blur", () => setTimeout(sluit, 120));
+    wis.addEventListener("click", () => { zet("zoek","",null); inp.focus(); });
+    st.el = wrap; st.input = inp;
+    return st;
+  }
+
+  /* ---------- Periode en reeksen ---------- */
+  function toonPeriode(p){
+    periode = p; gekozenCat = null;
+    const info = [];
+    if(p.voorlopig) info.push("De reeksen en speelmomenten zijn voorlopig overgenomen uit het reglement " + p.reeks_jaar + ". Wijzigingen volgen zodra Tennis en Padel Vlaanderen het nieuwe reglement publiceert.");
+    if(p.deadline) info.push("Inschrijven kan tot en met " + datum(p.deadline) + ".");
+    if(p.bedrag_eur != null) info.push("Inschrijvingsgeld: " + euro(p.bedrag_eur) + (p.bedrag_per==="speler" ? " per speler." : " per ploeg."));
+    info.push("Spelers zoek je in de ledenlijst " + p.leden_jaar + ".");
+    $("periodeInfo").textContent = info.join(" "); $("periodeInfo").hidden = false;
+    const cats = [], seen = new Set();
+    p.reeksen.forEach(r => { const k = catKey(r); if(!seen.has(k)){ seen.add(k); cats.push(r); } });
+    const multiComp = new Set(p.reeksen.map(r=>r.competitie)).size > 1;
+    const box = $("categorieen"); box.textContent = "";
+    cats.forEach((r,i) => {
+      const inp = el("input",{type:"radio",name:"categorie",id:"cat"+i,value:catKey(r)});
+      inp.addEventListener("change", ()=>{ gekozenCat = inp.value; toonReeksen(); });
+      box.appendChild(el("label",{class:"chip"}, inp, el("span",{text:(CAT_NAAM[r.categorie]||r.categorie) + (multiComp ? " · " + r.competitie.replace(/^Padel /,"") : "")})));
+    });
+    $("reeksen").textContent = ""; $("fsReeks").hidden = true; $("keuze").hidden = true;
+    toonKapitein();
+  }
+  function toonReeksen(){
+    const box = $("reeksen"); box.textContent = ""; $("keuze").hidden = true;
+    periode.reeksen.filter(r => catKey(r)===gekozenCat).forEach((r,i) => {
+      const inp = el("input",{type:"radio",name:"reeks",id:"reeks"+i,value:r.reeks});
+      inp.addEventListener("change", () => { toonKeuze(r); herControle(); });
+      box.appendChild(el("label",{class:"reeks"}, inp, el("span",{},
+        el("b",{text:reeksNaam(r)}),
+        el("span",{class:"dag",text:r.dag_uur || "Speelmoment volgt"}),
+        el("small",{text:r.punten_min + "–" + r.punten_max + " ptn"}),
+        r.min_leeftijd >= 18 ? el("small",{text:"vanaf " + r.min_leeftijd + " jaar"}) : null)));
+    });
+    $("fsReeks").hidden = false;
+  }
+  function toonKeuze(r){
+    const k = $("keuze"); k.textContent = "";
+    k.append("Je schrijft in voor ", el("strong",{text:(CAT_NAAM[r.categorie]||r.categorie) + " " + reeksNaam(r)}));
+    if(r.dag_uur){
+      k.append(". Standaard speelmoment: ", el("strong",{text:r.dag_uur}));
+      if(r.afwijkend) k.append(" (de thuisploeg mag starten " + r.afwijkend + ")");
+      k.append(". Controleer of je ploeg dan beschikbaar is.");
+    } else k.append(". Het speelmoment wordt later bevestigd.");
+    k.hidden = false;
+  }
+
+  /* ---------- Kapitein: het aangemelde lid ---------- */
+  function toonKapitein(){
+    $("kapNaam").textContent = kapitein.naam;
+    const b = $("kapBadge");
+    if(kapitein.klassement == null && kapitein.ongeldig == null){ b.hidden = true; return; }
+    b.hidden = false;
+    if(kapitein.ongeldig){ b.className = "badge man"; b.textContent = "Niet speelgerechtigd in deze reeks (" + kapitein.ongeldig + "). Geen probleem als je zelf niet meespeelt."; }
+    else { b.className = "badge ok"; b.textContent = "Lid " + periode.leden_jaar + (kapitein.klassement ? " · " + kapitein.klassement : ""); }
+  }
+  async function controleerKapitein(reeks){
+    try{
+      const res = await rpc("club_ic_zoek_lid", {p_token:TOKEN, p_periode_id:periode.id, p_zoek:kapitein.naam, p_reeks:reeks});
+      const m = (Array.isArray(res)?res:[]).find(x => x.speler_id===kapitein.speler_id);
+      if(huidigeReeks()!==reeks) return;
+      if(m){ kapitein.ongeldig = m.speelgerechtigd ? null : (m.reden || "niet speelgerechtigd"); kapitein.klassement = m.klassement; }
+      else { kapitein.ongeldig = "niet in de ledenlijst " + periode.leden_jaar; kapitein.klassement = null; }
+      toonKapitein();
+    }catch(_){}
+  }
+
+  /* ---------- Speelgerechtigdheid en rotaties ---------- */
+  async function herControle(){
+    const reeks = huidigeReeks(); if(!reeks) return;
+    controleerKapitein(reeks);
+    await Promise.all(team.filter(v => v.modus==="lid").map(async v => {
+      try{
+        const res = await rpc("club_ic_zoek_lid", {p_token:TOKEN, p_periode_id:periode.id, p_zoek:v.naam, p_reeks:reeks});
+        const m = (Array.isArray(res)?res:[]).find(x => x.speler_id===v.speler_id);
+        if(m && huidigeReeks()===reeks) v.markeer(m.speelgerechtigd, m.reden, m.klassement);
+      }catch(_){}
+    }));
+    rotatieCheck();
+  }
+  function rotatieCheck(){
+    const box = $("rotatieInfo");
+    const rid = huidigeReeks(); const r = rid && periode ? periode.reeksen.find(x => x.reeks===rid) : null;
+    const pts = team.filter(v => v.modus==="lid" && !v.ongeldig).map(v => punten(v.klassement));
+    if(!kapitein.ongeldig && kapitein.klassement) pts.push(punten(kapitein.klassement));
+    const p = pts.filter(x => x != null);
+    if(!r || p.length < 4){ box.hidden = true; return; }
+    let ok = 0, tot = 0; const n = p.length;
+    for(let a=0;a<n;a++)for(let b=a+1;b<n;b++)for(let c=b+1;c<n;c++)for(let d=c+1;d<n;d++){ tot++; const s = p[a]+p[b]+p[c]+p[d]; if(s>=r.punten_min && s<=r.punten_max) ok++; }
+    box.hidden = false;
+    if(ok===0){ box.removeAttribute("data-kind"); box.textContent = "Let op: met de gekozen spelers ligt geen enkele rotatie van 4 spelers tussen " + r.punten_min + " en " + r.punten_max + " punten, zoals het reglement vraagt (art. 6.6). Controleer je ploeg of kies een andere reeks."; }
+    else { box.setAttribute("data-kind","ok"); box.textContent = ok + " van de " + tot + " mogelijke rotaties van 4 gekoppelde spelers liggen binnen " + r.punten_min + "–" + r.punten_max + " punten."; }
+  }
+
+  function bouwVelden(){
+    const box = $("team"); box.textContent = ""; team = [];
+    for(let i=1;i<=MAX_TEAM;i++){ const v = ledenVeld("tg"+i,"Teamgenoot " + i, i<=MIN_TEAM); team.push(v); box.appendChild(v.el); }
+  }
+  function vulContact(){
+    const v = data.vorig; if(!v) return;
+    if(!$("email").value) $("email").value = v.email || "";
+    if(!$("gsm").value) $("gsm").value = v.gsm || "";
+    if(v.interclubleider != null && !document.querySelector("input[name=leider]:checked")) $(v.interclubleider ? "leiderJa" : "leiderNee").checked = true;
+  }
+
+  /* ---------- Verzenden ---------- */
+  function fout(msg, veld){
+    const f = $("formFout"); f.textContent = msg; f.hidden = false;
+    if(veld){ veld.setAttribute("aria-invalid","true"); veld.focus(); }
+  }
+  function waarde(v){
+    const t = v.input.value.trim();
+    if(v.modus==="lid") return {naam:v.naam, speler_id:v.speler_id};
+    if(t==="") return null;
+    return {naam:t, speler_id:null, open: v.modus==="zoek"};
+  }
+  async function verzend(e){
+    e.preventDefault();
+    document.querySelectorAll("[aria-invalid]").forEach(x=>x.removeAttribute("aria-invalid"));
+    $("formFout").hidden = true;
+    const email = $("email").value.trim();
+    const leider = document.querySelector("input[name=leider]:checked");
+    const reeks = document.querySelector("input[name=reeks]:checked");
+    if(!reeks) return fout(gekozenCat ? "Kies een niveau." : "Kies een categorie en een niveau.", document.querySelector(gekozenCat ? "input[name=reeks]" : "input[name=categorie]"));
+    const ongeldig = team.find(v => v.modus==="lid" && v.ongeldig);
+    if(ongeldig) return fout(ongeldig.naam + " is niet speelgerechtigd in deze reeks (" + ongeldig.ongeldig + "). Kies een andere reeks of een andere speler.", ongeldig.input);
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return fout("Vul een geldig e-mailadres in.", $("email"));
+    if(!leider) return fout("Duid aan of je de opleiding Interclubleider gevolgd hebt.", $("leiderJa"));
+    const namen = [], ids = [];
+    for(const v of team){
+      const w = waarde(v); if(!w) continue;
+      if(w.open) return fout("Kies " + v.input.value.trim() + " uit de lijst, of kies “manueel invullen”.", v.input);
+      namen.push(w.naam); ids.push(w.speler_id);
+    }
+    if(namen.length < MIN_TEAM){ const leeg = team.find(v => !waarde(v)); return fout("Vul minstens " + MIN_TEAM + " teamgenoten in.", leeg && leeg.input); }
+    const alle = ids.filter(x => x != null);
+    if(new Set(alle).size !== alle.length) return fout("Dezelfde speler staat er meer dan één keer in.");
+    const knop = $("verzend"); knop.disabled = true; knop.textContent = "Bezig met verzenden…";
+    try{
+      const res = await rpc("club_ic_inschrijven", {
+        p_token:TOKEN, p_periode_id:periode.id, p_reeks:reeks.value, p_email:email,
+        p_gsm:$("gsm").value.trim() || null, p_interclubleider: leider.value==="ja",
+        p_teamgenoten:namen, p_teamgenoten_ids:ids, p_opmerking:$("opmerking").value.trim() || null});
+      if(res && res.fout) return fout("Inschrijven lukte niet: " + res.fout + ".");
+      toonKlaar(res, reeks.value, namen.length + 1);
+      herlaad();
+    }catch(err){
+      if(err.message!=="niet aangemeld") fout(err.name==="AbortError" ? "De server antwoordt niet. Controleer je internetverbinding en probeer opnieuw." : "Verzenden lukte niet: " + err.message);
+    }finally{ knop.disabled = false; knop.textContent = "Ploeg inschrijven"; }
+  }
+  function toonKlaar(res, reeksId, spelers){
+    const r = periode.reeksen.find(x => x.reeks===reeksId);
+    $("refCode").textContent = res.referentie;
+    const sum = $("samenvatting"); sum.textContent = "";
+    [["Interclub", periode.seizoen + " " + periode.jaar],
+     ["Reeks", (CAT_NAAM[r.categorie]||r.categorie) + " " + reeksNaam(r) + " (" + r.punten_min + "–" + r.punten_max + " ptn)"],
+     ["Speelmoment", r.dag_uur || "volgt"],
+     ["Kapitein", res.kapitein_naam + (res.kapitein_speelgerechtigd===false ? " (niet speelgerechtigd in deze reeks, ter info)" : "")],
+     ["Spelers", String(spelers)]].forEach(([k,v]) => sum.append(el("dt",{text:k}), el("dd",{text:v})));
+    if(res.mollie_link){
+      let tekst = "Betaal het inschrijvingsgeld via Mollie en vermeld referentie " + res.referentie + ".";
+      if(res.bedrag_eur != null){
+        const totaal = res.bedrag_per==="speler" ? res.bedrag_eur * spelers : res.bedrag_eur;
+        tekst = "Te betalen: " + euro(totaal) + (res.bedrag_per==="speler" ? " (" + spelers + " spelers × " + euro(res.bedrag_eur) + ")" : "") + ". " + tekst;
+      }
+      $("betaalTekst").textContent = tekst; $("betaalLink").href = res.mollie_link;
+      $("betaal").hidden = false; $("geenBetaling").hidden = true;
+    } else { $("betaal").hidden = true; $("geenBetaling").hidden = false; }
+    $("form").hidden = true; $("klaar").hidden = false; window.scrollTo({top:0, behavior:"smooth"});
+  }
+  $("kopieer").addEventListener("click", async () => {
+    try{ await navigator.clipboard.writeText($("refCode").textContent); $("kopieer").textContent = "Gekopieerd"; }
+    catch(_){ const s = getSelection(), rg = document.createRange(); rg.selectNodeContents($("refCode")); s.removeAllRanges(); s.addRange(rg); $("kopieer").textContent = "Geselecteerd, kopieer met Ctrl+C"; }
+  });
+  $("nogEen").addEventListener("click", () => {
+    $("form").reset(); bouwVelden(); toonPeriode(periode); vulContact();
+    $("klaar").hidden = true; $("form").hidden = false; $("kopieer").textContent = "Kopieer referentie"; window.scrollTo({top:0});
+  });
+  $("form").addEventListener("submit", verzend);
+
+  /* ---------- Mijn ploegen ---------- */
+  function statusTags(x){
+    const t = el("div",{class:"tags"});
+    t.appendChild(el("span",{class:"tag " + (x.status==="geannuleerd" ? "weg" : x.status==="ingeschreven bij TV" ? "ok" : ""), text:x.status}));
+    t.appendChild(el("span",{class:"tag " + (x.betaalstatus==="betaald"||x.betaalstatus==="vrijgesteld" ? "ok" : x.betaalstatus==="open" ? "open" : "weg"), text:"betaling: " + x.betaalstatus}));
+    return t;
+  }
+  function toonMijn(){
+    const box = $("mijnLijst"); box.textContent = "";
+    if(!data.mijn.length){ box.appendChild(el("p",{class:"notice",text:"Je staat nog in geen enkele ingeschreven ploeg voor de komende interclub."})); return; }
+    data.mijn.forEach(x => {
+      const reeks = (CAT_NAAM[x.categorie]||x.categorie) + " " + reeksNaam(x);
+      const k = el("article",{class:"kaart"},
+        el("div",{class:"kop"}, el("b",{text:x.seizoen + " " + x.jaar + " · " + reeks}), el("code",{text:x.referentie})),
+        statusTags(x),
+        el("p",{class:"spelers"}, "Kapitein: " + x.kapitein + (x.ben_kapitein ? " (jij)" : "")),
+        el("p",{class:"spelers"}, "Teamgenoten: " + (x.teamgenoten||[]).join(", ")),
+        el("p",{class:"spelers"}, "Speelmoment: " + (x.dag_uur || "volgt") + " · " + x.punten_min + "–" + x.punten_max + " ptn"));
+      if(x.ben_kapitein && x.betaalstatus==="open" && x.mollie_link){
+        const a = el("a",{class:"btn pay",href:x.mollie_link,target:"_blank",rel:"noopener",text:"Betaal inschrijvingsgeld"});
+        k.append(el("p",{class:"hint",text:(x.te_betalen_eur != null ? "Te betalen: " + euro(x.te_betalen_eur) + ". " : "") + "Vermeld referentie " + x.referentie + "."}), a);
+      }
+      box.appendChild(k);
+    });
+  }
+
+  /* ---------- Kalender ---------- */
+  let kal = null;
+  const dagFmt = d => new Date(d).toLocaleDateString("nl-BE",{weekday:"long",day:"numeric",month:"long"});
+  const uurFmt = d => String(d).slice(11,16);
+  function ics(w){
+    // tijden zoals Tennis en Padel Vlaanderen ze geeft (lokale Belgische tijd); duur 3 uur als blok in de agenda
+    const t = String(w.datum).replace(/[-:]/g,"").slice(0,15);
+    const start = new Date(String(w.datum).slice(0,19)), eind = new Date(start.getTime() + 3*3600e3);
+    const p = n => String(n).padStart(2,"0");
+    const e = eind.getFullYear()+p(eind.getMonth()+1)+p(eind.getDate())+"T"+p(eind.getHours())+p(eind.getMinutes())+"00";
+    const tekst = s => String(s||"").replace(/[\\,;]/g, c => "\\" + c);
+    const titel = "Interclub " + w.ploeg + (w.thuis_uit==="thuis" ? " – " : " @ ") + w.tegenstander;
+    const inhoud = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//BTC Padel//Interclub//NL","BEGIN:VEVENT",
+      "UID:btc-ic-" + w.match_id + "-" + w.ploeg_id + "@btc-padel","DTSTAMP:" + new Date().toISOString().replace(/[-:]/g,"").slice(0,15) + "Z",
+      "DTSTART:" + t, "DTEND:" + e, "SUMMARY:" + tekst(titel),
+      "DESCRIPTION:" + tekst((w.competitie||"") + " " + (w.afdeling||"") + " · " + (w.ronde||"") + " · " + (w.thuis_uit==="thuis" ? "thuiswedstrijd BTC Wemmel" : "uitwedstrijd") + ". Eindtijd is een schatting."),
+      "END:VEVENT","END:VCALENDAR"].join("\r\n");
+    const a = el("a",{href:URL.createObjectURL(new Blob([inhoud],{type:"text/calendar"})),download:"interclub-" + w.match_id + ".ics"});
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+  async function laadKalender(){
+    const box = $("kalLijst");
+    if(!kal){ box.textContent = ""; box.appendChild(el("p",{class:"notice",text:"Laden…"}));
+      try{ kal = await rpc("club_ic_kalender", {p_token:TOKEN}); if(kal.fout) throw new Error(kal.fout); }
+      catch(e){ kal = null; if(e.message!=="niet aangemeld"){ box.textContent = ""; box.appendChild(el("p",{class:"notice","data-kind":"err",text:"Laden lukte niet: " + e.message})); } return; }
+    }
+    toonKalender();
+  }
+  function toonKalender(){
+    const box = $("kalLijst"); box.textContent = "";
+    const enkelMijn = document.querySelector("input[name=kalFilter]:checked").value==="mijn";
+    const lijst = kal.wedstrijden.filter(w => !enkelMijn || w.mijn);
+    const komend = lijst.filter(w => !w.gespeeld), gespeeld = lijst.filter(w => w.gespeeld).reverse();
+    if(!lijst.length){ box.appendChild(el("p",{class:"notice",text:enkelMijn ? "Geen wedstrijden van jouw ploegen in deze periode. Je ploeg verschijnt hier zodra je in de interclub gespeeld hebt of kapitein bent." : "Geen padelinterclubwedstrijden gepland. De kalender verschijnt zodra Tennis en Padel Vlaanderen de reeksen publiceert."})); return; }
+    function blok(titel, items, metScore){
+      if(!items.length) return;
+      box.appendChild(el("h2",{class:"dag-kop",text:titel}));
+      let dag = null, groep = null;
+      items.forEach(w => {
+        const d = String(w.datum).slice(0,10);
+        if(d!==dag){ dag = d; groep = el("div",{}); groep.appendChild(el("p",{class:"hint",style:"font-weight:600;margin:4px 0 6px",text:dagFmt(w.datum)})); box.appendChild(groep); }
+        const rechts = el("div",{class:"rechts"});
+        if(metScore && w.matchen_voor != null){
+          const k = w.matchen_voor > w.matchen_tegen ? "w" : w.matchen_voor < w.matchen_tegen ? "v" : "";
+          rechts.appendChild(el("span",{class:"score " + k,text:w.matchen_voor + "–" + w.matchen_tegen}));
+        } else if(!metScore){
+          const b = el("button",{type:"button",class:"ghost",text:"In agenda"}); b.addEventListener("click", () => ics(w)); rechts.appendChild(b);
+        }
+        groep.appendChild(el("div",{class:"wed" + (w.mijn ? " mijn" : "")},
+          el("span",{class:"uur",text:uurFmt(w.datum)}),
+          el("div",{class:"ploegen"}, el("b",{text:w.ploeg + (w.thuis_uit==="thuis" ? " – " : " @ ") + w.tegenstander}),
+            el("span",{text:[w.thuis_uit==="thuis" ? "Thuis" : "Uit", w.afdeling, w.ronde, w.kapitein ? "kapitein " + w.kapitein : null].filter(Boolean).join(" · ")})),
+          rechts));
+      });
+    }
+    blok("Komende wedstrijden", komend, false);
+    blok("Uitslagen", gespeeld, true);
+  }
+  document.querySelectorAll("input[name=kalFilter]").forEach(i => i.addEventListener("change", () => kal && toonKalender()));
+
+  /* ---------- Overzicht (commissie en bestuur) ---------- */
+  let ov = null;
+  async function laadOverzicht(){
+    const box = $("ovLijst"); box.textContent = ""; box.appendChild(el("p",{class:"notice",text:"Laden…"}));
+    try{
+      ov = await rpc("club_ic_overzicht", {p_token:TOKEN});
+      if(ov.fout){ box.textContent = ""; box.appendChild(el("p",{class:"notice","data-kind":"err",text:ov.fout})); return; }
+      const sel = $("ovPeriode"), keuze = sel.value;
+      sel.textContent = "";
+      ov.periodes.forEach(p => sel.appendChild(el("option",{value:p.id,text:p.seizoen + " " + p.jaar + (p.open ? " · open" : "")})));
+      const eerste = ov.periodes.find(p => p.open) || ov.periodes[0];
+      sel.value = keuze && ov.periodes.some(p => p.id===keuze) ? keuze : (eerste ? eerste.id : "");
+      toonOverzicht();
+    }catch(e){ if(e.message!=="niet aangemeld"){ box.textContent = ""; box.appendChild(el("p",{class:"notice","data-kind":"err",text:"Laden lukte niet: " + e.message})); } }
+  }
+  function kiesVeld(label, opties, waarde, opslaan){
+    const s = el("select",{"aria-label":label});
+    opties.forEach(o => { const op = el("option",{value:o,text:o}); if(o===waarde) op.selected = true; s.appendChild(op); });
+    s.addEventListener("change", () => opslaan(s.value, s));
+    return el("div",{class:"f"}, el("label",{text:label}), s);
+  }
+  function toonOverzicht(){
+    const box = $("ovLijst"); box.textContent = "";
+    const pid = $("ovPeriode").value;
+    const rijen = ov.inschrijvingen.filter(x => x.periode_id===pid);
+    const actief = rijen.filter(x => x.status!=="geannuleerd");
+    const tel = $("ovTelling"); tel.textContent = "";
+    [["ploegen", actief.length],
+     ["spelers", actief.reduce((s,x)=>s + (x.aantal_spelers||0), 0)],
+     ["betaald", actief.filter(x => x.betaalstatus==="betaald"||x.betaalstatus==="vrijgesteld").length],
+     ["bij TV", actief.filter(x => x.status==="ingeschreven bij TV").length],
+     ["na te kijken", actief.filter(x => !x.kapitein_gekoppeld || x.niet_gekoppeld > 0).length]]
+      .forEach(([k,v]) => tel.appendChild(el("span",{}, el("b",{text:String(v)}), " " + k)));
+    if(!rijen.length){ box.appendChild(el("p",{class:"notice",text:"Nog geen inschrijvingen voor deze interclub."})); return; }
+    rijen.forEach(x => {
+      const reeks = (CAT_NAAM[x.categorie]||x.categorie) + " " + reeksNaam(x);
+      const bew = el("span",{class:"bewaard","aria-live":"polite"});
+      const opslaan = veld => async (waarde, ctrl) => {
+        bew.textContent = "Bewaren…"; ctrl.disabled = true;
+        try{
+          const r = await rpc("club_ic_status", {p_token:TOKEN, p_id:x.id, p_veld:veld, p_waarde:waarde});
+          if(r.fout) throw new Error(r.fout);
+          if(veld==="status") x.status = waarde; else if(veld==="betaalstatus") x.betaalstatus = waarde; else x.notitie = waarde;
+          bew.textContent = "Bewaard"; toonTellingAlleen();
+        }catch(e){ bew.textContent = ""; alert("Bewaren lukte niet: " + e.message); }
+        finally{ ctrl.disabled = false; }
+      };
+      const notitie = el("textarea",{maxlength:"500","aria-label":"Interne notitie",placeholder:"Interne notitie (niet zichtbaar voor de kapitein)"});
+      notitie.value = x.notitie || "";
+      notitie.addEventListener("change", () => opslaan("notitie")(notitie.value, notitie));
+      const waarschuw = [];
+      if(!x.kapitein_gekoppeld) waarschuw.push("kapitein niet gekoppeld aan de ledenlijst");
+      if(x.niet_gekoppeld > 0) waarschuw.push(x.niet_gekoppeld + " teamgenoot/-genoten manueel ingevuld");
+      if(x.kapitein_speelgerechtigd===false) waarschuw.push("kapitein niet speelgerechtigd (" + (x.kapitein_reden||"") + ")");
+      box.appendChild(el("article",{class:"kaart"},
+        el("div",{class:"kop"}, el("b",{text:reeks}), el("code",{text:x.referentie})),
+        el("p",{class:"spelers"}, "Kapitein: " + x.kapitein + " · " + x.email + (x.gsm ? " · " + x.gsm : "") + (x.interclubleider ? " · interclubleider" : "")),
+        el("p",{class:"spelers"}, "Teamgenoten (" + (x.teamgenoten||[]).length + "): " + (x.teamgenoten||[]).join(", ")),
+        x.opmerking ? el("p",{class:"spelers"}, "Opmerking: " + x.opmerking) : null,
+        waarschuw.length ? el("p",{class:"notice",text:"Na te kijken: " + waarschuw.join("; ") + "."}) : null,
+        el("div",{class:"ov-velden"},
+          kiesVeld("Status", STATUS, x.status, opslaan("status")),
+          kiesVeld("Betaling" + (x.te_betalen_eur != null ? " (" + euro(x.te_betalen_eur) + ")" : ""), BETAAL, x.betaalstatus, opslaan("betaalstatus"))),
+        notitie, bew,
+        el("p",{class:"hint",text:"Ingeschreven op " + new Date(x.aangemaakt).toLocaleString("nl-BE",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})})));
+    });
+  }
+  function toonTellingAlleen(){ const s = scrollY; toonOverzicht(); scrollTo(0, s); }
+  $("ovPeriode").addEventListener("change", toonOverzicht);
+  $("ovCsv").addEventListener("click", () => {
+    if(!ov) return;
+    const pid = $("ovPeriode").value;
+    const q = v => '"' + String(v ?? "").replace(/"/g,'""') + '"';
+    const kop = ["referentie","categorie","reeks","punten","speelmoment","kapitein","email","gsm","interclubleider","teamgenoten","aantal_spelers","status","betaalstatus","te_betalen_eur","opmerking","notitie","ingeschreven"];
+    const rijen = ov.inschrijvingen.filter(x => x.periode_id===pid).map(x => [x.referentie, CAT_NAAM[x.categorie]||x.categorie, reeksNaam(x),
+      x.punten_min + "-" + x.punten_max, x.dag_uur, x.kapitein, x.email, x.gsm, x.interclubleider ? "ja" : "nee", (x.teamgenoten||[]).join(" | "),
+      x.aantal_spelers, x.status, x.betaalstatus, x.te_betalen_eur, x.opmerking, x.notitie, x.aangemaakt].map(q).join(";"));
+    const blob = new Blob(["﻿" + [kop.join(";"), ...rijen].join("\r\n")], {type:"text/csv;charset=utf-8"});
+    const a = el("a",{href:URL.createObjectURL(blob),download:"interclub-" + pid + ".csv"}); document.body.appendChild(a); a.click(); a.remove();
+  });
+
+  /* ---------- Afmelden en start ---------- */
+  $("afmelden").addEventListener("click", () => window.BTC.afmelden());
+  async function herlaad(){ try{ const d = await rpc("club_ic_data", {p_token:TOKEN}); if(!d.fout) data = d; }catch(_){} }
+  (async function start(){
+    if(!TOKEN) return;
+    try{
+      data = await rpc("club_ic_data", {p_token:TOKEN});
+      if(data.fout) throw new Error(data.fout);
+      $("laden").hidden = true;
+      $("wieNaam").textContent = data.ik.naam;
+      kapitein = {speler_id:data.ik.speler_id, naam:data.ik.naam, ongeldig:null, klassement:null};
+      $("tabOv").hidden = !data.beheer;
+      const periodes = data.periodes || [];
+      if(!periodes.length){
+        $("form").hidden = true;
+        $("paneIn").prepend(el("p",{class:"notice",text:"Er zijn momenteel geen interclubinschrijvingen open. Vragen? Contacteer de padelcommissie."}));
+      } else {
+        if(periodes.length > 1){
+          periodes.forEach((p,i) => {
+            const inp = el("input",{type:"radio",name:"periode",id:"per"+i,value:p.id});
+            if(i===0) inp.checked = true;
+            inp.addEventListener("change", ()=>{ bouwVelden(); toonPeriode(p); });
+            $("periodes").appendChild(el("label",{class:"chip"}, inp, el("span",{text:p.seizoen + " " + p.jaar})));
+          });
+          $("stapPeriode").hidden = false;
+        }
+        toonPeriode(periodes[0]); bouwVelden(); vulContact();
+      }
+      const h = location.hash;
+      toonTab(h==="#mijn" ? "tabMijn" : (h==="#overzicht" && data.beheer) ? "tabOv" : h==="#kalender" ? "tabKal"
+            : h==="#inschrijven" ? "tabIn" : periodes.length ? "tabIn" : "tabKal");
+    }catch(err){
+      if(err.message==="niet aangemeld") return;
+      $("laden").hidden = true;
+      $("fout").textContent = "De pagina kon niet geladen worden (" + (err.name==="AbortError" ? "geen antwoord van de server" : err.message) + "). Probeer later opnieuw of contacteer de padelcommissie.";
+      $("fout").hidden = false;
+    }
+  })();
+})();
+</script>
+</body>
+</html>
