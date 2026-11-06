@@ -42,7 +42,7 @@ a{color:var(--title2)}
 [hidden]{display:none!important}
 /* Gsm en smalle schermen: één kolom, zelfde volgorde als voorheen. */
 .kol,.groep,.beheer{display:contents}
-.beheer>*,#vbBlok{order:1}#app{order:2}#instellingen{order:3}#laden{order:4}
+.beheer>*,#vbBlok{order:1}#instellingen{order:3}#laden{order:4}
 .kal .note{margin:0}
 .kl-knop{display:none}
 /* Pc (vanaf 1024 px, aangemeld): links Mijn padel en Clubkalender, midden de onderdelen in één kader,
@@ -50,7 +50,7 @@ a{color:var(--title2)}
 @media (min-width:1024px){
   body.aangemeld .wrap{max-width:1360px}
   body.aangemeld main .wrap{grid-template-columns:minmax(300px,360px) minmax(0,1fr) minmax(260px,300px);grid-template-rows:auto auto;gap:16px 28px;align-items:stretch}
-  body.aangemeld .wrap>*,body.aangemeld .kol>*,body.aangemeld .beheer>*,body.aangemeld #app,body.aangemeld #instellingen,body.aangemeld #vbBlok,body.aangemeld #laden{order:0}
+  body.aangemeld .wrap>*,body.aangemeld .kol>*,body.aangemeld .beheer>*,body.aangemeld #instellingen,body.aangemeld #vbBlok,body.aangemeld #laden{order:0}
   body.aangemeld .kol-rechts{display:contents}
   body.aangemeld .kol-links{grid-column:1;grid-row:1;align-self:start;display:flex;flex-direction:column;gap:16px;min-width:0}
   body.aangemeld .kol-links .week{margin:0}
@@ -64,8 +64,8 @@ a{color:var(--title2)}
   body.aangemeld .kol-rboven{grid-column:3;grid-row:1;display:flex;flex-direction:column;gap:16px;min-width:0}
   body.aangemeld .kol-rboven .weergave{margin:0}
   body.aangemeld .kol-rboven>section:not([hidden]):last-of-type{flex:1 1 auto}
-  body.aangemeld .kol-rboven:has(#app[hidden]) #instellingen{flex:1 1 auto}
-  body.aangemeld #app,body.aangemeld #instellingen{align-content:start}
+  body.aangemeld #instellingen{flex:1 1 auto}
+  body.aangemeld #instellingen{align-content:start}
   /* Voettekst (enkel beheerders): Beheer en Bekijk de app als naast elkaar over de volle breedte. */
   body.aangemeld .kol-ronder{grid-column:1/-1;grid-row:2;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:stretch;min-width:0;
     border-top:1px solid var(--line);margin-top:16px;padding-top:24px}
@@ -103,7 +103,7 @@ header .wrap > div:nth-child(2){flex:1;min-width:0}
 .hit[aria-pressed=true]{border-color:var(--accent);outline:1px solid var(--accent)}
 .doe{justify-self:start;font:700 15px "League Spartan","Arial Narrow",Arial,sans-serif;letter-spacing:.06em;text-transform:uppercase;background:var(--accent);color:var(--surface);border:0;border-radius:8px;padding:10px 16px;cursor:pointer}
 .doe[disabled]{opacity:.45;cursor:default}
-.app{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--lime);border-radius:10px;padding:14px 16px;display:grid;gap:8px}
+.app{display:grid;gap:8px}
 .app .kop{display:flex;gap:12px;align-items:center}
 .app img{width:44px;height:44px;border-radius:10px;flex:none}
 .app .kop b{font-size:16px}.app p{margin:0;font-size:14px;color:var(--muted)}
@@ -266,11 +266,11 @@ a.wk.thuis{background:#DCE4D2;border-color:var(--accent)}
       <button type="button" class="tegel" data-thema="auto" role="radio" aria-label="Systeem"><span class="ring"><svg class="bal" viewBox="0 0 56 56" aria-hidden="true"><defs><clipPath id="balLinks"><rect x="0" y="0" width="28" height="56"/></clipPath><clipPath id="balRechts"><rect x="28" y="0" width="28" height="56"/></clipPath></defs><g clip-path="url(#balLinks)"><circle cx="28" cy="28" r="25" fill="#F3F1E9"/><path d="M8 13c6 5 6 25 0 30M48 13c-6 5-6 25 0 30" fill="none" stroke="#435B28" stroke-width="2.6" stroke-linecap="round"/></g><g clip-path="url(#balRechts)"><circle cx="28" cy="28" r="25" fill="#152B46"/><path d="M8 13c6 5 6 25 0 30M48 13c-6 5-6 25 0 30" fill="none" stroke="#C5E75A" stroke-width="2.6" stroke-linecap="round"/></g><circle cx="28" cy="28" r="25" fill="none" stroke="#7D8A6A" stroke-width="2"/></svg></span><span class="tl">Systeem</span></button>
     </div>
     </div>
-  </section>
-  <section class="app" id="app" hidden aria-labelledby="appTitel" data-kl="app">
-    <div class="kop kl-kop"><img src="app/apple-touch-icon.png" alt=""><div><b id="appTitel">BTC Padel als app</b><p>Zet de clubsite op je beginscherm: opent met één tik, zonder adresbalk.</p></div></div>
-    <div id="appUitleg"></div>
-    <div class="knoppen"><button class="doe" type="button" id="appInstalleer" hidden>Installeren</button><button class="later" type="button" id="appLater">Niet nu</button></div>
+    <div class="inst-deel app" id="app" hidden aria-labelledby="appTitel">
+      <div class="kop"><img src="app/apple-touch-icon.png" alt=""><div><b id="appTitel">BTC Padel als app</b><p>Zet de clubsite op je beginscherm: opent met één tik, zonder adresbalk.</p></div></div>
+      <div id="appUitleg"></div>
+      <div class="knoppen"><button class="doe" type="button" id="appInstalleer" hidden>Installeren</button><button class="later" type="button" id="appLater">Niet nu</button></div>
+    </div>
   </section>
   </div>
   <div class="kol kol-ronder">
