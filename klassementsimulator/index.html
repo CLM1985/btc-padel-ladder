@@ -2,6 +2,7 @@
 <html lang="nl">
 <head>
 <meta charset="utf-8">
+<script src="../thema.js"></script>
 <script src="../toegang.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <link rel="manifest" href="../manifest.webmanifest">
@@ -30,11 +31,11 @@
   --f-mono: "Montserrat", system-ui, sans-serif;
   --r: 8px;
 }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg: #0D1826; --surface: #152B46; --surface-2: #1A3352; --ink: #F3F1E9; --muted: #AEBBCB; --line: #2A4566;
   --accent: #C5E75A; --accent-ink: #152B46; --accent-soft: #243C2A; --ball: #C5E75A; --navy: #0A1420; --logo: #C5E75A;
   --good: #A6D46E; --good-soft: #1E3522; --warn: #E7946F; --warn-soft: #3A2418; --bad: #F2867A; --bad-soft: #3A1A18;
-  color-scheme: dark } }
+  color-scheme: dark }}
 :root[data-theme="dark"] {
   --bg: #0D1826; --surface: #152B46; --surface-2: #1A3352; --ink: #F3F1E9; --muted: #AEBBCB; --line: #2A4566;
   --accent: #C5E75A; --accent-ink: #152B46; --accent-soft: #243C2A; --ball: #C5E75A; --navy: #0A1420; --logo: #C5E75A;
