@@ -54,14 +54,12 @@ a{color:var(--title2)}
   body.aangemeld .kol-rechts{display:contents}
   body.aangemeld .kol-links{grid-column:1;grid-row:1/span 3;align-self:start;position:sticky;top:16px;display:flex;flex-direction:column;gap:16px;min-width:0}
   body.aangemeld .kol-links .week{margin:0}
-  body.aangemeld .kol-midden{grid-column:2;grid-row:1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-content:start;min-width:0;
+  body.aangemeld .kol-midden{grid-column:2;grid-row:1;display:flex;flex-direction:column;gap:18px;min-width:0;
     background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px}
   body.aangemeld .groep{display:flex;flex-direction:column;gap:10px;min-width:0}
-  body.aangemeld .groep-ladder,body.aangemeld .groep-interclub{grid-column:1/-1}
-  body.aangemeld .groep-tornooien,body.aangemeld .groep-lessen,body.aangemeld .groep-interclub{border-top:1px solid var(--line);padding-top:18px}
+  body.aangemeld .groep+.groep{border-top:1px solid var(--line);padding-top:18px}
   body.aangemeld .groep h2{margin:0}
-  body.aangemeld .groep .links{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
-  body.aangemeld .groep-tornooien .links,body.aangemeld .groep-lessen .links{grid-template-columns:1fr}
+  body.aangemeld .groep .links{grid-template-columns:1fr;gap:10px}
   body.aangemeld .kol-midden a.lk{background:var(--bg)}
   body.aangemeld .kol-rboven{grid-column:3;grid-row:1;display:flex;flex-direction:column;gap:16px;min-width:0}
   body.aangemeld .kol-rboven .weergave{margin:0}
