@@ -70,6 +70,9 @@ header .wrap > div:nth-child(2){flex:1;min-width:0}
 .chips-d{display:flex;gap:8px;flex-wrap:wrap}
 .kies-d{font:600 14px "Montserrat",system-ui,sans-serif;padding:7px 14px;border:1px solid var(--line);border-radius:999px;background:var(--bg);color:var(--fg);cursor:pointer}
 .kies-d[aria-checked=true]{background:var(--title2);border-color:var(--title2);color:var(--surface)}
+a.doe{text-decoration:none;display:inline-block}
+.weergave .later{background:none;border:0;padding:0;font:600 14px "Montserrat",system-ui,sans-serif;color:var(--muted);text-decoration:underline;cursor:pointer}
+.weergave .later:hover{color:var(--title2)}
 .week-inst{margin-left:auto;color:var(--muted);display:inline-flex}
 .week-inst:hover{color:var(--title2)}
 .tegels{display:flex;justify-content:space-around;gap:10px}
@@ -174,6 +177,22 @@ a.wk.thuis{background:#DCE4D2;border-color:var(--accent)}
         <button type="button" class="kies-d" data-dagen="30" role="radio">1 maand</button>
       </div>
     </div>
+    <div class="inst-deel" id="agenda" hidden>
+      <p class="inst-titel">Agenda koppelen</p>
+      <p class="inst-uitleg">Zet je interclub, lessen en ladderwedstrijden automatisch in je eigen agenda (Apple, Google, Outlook). Wijzigingen in de app komen vanzelf mee; Google ververst enkele keren per dag.</p>
+      <div class="knoppen" id="agendaUit"><button class="doe" type="button" id="agendaMaak">Agenda koppelen</button></div>
+      <div id="agendaAan" hidden style="display:grid;gap:8px">
+        <div class="knoppen">
+          <a class="doe" id="agendaApple" href="#">Apple Agenda</a>
+          <a class="doe" id="agendaGoogle" href="#" target="_blank" rel="noopener">Google Agenda</a>
+          <button class="later" type="button" id="agendaKopieer">Link kopiëren</button>
+        </div>
+        <p class="inst-uitleg" id="agendaStatus"></p>
+        <p class="inst-uitleg">Deel deze link niet: wie hem heeft, ziet jouw agenda. Gedeeld of verloren? Maak een nieuwe link; de oude werkt dan niet meer.</p>
+        <div class="knoppen"><button class="later" type="button" id="agendaNieuw">Nieuwe link maken</button><button class="later" type="button" id="agendaStop">Koppeling stoppen</button></div>
+      </div>
+      <p class="err" id="agendaFout" role="alert"></p>
+    </div>
     <div class="inst-deel" id="meld" hidden aria-labelledby="meldTitel">
     <div><p class="inst-titel" id="meldTitel">Meldingen op dit toestel</p><p class="inst-uitleg" id="meldUitleg">Krijg een melding als er iets voor jou gebeurt: een les ingepland of bevestigd, een plaats vrijgekomen, een tegenstander die een datum voorstelt of een uitslag invoert.</p></div>
     <p id="meldStatus" style="font-weight:600;color:var(--fg)"></p>
@@ -207,7 +226,7 @@ function terug(){
   const t=new URLSearchParams(location.search).get("terug")||"";
   return /^(ladder-inschrijving|tornooien|lessen|interclub|opstellingsplanner|klassementsimulator|beheer)\/([a-z-]+\.html)?(#[A-Za-z0-9-]*)?$/.test(t)?t:null;
 }
-function toonLogin(){ $("instDagen").hidden=true; $("meld").hidden=true; $("login").hidden=false; $("publiek").hidden=false; $("menu").hidden=true; $("wie").hidden=true; $("laden").hidden=true; }
+function toonLogin(){ $("instDagen").hidden=true; $("agenda").hidden=true; $("meld").hidden=true; $("login").hidden=false; $("publiek").hidden=false; $("menu").hidden=true; $("wie").hidden=true; $("laden").hidden=true; }
 async function toonMenu(){
   const tok=lees("btc-club-token"); if(!tok){toonLogin();return;}
   let m; try{ m=await rpc("club_mij",{p_token:tok}); }catch(e){ $("laden").textContent="De server antwoordt niet. Probeer later opnieuw."; return; }
@@ -219,7 +238,7 @@ async function toonMenu(){
   $("blokBeheer").hidden=!(m.onderdelen&&m.onderdelen.beheer);
   if(m.onderdelen&&m.onderdelen.trainer) $("lkLessenUitleg").textContent="Inschrijven, of als trainer lesmomenten openen";
   if(m.onderdelen&&m.onderdelen.hoofdcoach) $("lkLessenUitleg").textContent="Inschrijven, lesmomenten en het overzicht van alle coaches";
-  $("login").hidden=true; $("publiek").hidden=true; $("menu").hidden=false; $("laden").hidden=true; $("instDagen").hidden=false; $("meld").hidden=false;
+  $("login").hidden=true; $("publiek").hidden=true; $("menu").hidden=false; $("laden").hidden=true; $("instDagen").hidden=false; $("meld").hidden=false; $("agenda").hidden=false; toonAgenda("status").catch(()=>{ $("agenda").hidden=true; });
   toonMeld().catch(()=>{});
   toonWeek(tok).catch(()=>{ $("week").hidden=true; });
 }
@@ -236,6 +255,30 @@ function wkKaart(x){
     +(x.actie?`<span class="actie">${esc(x.actie)}</span>`:"");
   return a;
 }
+// Agenda koppelen: persoonlijke agendalink (iCal-abonnement) via de Edge Function "agenda"
+const AGENDA="https://povgjkvmzfrhhaxfanwn.supabase.co/functions/v1/agenda?t=";
+async function toonAgenda(actie){
+  $("agendaFout").textContent="";
+  const r=await rpc("club_agenda",{p_token:lees("btc-club-token"),p_actie:actie});
+  if(r.fout) throw new Error(r.fout);
+  const aan=!!r.feed; $("agendaAan").hidden=!aan; $("agendaUit").hidden=aan;
+  if(!aan) return;
+  const https=AGENDA+r.feed, webcal=https.replace(/^https:/,"webcal:");
+  $("agendaApple").href=webcal;
+  $("agendaGoogle").href="https://calendar.google.com/calendar/render?cid="+encodeURIComponent(webcal);
+  $("agendaKopieer").dataset.link=https;
+  $("agendaStatus").textContent=r.laatst_opgehaald?"Laatst opgehaald door je agenda: "+new Date(r.laatst_opgehaald).toLocaleString("nl-BE",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})+".":"Nog niet opgehaald door een agenda.";
+}
+const agendaFout=e=>{ $("agendaFout").textContent=e.message||String(e); };
+$("agendaMaak").addEventListener("click",()=>toonAgenda("maak").catch(agendaFout));
+$("agendaNieuw").addEventListener("click",()=>{ if(confirm("Nieuwe link maken? De oude link werkt dan niet meer; voeg de nieuwe opnieuw toe in je agenda.")) toonAgenda("nieuw").catch(agendaFout); });
+$("agendaStop").addEventListener("click",()=>{ if(confirm("Koppeling stoppen? Je agenda krijgt geen updates meer. Verwijder de agenda \"BTC Padel\" daarna ook in je agenda-app.")) toonAgenda("intrekken").catch(agendaFout); });
+$("agendaKopieer").addEventListener("click",async()=>{
+  const b=$("agendaKopieer");
+  try{ await navigator.clipboard.writeText(b.dataset.link); b.textContent="Gekopieerd"; }
+  catch(e){ prompt("Kopieer deze link:",b.dataset.link); }
+  setTimeout(()=>{ b.textContent="Link kopiëren"; },2000);
+});
 const DAGEN_OPTIES=[3,7,14,30];
 function dagenVooruit(){ let d=7; try{ d=parseInt(localStorage.getItem("btc-dagen"),10)||7; }catch(e){} return DAGEN_OPTIES.includes(d)?d:7; }
 function toonDagenKeuze(){
