@@ -132,6 +132,13 @@ dl.sum dt{color:var(--muted)} dl.sum dd{margin:0;min-width:0;overflow-wrap:anywh
 .wed{display:grid;grid-template-columns:4.2em 1fr auto;gap:4px 12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
 .wed+.wed{margin-top:8px}
 .wed.mijn{border-left:4px solid var(--accent)}
+.wed.thuis{background:var(--court-soft);border-color:var(--court)}
+.wed.thuis.mijn{border-left-color:var(--accent)}
+.wed .logo{width:22px;height:32px;object-fit:contain;background:#fff;border-radius:4px;padding:2px;vertical-align:middle;margin-right:8px}
+.legende{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted);align-items:center}
+.legende span{display:inline-flex;gap:6px;align-items:center}
+.legende i{display:inline-block;width:14px;height:14px;border-radius:4px;border:1px solid var(--court);background:var(--court-soft)}
+.legende i.mijn{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent)}
 .wed .uur{font:700 18px var(--display);font-variant-numeric:tabular-nums}
 .wed .ploegen b{display:block}
 .wed .ploegen span{font-size:13px;color:var(--muted)}
@@ -152,7 +159,7 @@ footer{font-size:13px;color:var(--muted);text-align:center}
 <main><div class="wrap">
   <nav class="tabs" role="tablist" aria-label="Onderdelen">
     <button type="button" role="tab" id="tabKal" aria-selected="false" aria-controls="paneKal">Kalender</button>
-    <button type="button" role="tab" id="tabIn" aria-selected="true" aria-controls="paneIn">Inschrijven</button>
+    <button type="button" role="tab" id="tabIn" aria-selected="true" aria-controls="paneIn">Voorjaarsinterclub</button>
     <button type="button" role="tab" id="tabMijn" aria-selected="false" aria-controls="paneMijn">Mijn ploegen</button>
     <button type="button" role="tab" id="tabOv" aria-selected="false" aria-controls="paneOv" hidden>Overzicht</button>
   </nav>
@@ -234,6 +241,7 @@ footer{font-size:13px;color:var(--muted);text-align:center}
         <label class="chip"><input type="radio" name="kalFilter" value="alle" checked><span>Alle BTC-ploegen</span></label>
         <label class="chip"><input type="radio" name="kalFilter" value="mijn"><span>Mijn ploegen</span></label>
       </div>
+      <div class="legende"><span><i></i>Thuiswedstrijd op BTC</span><span><i class="mijn"></i>Mijn ploeg</span></div>
       <div id="kalLijst" style="display:flex;flex-direction:column;gap:14px"></div>
       <p class="hint">Komende padelinterclubwedstrijden en uitslagen van de voorbije 3 weken, automatisch bijgewerkt van Tennis en Padel Vlaanderen. Zet een wedstrijd in je agenda met "In agenda".</p>
     </div>
@@ -650,9 +658,10 @@ footer{font-size:13px;color:var(--muted);text-align:center}
         } else if(!metScore){
           const b = el("button",{type:"button",class:"ghost",text:"In agenda"}); b.addEventListener("click", () => ics(w)); rechts.appendChild(b);
         }
-        groep.appendChild(el("div",{class:"wed" + (w.mijn ? " mijn" : "")},
+        const thuis = w.thuis_uit==="thuis";
+        groep.appendChild(el("div",{class:"wed" + (w.mijn ? " mijn" : "") + (thuis ? " thuis" : "")},
           el("span",{class:"uur",text:uurFmt(w.datum)}),
-          el("div",{class:"ploegen"}, el("b",{text:w.ploeg + (w.thuis_uit==="thuis" ? " – " : " @ ") + w.tegenstander}),
+          el("div",{class:"ploegen"}, el("b",{}, thuis ? el("img",{class:"logo",src:"../app/logo-btc.jpg",alt:"Thuis op BTC Wemmel",width:"22",height:"32"}) : null, w.ploeg + (thuis ? " – " : " @ ") + w.tegenstander),
             el("span",{text:[w.thuis_uit==="thuis" ? "Thuis" : "Uit", w.afdeling, w.ronde, w.kapitein ? "kapitein " + w.kapitein : null].filter(Boolean).join(" · ")})),
           rechts));
       });
@@ -765,7 +774,7 @@ footer{font-size:13px;color:var(--muted);text-align:center}
       const periodes = data.periodes || [];
       if(!periodes.length){
         $("form").hidden = true;
-        $("paneIn").prepend(el("p",{class:"notice",text:"Er zijn momenteel geen interclubinschrijvingen open. Vragen? Contacteer de padelcommissie."}));
+        $("paneIn").prepend(el("p",{class:"notice",text:"De inschrijvingen voor de voorjaarsinterclub 2027 openen na de berekening van de nieuwe padelklassementen (eind 2026). Je krijgt bericht zodra je je ploeg kan inschrijven."}));
       } else {
         if(periodes.length > 1){
           periodes.forEach((p,i) => {
