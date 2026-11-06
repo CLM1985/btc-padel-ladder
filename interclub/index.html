@@ -473,6 +473,7 @@ footer{font-size:13px;color:var(--muted);text-align:center}
   function toonPeriode(p){
     periode = p; gekozenCat = null; kapitein.ongeldig = null; kapitein.klassement = null;
     const info = [];
+    if(p.vooraf) info.push("Vooraf open voor commissie en bestuur: voor leden is de inschrijving nog niet open. Een inschrijving die je nu indient, is wel een echte inschrijving en je teamgenoten krijgen er een melding van.");
     if(p.voorlopig) info.push("De reeksen en speelmomenten zijn voorlopig overgenomen uit het reglement " + p.reeks_jaar + ". Wijzigingen volgen zodra Tennis en Padel Vlaanderen het nieuwe reglement publiceert.");
     if(p.deadline) info.push("Inschrijven kan tot en met " + datum(p.deadline) + ".");
     if(p.bedrag_eur != null) info.push("Inschrijvingsgeld: " + euro(p.bedrag_eur) + (p.bedrag_per==="speler" ? " per speler." : " per ploeg."));
