@@ -2,6 +2,7 @@
 <html lang="nl">
 <head>
 <meta charset="utf-8">
+<script src="thema.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#152B46">
@@ -19,7 +20,8 @@
 <style>
 /* Layout: padelrubriek-kop; één aanmelding (persoonlijke code) geeft toegang tot alle clubpagina's */
 :root{--bg:#F3F1E9;--surface:#fff;--band:#DFE7EE;--fg:#152B46;--muted:#55657A;--line:#DED7C8;--title2:#435B28;--accent:#435B28;--lime:#C5E75A;color-scheme:light}
-@media (prefers-color-scheme:dark){:root{--bg:#0E1A2A;--surface:#152B46;--band:#1B3554;--fg:#F3F1E9;--muted:#A3B1C1;--line:#2A4566;--title2:#C5E75A;--accent:#C5E75A;color-scheme:dark}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1A2A;--surface:#152B46;--band:#1B3554;--fg:#F3F1E9;--muted:#A3B1C1;--line:#2A4566;--title2:#C5E75A;--accent:#C5E75A;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0E1A2A;--surface:#152B46;--band:#1B3554;--fg:#F3F1E9;--muted:#A3B1C1;--line:#2A4566;--title2:#C5E75A;--accent:#C5E75A;color-scheme:dark}
 *{box-sizing:border-box}html,body{margin:0}
 body{background:var(--bg);color:var(--fg);font:15px/1.5 "Montserrat",system-ui,sans-serif}
 .wrap{max-width:820px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
@@ -59,6 +61,8 @@ header .wrap > div:nth-child(2){flex:1;min-width:0}
 .app .knoppen{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .app .later{background:none;border:0;padding:0;font:600 14px "Montserrat",system-ui,sans-serif;color:var(--muted);text-decoration:underline;cursor:pointer}
 .err{color:#A5432A;font-size:14px;margin:0;min-height:1em}
+.kies{font:600 14px "Montserrat",system-ui,sans-serif;padding:7px 14px;border:1px solid var(--line);border-radius:999px;background:var(--bg);color:var(--fg);cursor:pointer}
+.kies[aria-checked=true]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
 .week{background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--lime);border-radius:10px;padding:14px 16px;display:grid;gap:10px;margin-bottom:6px}
 .week-kop{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 .week-kop h2{margin:0;color:var(--fg);font-size:20px;letter-spacing:.06em}
@@ -68,7 +72,8 @@ header .wrap > div:nth-child(2){flex:1;min-width:0}
 a.wk{display:grid;grid-template-columns:3.4em 1fr;gap:2px 12px;align-items:center;text-decoration:none;color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:9px 12px;background:var(--bg)}
 a.wk:hover,a.wk:focus-visible{border-color:var(--accent)}
 a.wk.thuis{background:#DCE4D2;border-color:var(--accent)}
-@media (prefers-color-scheme:dark){a.wk.thuis{background:#24402B}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) a.wk.thuis{background:#24402B}}
+:root[data-theme="dark"] a.wk.thuis{background:#24402B}
 .wk .dag{grid-row:1/span 3;text-align:center;line-height:1.1}
 .wk .dag b{display:block;font:800 13px "League Spartan","Arial Narrow",Arial,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--title2)}
 .wk .dag span{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
@@ -77,7 +82,8 @@ a.wk.thuis{background:#DCE4D2;border-color:var(--accent)}
 .wk .tt img{width:16px;height:23px;object-fit:contain;background:#fff;border-radius:3px;padding:1px;vertical-align:-5px;margin-right:6px}
 .wk .dt{font-size:13px;color:var(--muted)}
 .wk .actie{grid-column:2;justify-self:start;margin-top:4px;font:700 13px "League Spartan","Arial Narrow",Arial,sans-serif;letter-spacing:.06em;text-transform:uppercase;background:var(--accent);color:var(--surface);border-radius:6px;padding:5px 10px}
-@media (prefers-color-scheme:dark){.err{color:#E58B6C}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .err{color:#E58B6C}}
+:root[data-theme="dark"] .err{color:#E58B6C}
 @media (max-width:560px){header .wrap{flex-wrap:wrap}.wie{text-align:left;justify-items:start;width:100%}}
 </style>
 </head>
@@ -133,6 +139,15 @@ a.wk.thuis{background:#DCE4D2;border-color:var(--accent)}
     <p id="meldStatus" style="font-weight:600;color:var(--fg)"></p>
     <div class="knoppen"><button class="doe" type="button" id="meldAan" hidden>Meldingen aanzetten</button><button class="later" type="button" id="meldTest" hidden>Stuur een testmelding</button><button class="later" type="button" id="meldUit" hidden>Meldingen uitzetten</button></div>
     <p class="err" id="meldFout" role="alert"></p>
+  </section>
+  <h2>Weergave</h2>
+  <section class="app" aria-labelledby="themaTitel">
+    <div><b id="themaTitel" style="font-size:16px">Kleuren van de app</b><p>Licht volgt de huisstijl van de club. Je keuze geldt voor dit toestel.</p></div>
+    <div class="knoppen" role="radiogroup" aria-label="Weergave" id="thema">
+      <button type="button" class="kies" data-thema="licht" role="radio">Licht</button>
+      <button type="button" class="kies" data-thema="donker" role="radio">Donker</button>
+      <button type="button" class="kies" data-thema="auto" role="radio">Zoals mijn toestel</button>
+    </div>
   </section>
   <div id="blokBeheer" hidden style="display:contents">
   <h2>Beheer</h2>
@@ -295,6 +310,10 @@ async function doeLogin(){
 }
 $("ldoe").addEventListener("click",doeLogin);
 $("lcode").addEventListener("keydown",e=>{if(e.key==="Enter"&&keuze)doeLogin();});
+document.querySelectorAll("#thema .kies").forEach(b=>{
+  b.setAttribute("aria-checked",String(b.dataset.thema===window.BTCThema.huidig));
+  b.addEventListener("click",()=>{ if(b.dataset.thema!==window.BTCThema.huidig) window.BTCThema.zet(b.dataset.thema); });
+});
 toonMenu();
 </script>
 </body>
