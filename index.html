@@ -67,13 +67,15 @@ a{color:var(--title2)}
   body.aangemeld .kol-rboven:has(#app[hidden]) #instellingen{flex:1 1 auto}
   body.aangemeld #app,body.aangemeld #instellingen{align-content:start}
   /* Voettekst (enkel beheerders): Beheer en Bekijk de app als naast elkaar over de volle breedte. */
-  body.aangemeld .kol-ronder{grid-column:1/-1;grid-row:2;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start;min-width:0;
+  body.aangemeld .kol-ronder{grid-column:1/-1;grid-row:2;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:stretch;min-width:0;
     border-top:1px solid var(--line);margin-top:16px;padding-top:24px}
+  body.aangemeld .kol-ronder>section{margin:0;align-content:start;border-radius:12px;padding:14px 16px}
   body.aangemeld .kol-ronder:not(:has(>section:not([hidden]))){display:none}
   body.aangemeld .beheer{display:grid;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
   body.aangemeld .beheer h2{margin:0;color:var(--fg);font-size:16px;letter-spacing:.04em;text-transform:none}
   body.aangemeld .beheer .links{grid-template-columns:1fr}
-  body.aangemeld .vb-keuze .kies-d{padding:6px 12px}
+  body.aangemeld .vb-keuze{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px}
+  body.aangemeld .vb-keuze .kies-d{padding:6px 8px;width:100%;text-align:center;white-space:nowrap}
   /* Inklappen: klein pijltje rechts in de titelregel; de toestand blijft per toestel bewaard. */
   body.aangemeld [data-kl]>.kl-kop{position:relative;padding-right:28px}
   body.aangemeld .kl-knop{display:inline-flex;position:absolute;right:0;top:50%;transform:translateY(-50%);width:28px;height:28px;align-items:center;justify-content:center;
