@@ -59,6 +59,24 @@ header .wrap > div:nth-child(2){flex:1;min-width:0}
 .app .knoppen{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .app .later{background:none;border:0;padding:0;font:600 14px "Montserrat",system-ui,sans-serif;color:var(--muted);text-decoration:underline;cursor:pointer}
 .err{color:#A5432A;font-size:14px;margin:0;min-height:1em}
+.week{background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--lime);border-radius:10px;padding:14px 16px;display:grid;gap:10px;margin-bottom:6px}
+.week-kop{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.week-kop h2{margin:0;color:var(--fg);font-size:20px;letter-spacing:.06em}
+.week-sub{font-size:13px;color:var(--muted)}
+.week-groep{margin:4px 0 6px;font:700 13px "League Spartan","Arial Narrow",Arial,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.week-lijst{display:grid;gap:8px}
+a.wk{display:grid;grid-template-columns:3.4em 1fr;gap:2px 12px;align-items:center;text-decoration:none;color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:9px 12px;background:var(--bg)}
+a.wk:hover,a.wk:focus-visible{border-color:var(--accent)}
+a.wk.thuis{background:#DCE4D2;border-color:var(--accent)}
+@media (prefers-color-scheme:dark){a.wk.thuis{background:#24402B}}
+.wk .dag{grid-row:1/span 3;text-align:center;line-height:1.1}
+.wk .dag b{display:block;font:800 13px "League Spartan","Arial Narrow",Arial,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--title2)}
+.wk .dag span{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.wk .soort{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.wk .tt{font-weight:600;font-size:15px;line-height:1.3}
+.wk .tt img{width:16px;height:23px;object-fit:contain;background:#fff;border-radius:3px;padding:1px;vertical-align:-5px;margin-right:6px}
+.wk .dt{font-size:13px;color:var(--muted)}
+.wk .actie{grid-column:2;justify-self:start;margin-top:4px;font:700 13px "League Spartan","Arial Narrow",Arial,sans-serif;letter-spacing:.06em;text-transform:uppercase;background:var(--accent);color:var(--surface);border-radius:6px;padding:5px 10px}
 @media (prefers-color-scheme:dark){.err{color:#E58B6C}}
 @media (max-width:560px){header .wrap{flex-wrap:wrap}.wie{text-align:left;justify-items:start;width:100%}}
 </style>
@@ -83,6 +101,13 @@ header .wrap > div:nth-child(2){flex:1;min-width:0}
   </nav>
   </div>
   <div id="menu" hidden style="display:contents">
+  <section class="week" id="week" aria-labelledby="weekTitel">
+    <div class="week-kop"><h2 id="weekTitel">Mijn padel</h2><span class="week-sub">komende 7 dagen</span></div>
+    <div id="weekTe" hidden><p class="week-groep">Te doen</p><div class="week-lijst" id="weekTeLijst"></div></div>
+    <div id="weekPlan" hidden><p class="week-groep">Gepland</p><div class="week-lijst" id="weekPlanLijst"></div></div>
+    <p class="note" id="weekLeeg" hidden>Niets gepland deze week en geen openstaande acties.</p>
+    <p class="note" id="weekLaden">Laden…</p>
+  </section>
   <h2>Ladder</h2>
   <nav class="links" aria-label="Ladder">
     <a class="lk" href="ladder-inschrijving/app.html"><b>Mijn ladder</b><span>Wedstrijden, agenda en stand</span></a>
@@ -153,6 +178,29 @@ async function toonMenu(){
   if(m.onderdelen&&m.onderdelen.hoofdcoach) $("lkLessenUitleg").textContent="Inschrijven, lesmomenten en het overzicht van alle coaches";
   $("login").hidden=true; $("publiek").hidden=true; $("menu").hidden=false; $("laden").hidden=true;
   toonMeld().catch(()=>{});
+  toonWeek(tok).catch(()=>{ $("week").hidden=true; });
+}
+// Mijn padel: komende 7 dagen + openstaande acties (één functie in de database)
+const SOORT={interclub:"Interclub",les:"Les",ladder:"Ladder"};
+function wkKaart(x){
+  const a=document.createElement("a"); a.className="wk"+(x.thuis?" thuis":""); a.href=x.url||"#";
+  let dag="",uur="";
+  if(x.wanneer){ const d=new Date(x.wanneer); dag=d.toLocaleDateString("nl-BE",{weekday:"short"}).replace(".",""); uur=d.toLocaleDateString("nl-BE",{day:"numeric",month:"numeric"})+" "+x.wanneer.slice(11,16); }
+  a.innerHTML=`<div class="dag"><b>${esc(dag||"—")}</b><span>${esc(uur)}</span></div>`
+    +`<div class="soort">${esc(SOORT[x.soort]||x.soort)}</div>`
+    +`<div class="tt">${x.thuis?'<img src="app/logo-btc.jpg" alt="Thuis op BTC">':""}${esc(x.titel)}</div>`
+    +(x.detail?`<div class="dt">${esc(x.detail)}</div>`:"")
+    +(x.actie?`<span class="actie">${esc(x.actie)}</span>`:"");
+  return a;
+}
+async function toonWeek(tok){
+  const r=await rpc("club_mijn_week",{p_token:tok});
+  $("weekLaden").hidden=true;
+  if(r.fout){ $("week").hidden=true; return; }
+  const te=r.items.filter(x=>x.actie), plan=r.items.filter(x=>!x.actie);
+  $("weekTeLijst").replaceChildren(...te.map(wkKaart)); $("weekTe").hidden=!te.length;
+  $("weekPlanLijst").replaceChildren(...plan.map(wkKaart)); $("weekPlan").hidden=!plan.length;
+  $("weekLeeg").hidden=r.items.length>0;
 }
 // Meldingen (web push): enkel na toestemming; op iPhone enkel in de geïnstalleerde app
 const MELD={
