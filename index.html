@@ -52,7 +52,7 @@ a{color:var(--title2)}
   body.aangemeld main .wrap{grid-template-columns:minmax(300px,360px) minmax(0,1fr) minmax(260px,300px);grid-template-rows:auto auto;gap:16px 28px;align-items:stretch}
   body.aangemeld .wrap>*,body.aangemeld .kol>*,body.aangemeld .beheer>*,body.aangemeld #app,body.aangemeld #instellingen,body.aangemeld #vbBlok,body.aangemeld #laden{order:0}
   body.aangemeld .kol-rechts{display:contents}
-  body.aangemeld .kol-links{grid-column:1;grid-row:1;align-self:start;position:sticky;top:16px;display:flex;flex-direction:column;gap:16px;min-width:0}
+  body.aangemeld .kol-links{grid-column:1;grid-row:1;align-self:start;display:flex;flex-direction:column;gap:16px;min-width:0}
   body.aangemeld .kol-links .week{margin:0}
   body.aangemeld .kol-midden{grid-column:2;grid-row:1;align-self:start;display:flex;flex-direction:column;gap:18px;min-width:0;
     background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px}
@@ -78,7 +78,7 @@ a{color:var(--title2)}
   body.aangemeld .vb-keuze .kies-d{padding:6px 8px;width:100%;text-align:center;white-space:nowrap}
   /* Inklappen: klein pijltje rechts in de titelregel; de toestand blijft per toestel bewaard. */
   body.aangemeld [data-kl]>.kl-kop{position:relative;padding-right:28px}
-  body.aangemeld .kl-knop{display:inline-flex;position:absolute;right:0;top:50%;transform:translateY(-50%);width:28px;height:28px;align-items:center;justify-content:center;
+  body.aangemeld .kl-knop{display:inline-flex;position:absolute;right:0;top:0;width:28px;height:28px;align-items:center;justify-content:center;
     background:none;border:0;border-radius:6px;padding:0;color:var(--muted);cursor:pointer}
   body.aangemeld .kl-knop:hover{color:var(--fg);background:var(--band)}
   body.aangemeld .kl-knop:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
