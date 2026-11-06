@@ -72,21 +72,22 @@ a{color:var(--title2)}
   body.aangemeld .ovz-titel{display:block}
   body.aangemeld .vb-keuze{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px}
   body.aangemeld .vb-keuze .kies-d{padding:6px 8px;width:100%;text-align:center;white-space:nowrap}
-  /* Inklappen: klein pijltje rechts in de titelregel; de toestand blijft per toestel bewaard. */
-  body.aangemeld [data-kl]>.kl-kop{position:relative;padding-right:28px}
-  body.aangemeld .kl-knop{display:inline-flex;position:absolute;right:0;top:0;width:28px;height:28px;align-items:center;justify-content:center;
-    background:none;border:0;border-radius:6px;padding:0;color:var(--muted);cursor:pointer}
-  body.aangemeld .kl-knop:hover{color:var(--fg);background:var(--band)}
-  body.aangemeld .kl-knop:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-  body.aangemeld .kl-knop svg{width:16px;height:16px;transition:transform .15s}
-  body.aangemeld [data-kl].dicht>.kl-kop>.kl-knop svg{transform:rotate(-90deg)}
-  body.aangemeld [data-kl].dicht>:not(.kl-kop){display:none!important}
-  body.aangemeld [data-kl].dicht{flex:0 0 auto!important}
-  body.aangemeld [data-kl].dicht>.kl-kop .inst-uitleg,body.aangemeld [data-kl].dicht>.kop p{display:none}
-  body.aangemeld [data-kl].dicht>.kop img{width:28px;height:28px;border-radius:7px}
-  body.aangemeld .inst-deel>.kl-kop{cursor:pointer}
 }
-@media (min-width:1024px) and (prefers-reduced-motion:reduce){ .kl-knop svg{transition:none} }
+/* Inklappen (pc en gsm): klein pijltje rechts in de titelregel; de toestand blijft per toestel bewaard. */
+body.aangemeld [data-kl]>.kl-kop{position:relative;padding-right:28px}
+body.aangemeld .kl-knop{display:inline-flex;position:absolute;right:0;top:0;width:28px;height:28px;align-items:center;justify-content:center;
+    background:none;border:0;border-radius:6px;padding:0;color:var(--muted);cursor:pointer}
+body.aangemeld .kl-knop:hover{color:var(--fg);background:var(--band)}
+body.aangemeld .kl-knop:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+body.aangemeld .kl-knop svg{width:16px;height:16px;transition:transform .15s}
+body.aangemeld [data-kl].dicht>.kl-kop>.kl-knop svg{transform:rotate(-90deg)}
+body.aangemeld [data-kl].dicht>:not(.kl-kop){display:none!important}
+body.aangemeld [data-kl].dicht{flex:0 0 auto!important}
+body.aangemeld [data-kl].dicht>.kl-kop .inst-uitleg,body.aangemeld [data-kl].dicht>.kop p{display:none}
+body.aangemeld [data-kl].dicht>.kop img{width:28px;height:28px;border-radius:7px}
+body.aangemeld .inst-deel>.kl-kop{cursor:pointer}
+@media (max-width:1023px){ body.aangemeld [data-kl]>.kl-kop{padding-right:40px} body.aangemeld .kl-knop{width:36px;height:36px;top:-6px} }
+@media (prefers-reduced-motion:reduce){ .kl-knop svg{transition:none} }
 header .wrap > div:nth-child(2){flex:1;min-width:0}
 .wie{font-size:14px;text-align:right;display:grid;gap:4px;justify-items:end}
 .wie button{background:none;border:0;padding:0;font:600 14px inherit;font-family:inherit;color:var(--title2);text-decoration:underline;cursor:pointer}
@@ -336,7 +337,7 @@ async function toonMenu(){
   toonMeld().catch(()=>{});
   toonWeek(tok).catch(()=>{ $("week").hidden=true; });
 }
-// Inklapbare kaarten op pc (Mijn padel, Clubkalender, Instellingen, app, Beheer, Bekijk als). Toestand per toestel.
+// Inklapbare kaarten op pc en gsm (Mijn padel, Clubkalender, Instellingen, app, Beheer, Bekijk als). Toestand per toestel.
 (function(){
   // Standaard dicht: Beheer, Bekijk als en de drie onderdelen binnen Instellingen. Daarna onthoudt elk toestel de keuze per kaart.
   const STANDAARD_DICHT=["beheer","voorbeeld","inst-dagen","inst-agenda","inst-meld","inst-app"];
