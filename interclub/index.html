@@ -293,7 +293,8 @@ footer{font-size:13px;color:var(--muted);text-align:center}
   }
   const euro = n => new Intl.NumberFormat("nl-BE",{style:"currency",currency:"EUR"}).format(n);
   const datum = d => new Date(String(d).slice(0,10)+"T12:00:00").toLocaleDateString("nl-BE",{day:"numeric",month:"long",year:"numeric"});
-  const reeksNaam = r => /^\d{2,}$/.test(r.afdeling) ? "P" + r.afdeling : "Reeks " + r.afdeling;
+  const reeksNaam = r => r.afdeling == null ? "" : /^\d{2,}$/.test(r.afdeling) ? "P" + r.afdeling : "Reeks " + r.afdeling;
+  const veiligeLink = u => /^https:\/\//i.test(String(u||"")) ? u : null;
   const catKey = r => r.competitie + "|" + r.categorie;
   const punten = k => { const m = /(\d+)/.exec(k||""); return m ? parseInt(m[1],10) : null; };
   const huidigeReeks = () => { const r = document.querySelector("input[name=reeks]:checked"); return r ? r.value : null; };
@@ -399,7 +400,7 @@ footer{font-size:13px;color:var(--muted);text-align:center}
 
   /* ---------- Periode en reeksen ---------- */
   function toonPeriode(p){
-    periode = p; gekozenCat = null;
+    periode = p; gekozenCat = null; kapitein.ongeldig = null; kapitein.klassement = null;
     const info = [];
     if(p.voorlopig) info.push("De reeksen en speelmomenten zijn voorlopig overgenomen uit het reglement " + p.reeks_jaar + ". Wijzigingen volgen zodra Tennis en Padel Vlaanderen het nieuwe reglement publiceert.");
     if(p.deadline) info.push("Inschrijven kan tot en met " + datum(p.deadline) + ".");
@@ -554,7 +555,7 @@ footer{font-size:13px;color:var(--muted);text-align:center}
      ["Speelmoment", r.dag_uur || "volgt"],
      ["Kapitein", res.kapitein_naam + (res.kapitein_speelgerechtigd===false ? " (niet speelgerechtigd in deze reeks, ter info)" : "")],
      ["Spelers", String(spelers)]].forEach(([k,v]) => sum.append(el("dt",{text:k}), el("dd",{text:v})));
-    if(res.mollie_link){
+    if(veiligeLink(res.mollie_link)){
       let tekst = "Betaal het inschrijvingsgeld via Mollie en vermeld referentie " + res.referentie + ".";
       if(res.bedrag_eur != null){
         const totaal = res.bedrag_per==="speler" ? res.bedrag_eur * spelers : res.bedrag_eur;
@@ -593,7 +594,7 @@ footer{font-size:13px;color:var(--muted);text-align:center}
         el("p",{class:"spelers"}, "Kapitein: " + x.kapitein + (x.ben_kapitein ? " (jij)" : "")),
         el("p",{class:"spelers"}, "Teamgenoten: " + (x.teamgenoten||[]).join(", ")),
         el("p",{class:"spelers"}, "Speelmoment: " + (x.dag_uur || "volgt") + " · " + x.punten_min + "–" + x.punten_max + " ptn"));
-      if(x.ben_kapitein && x.betaalstatus==="open" && x.mollie_link){
+      if(x.ben_kapitein && x.betaalstatus==="open" && veiligeLink(x.mollie_link)){
         const a = el("a",{class:"btn pay",href:x.mollie_link,target:"_blank",rel:"noopener",text:"Betaal inschrijvingsgeld"});
         k.append(el("p",{class:"hint",text:(x.te_betalen_eur != null ? "Te betalen: " + euro(x.te_betalen_eur) + ". " : "") + "Vermeld referentie " + x.referentie + "."}), a);
       }
@@ -686,6 +687,12 @@ footer{font-size:13px;color:var(--muted);text-align:center}
     const box = $("ovLijst"); box.textContent = "";
     const pid = $("ovPeriode").value;
     const rijen = ov.inschrijvingen.filter(x => x.periode_id===pid);
+    toonTelling();
+    if(!rijen.length){ box.appendChild(el("p",{class:"notice",text:"Nog geen inschrijvingen voor deze interclub."})); return; }
+    rijen.forEach(x => kaartOverzicht(box, x));
+  }
+  function toonTelling(){
+    const rijen = ov.inschrijvingen.filter(x => x.periode_id===$("ovPeriode").value);
     const actief = rijen.filter(x => x.status!=="geannuleerd");
     const tel = $("ovTelling"); tel.textContent = "";
     [["ploegen", actief.length],
@@ -694,8 +701,9 @@ footer{font-size:13px;color:var(--muted);text-align:center}
      ["bij TV", actief.filter(x => x.status==="ingeschreven bij TV").length],
      ["na te kijken", actief.filter(x => !x.kapitein_gekoppeld || x.niet_gekoppeld > 0).length]]
       .forEach(([k,v]) => tel.appendChild(el("span",{}, el("b",{text:String(v)}), " " + k)));
-    if(!rijen.length){ box.appendChild(el("p",{class:"notice",text:"Nog geen inschrijvingen voor deze interclub."})); return; }
-    rijen.forEach(x => {
+  }
+  function kaartOverzicht(box, x){
+    {
       const reeks = (CAT_NAAM[x.categorie]||x.categorie) + " " + reeksNaam(x);
       const bew = el("span",{class:"bewaard","aria-live":"polite"});
       const opslaan = veld => async (waarde, ctrl) => {
@@ -703,8 +711,8 @@ footer{font-size:13px;color:var(--muted);text-align:center}
         try{
           const r = await rpc("club_ic_status", {p_token:TOKEN, p_id:x.id, p_veld:veld, p_waarde:waarde});
           if(r.fout) throw new Error(r.fout);
-          if(veld==="status") x.status = waarde; else if(veld==="betaalstatus") x.betaalstatus = waarde; else x.notitie = waarde;
-          bew.textContent = "Bewaard"; toonTellingAlleen();
+          if(veld==="status") x.status = waarde; else if(veld==="betaalstatus") x.betaalstatus = waarde; else x.notitie = waarde.trim();
+          bew.textContent = "Bewaard"; toonTelling();
         }catch(e){ bew.textContent = ""; alert("Bewaren lukte niet: " + e.message); }
         finally{ ctrl.disabled = false; }
       };
@@ -726,14 +734,14 @@ footer{font-size:13px;color:var(--muted);text-align:center}
           kiesVeld("Betaling" + (x.te_betalen_eur != null ? " (" + euro(x.te_betalen_eur) + ")" : ""), BETAAL, x.betaalstatus, opslaan("betaalstatus"))),
         notitie, bew,
         el("p",{class:"hint",text:"Ingeschreven op " + new Date(x.aangemaakt).toLocaleString("nl-BE",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})})));
-    });
+    }
   }
-  function toonTellingAlleen(){ const s = scrollY; toonOverzicht(); scrollTo(0, s); }
   $("ovPeriode").addEventListener("change", toonOverzicht);
   $("ovCsv").addEventListener("click", () => {
     if(!ov) return;
     const pid = $("ovPeriode").value;
-    const q = v => '"' + String(v ?? "").replace(/"/g,'""') + '"';
+    // aanhalingstekens verdubbelen; waarden die met = + - @ beginnen niet als formule laten uitvoeren in Excel
+    const q = v => { let t = String(v ?? ""); if(/^[=+\-@\t\r]/.test(t)) t = "'" + t; return '"' + t.replace(/"/g,'""') + '"'; };
     const kop = ["referentie","categorie","reeks","punten","speelmoment","kapitein","email","gsm","interclubleider","teamgenoten","aantal_spelers","status","betaalstatus","te_betalen_eur","opmerking","notitie","ingeschreven"];
     const rijen = ov.inschrijvingen.filter(x => x.periode_id===pid).map(x => [x.referentie, CAT_NAAM[x.categorie]||x.categorie, reeksNaam(x),
       x.punten_min + "-" + x.punten_max, x.dag_uur, x.kapitein, x.email, x.gsm, x.interclubleider ? "ja" : "nee", (x.teamgenoten||[]).join(" | "),
