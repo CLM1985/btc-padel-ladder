@@ -142,17 +142,20 @@ th{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mut
 .namen .r{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .namen select{font-size:.78rem;padding:2px 4px}
 .acties{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
-/* Domeinkeuze: even brede knoppen in een raster (2 per rij; 3 per rij met de groepsnaam links zodra het vak breed genoeg is). */
-.domeinen{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;container-type:inline-size}
-.domeinen .groep{display:grid;grid-template-columns:minmax(0,1fr);gap:6px}
-.domeinen .groep-naam{font-size:.78rem;color:var(--muted)}
-.domeinen .opties{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-@container (min-width:620px){
-  .domeinen .groep{grid-template-columns:150px minmax(0,1fr);gap:16px;align-items:start;padding-top:10px;border-top:1px solid var(--line)}
-  .domeinen .groep:first-child{border-top:0;padding-top:0}
-  .domeinen .groep-naam{padding-top:12px}
-  .domeinen .opties{grid-template-columns:repeat(3,minmax(0,1fr))}
-}
+/* Domeinkeuze: per groep inklapbaar (standaard dicht); binnen een groep even brede knoppen, 2 per rij (3 als het vak breed genoeg is). */
+.domeinen{display:grid;grid-template-columns:minmax(0,1fr);gap:0;container-type:inline-size;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.domeinen .groep{border-top:1px solid var(--line)}
+.domeinen .groep:first-child{border-top:0}
+.domeinen .groep>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;min-height:44px;padding:0 12px;font-size:.92rem;font-weight:600}
+.domeinen .groep>summary::-webkit-details-marker{display:none}
+.domeinen .groep>summary:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:10px}
+.domeinen .groep-teller{font-weight:600;font-size:.75rem;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:2px 8px}
+.domeinen .groep-teller:empty{display:none}
+.domeinen .pijl{margin-left:auto;width:16px;height:16px;color:var(--muted);transition:transform .15s;transform:rotate(-90deg)}
+.domeinen .groep[open] .pijl{transform:none}
+.domeinen .opties{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:0 12px 12px}
+@container (min-width:620px){ .domeinen .opties{grid-template-columns:repeat(3,minmax(0,1fr))} }
+@media (prefers-reduced-motion:reduce){ .domeinen .pijl{transition:none} }
 .dom{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;min-height:52px;box-sizing:border-box;border:1px solid var(--line);border-radius:10px;padding:6px 12px;font-size:.88rem;line-height:1.25;cursor:pointer;background:var(--surface)}
 .dom .es{font-size:.75rem;color:var(--muted);font-weight:400}
 .dom{position:relative}.dom input{position:absolute;opacity:0;pointer-events:none}
@@ -497,8 +500,8 @@ function tekenPrive() {
   const oudC = $("pCoach").value, oudD = domeinKeuze();
   $("pCoach").innerHTML = `<option value="">Kies een coach</option>` + (D.coaches || []).map((c) => `<option value="${c.id}" ${String(c.id) === oudC ? "selected" : ""}>${esc(c.naam)}</option>`).join("");
   const groepen = (D.themas || []).reduce((g, t) => ((g[t.groep] = g[t.groep] || []).push(t), g), {});
-  $("pDomeinen").innerHTML = Object.entries(groepen).map(([g, ts]) => `<div class="groep"><span class="groep-naam">${esc(g)}</span><div class="opties">${ts.map((t) => { const [nl, es] = splitsNaam(t.naam);
-    return `<label class="dom"><input type="checkbox" value="${t.code}" ${oudD.includes(t.code) ? "checked" : ""}><span>${esc(nl)}</span>${es ? `<span class="es">${esc(es)}</span>` : ""}</label>`; }).join("")}</div></div>`).join("");
+  $("pDomeinen").innerHTML = Object.entries(groepen).map(([g, ts]) => `<details class="groep" data-groep="${esc(g)}" ${DOM_OPEN.has(g) ? "open" : ""}><summary>${esc(g)}<span class="groep-teller"></span><svg class="pijl" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg></summary><div class="opties">${ts.map((t) => { const [nl, es] = splitsNaam(t.naam);
+    return `<label class="dom"><input type="checkbox" value="${t.code}" ${oudD.includes(t.code) ? "checked" : ""}><span>${esc(nl)}</span>${es ? `<span class="es">${esc(es)}</span>` : ""}</label>`; }).join("")}</div></details>`).join("");
   domeinGrens();
   const L = D.aanvragen || [];
   $("pLijst").innerHTML = L.length ? `<div class="aanvragen">${L.map((a) => {
@@ -510,11 +513,15 @@ function tekenPrive() {
       ${a.status === "open" ? `<button type="button" data-act="intrekken" data-id="${a.id}">Aanvraag intrekken</button>` : ""}</article>`; }).join("")}</div>`
     : `<div class="leeg">Nog geen aanvragen.</div>`;
 }
+// Open groepen onthouden zolang de pagina openstaat (standaard alles dicht).
+const DOM_OPEN = new Set();
+document.addEventListener("toggle", (e) => { const d = e.target; if (d.matches && d.matches("#pDomeinen details.groep")) { d.open ? DOM_OPEN.add(d.dataset.groep) : DOM_OPEN.delete(d.dataset.groep); } }, true);
 // "Smash (remate)" → ["Smash", "remate"]: de term tussen haakjes komt als tweede regel.
 function splitsNaam(n) { const m = /^(.*?)\s*\(([^()]+)\)\s*$/.exec(n || ""); return m ? [m[1], m[2]] : [n || "", ""]; }
 function domeinGrens() {
   const n = domeinKeuze().length;
   if ($("pDomTeller")) $("pDomTeller").textContent = n ? `(${n} gekozen)` : "";
+  document.querySelectorAll("#pDomeinen details.groep").forEach((d) => { const k = d.querySelectorAll("input:checked").length; d.querySelector(".groep-teller").textContent = k ? `${k} gekozen` : ""; });
   document.querySelectorAll("#pDomeinen input").forEach((i) => { i.disabled = !i.checked && n >= 3; });
 }
 async function verstuurAanvraag() {
@@ -526,7 +533,7 @@ async function verstuurAanvraag() {
   try {
     const j = await rpc("club_les_aanvraag", { p_trainer: coach, p_themas: dom, p_bericht: $("pBericht").value, p_akkoord: true });
     if (j.fout) { melding("Aanvraag lukte niet: " + j.fout + ".", "fout"); return; }
-    $("pBericht").value = ""; $("pAkkoord").checked = false; document.querySelectorAll("#pDomeinen input").forEach((i) => { i.checked = false; });
+    $("pBericht").value = ""; $("pAkkoord").checked = false; document.querySelectorAll("#pDomeinen input").forEach((i) => { i.checked = false; }); domeinGrens();
     melding("Aanvraag verstuurd. Je coach neemt contact met je op.", "ok"); await laad();
   } finally { $("pVerstuur").disabled = false; }
 }
