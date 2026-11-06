@@ -52,9 +52,68 @@
   }
   window.BTC = { token: lees(SLEUTEL), naarLogin: naarLogin, afmelden: afmelden, voorbeeldBalk: voorbeeldBalk, voorbeeldStop: voorbeeldStop };
   if (window.BTC_START) return;            // startpagina: zelf aanmelden, balk via club_mij
-  if (window.BTC_PUBLIEK) { if (window.BTC.token) { voorbeeldBalk(lees(VB)); zijbalk(); } }  // publieke pagina: geen doorverwijzing
+  if (window.BTC_PUBLIEK) { kop(); if (window.BTC.token) { voorbeeldBalk(lees(VB)); zijbalk(); } }  // publieke pagina: geen doorverwijzing
   else if (!window.BTC.token) naarLogin();
-  else { voorbeeldBalk(lees(VB)); zijbalk(); }
+  else { kop(); voorbeeldBalk(lees(VB)); zijbalk(); }
+
+  /* Eén kop voor alle onderliggende pagina's, in de stijl van de startpagina: lichtblauwe band over de volle
+     breedte, logo, "← Mijn padel", paginatitel, naam en Afmelden. De oude kop van de pagina wordt verborgen;
+     paginagebonden info (status, telvenster, tornooigegevens) verhuist naar de nieuwe kop. */
+  function kop() {
+    var klaar = function () {
+      var oud = document.querySelector("body > header, body > .wrap > header, body > .wrap > .top");
+      if (!oud) return;
+      var h1 = oud.querySelector("h1");
+      var band = document.createElement("header"); band.className = "btc-band";
+      band.innerHTML = '<div class="btc-band-wrap"><a class="btc-band-logo" href="../" aria-label="Naar Mijn padel"><img src="../app/logo-btc.jpg" alt=""></a>' +
+        '<div class="btc-band-tekst"><p class="btc-band-terug"><a href="../">← Mijn padel</a></p><h1 class="btc-band-titel"></h1><div class="btc-band-meta"></div></div>' +
+        '<div class="btc-band-wie" hidden><span class="btc-band-naam"></span><button type="button" class="btc-band-af">Afmelden</button></div></div>';
+      var titel = band.querySelector(".btc-band-titel");
+      var zetTitel = function () { titel.textContent = h1 ? h1.textContent.trim() : document.title; };
+      zetTitel();
+      if (h1 && window.MutationObserver) new MutationObserver(zetTitel).observe(h1, { childList: true, characterData: true, subtree: true });
+      var meta = band.querySelector(".btc-band-meta");
+      ["#status", ".meta", "#naarLijst"].forEach(function (sel) {
+        var el = oud.querySelector(sel); if (el && !meta.contains(el)) meta.appendChild(el);
+      });
+      oud.classList.add("btc-oude-kop");
+      var terug = document.querySelector("body > .wrap > nav.terug"); if (terug) terug.classList.add("btc-oude-kop");
+      document.body.insertBefore(band, document.body.firstChild);
+      // De band loopt altijd van rand tot rand, ook als de pagina zelf rond de body een marge of padding heeft.
+      var cs = getComputedStyle(document.body);
+      band.style.marginTop = "-" + (parseFloat(cs.paddingTop) + parseFloat(cs.marginTop)) + "px";
+      band.style.marginLeft = "-" + (parseFloat(cs.paddingLeft) + parseFloat(cs.marginLeft)) + "px";
+      band.style.marginRight = "-" + (parseFloat(cs.paddingRight) + parseFloat(cs.marginRight)) + "px";
+      band.querySelector(".btc-band-af").addEventListener("click", afmelden);
+      if (lees(SLEUTEL)) {
+        fetch(API + "club_mij", { method: "POST", headers: { apikey: KEY, Authorization: "Bearer " + KEY, "Content-Type": "application/json" }, body: JSON.stringify({ p_token: lees(SLEUTEL) }) })
+          .then(function (r) { return r.json(); })
+          .then(function (m) { if (m && m.naam) { band.querySelector(".btc-band-naam").textContent = m.naam; band.querySelector(".btc-band-wie").hidden = false; } })
+          .catch(function () {});
+      }
+      var st = document.createElement("style");
+      st.textContent = ":root{--btc-band:#DFE7EE;--btc-band-fg:#152B46;--btc-band-groen:#435B28;--btc-band-muted:#55657A}" +
+        "@media (prefers-color-scheme:dark){:root:not([data-theme=\"light\"]){--btc-band:#1B3554;--btc-band-fg:#F3F1E9;--btc-band-groen:#C5E75A;--btc-band-muted:#A3B1C1}}" +
+        ":root[data-theme=\"dark\"]{--btc-band:#1B3554;--btc-band-fg:#F3F1E9;--btc-band-groen:#C5E75A;--btc-band-muted:#A3B1C1}" +
+        ".btc-oude-kop{display:none!important}" +
+        ".btc-band{display:block;box-sizing:border-box;align-self:stretch;background:var(--btc-band);color:var(--btc-band-fg);font:15px/1.5 Montserrat,system-ui,sans-serif;margin-bottom:20px}" +
+        ".btc-band-wrap{max-width:1360px;margin:0 auto;display:flex;gap:16px;align-items:center;padding:20px max(16px,env(safe-area-inset-right,0px)) 22px max(16px,env(safe-area-inset-left,0px))}" +
+        ".btc-band-logo img{display:block;width:50px;height:auto;background:#fff;border-radius:4px;padding:4px}" +
+        ".btc-band-tekst{flex:1;min-width:0}" +
+        ".btc-band-terug{margin:0 0 6px;font-size:12px;letter-spacing:.2em;text-transform:uppercase}" +
+        ".btc-band-terug a{color:var(--btc-band-groen);text-decoration:none;font-weight:600}.btc-band-terug a:hover{text-decoration:underline}" +
+        ".btc-band-titel{font:800 clamp(22px,5vw,40px)/.95 'League Spartan','Arial Narrow',Arial,sans-serif;margin:0;text-transform:uppercase;color:var(--btc-band-fg);letter-spacing:0;overflow-wrap:anywhere;hyphens:auto}" +
+        ".btc-band-titel::after{content:'';display:block;width:28px;height:3px;background:#C5E75A;border-radius:2px;margin-top:8px}" +
+        ".btc-band-meta{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:8px;font-size:13px;color:var(--btc-band-muted)}.btc-band-meta:empty{display:none}" +
+        ".btc-band-meta .wie,.btc-band-meta #wie{display:none!important}.btc-band-meta .meta{display:flex;flex-wrap:wrap;gap:4px 14px;margin:0}" +
+        ".btc-band-meta a{color:var(--btc-band-groen);font-weight:600}" +
+        ".btc-band-wie{font-size:14px;text-align:right;display:grid;gap:4px;justify-items:end}" +
+        ".btc-band-af{background:none;border:0;padding:0;font:600 14px Montserrat,system-ui,sans-serif;color:var(--btc-band-groen);text-decoration:underline;cursor:pointer}" +
+        "@media (max-width:560px){.btc-band-wrap{flex-wrap:wrap}.btc-band-wie{text-align:left;justify-items:start;width:100%}}";
+      document.head.appendChild(st);
+    };
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", klaar); else setTimeout(klaar, 0);
+  }
 
   /* Pc-indeling voor de onderliggende pagina's (vanaf 1024 px, enkel aangemeld):
      links altijd Mijn padel en Clubkalender (360 px), rechts de pagina zelf. Op smallere schermen
