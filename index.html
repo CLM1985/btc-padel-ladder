@@ -89,7 +89,8 @@ a{color:var(--title2)}
   body.aangemeld [data-kl].dicht>.kl-kop>.kl-knop svg{transform:rotate(-90deg)}
   body.aangemeld [data-kl].dicht>:not(.kl-kop){display:none!important}
   body.aangemeld [data-kl].dicht{flex:0 0 auto!important}
-  body.aangemeld [data-kl].dicht>.kl-kop .inst-uitleg{display:none}
+  body.aangemeld [data-kl].dicht>.kl-kop .inst-uitleg,body.aangemeld [data-kl].dicht>.kop p{display:none}
+  body.aangemeld [data-kl].dicht>.kop img{width:28px;height:28px;border-radius:7px}
   body.aangemeld .inst-deel>.kl-kop{cursor:pointer}
 }
 @media (min-width:1024px) and (prefers-reduced-motion:reduce){ .kl-knop svg{transition:none} }
@@ -263,6 +264,11 @@ a.wk.thuis{background:#DCE4D2;border-color:var(--accent)}
     <div class="knoppen"><button class="doe" type="button" id="meldAan" hidden>Meldingen aanzetten</button><button class="later" type="button" id="meldTest" hidden>Stuur een testmelding</button><button class="later" type="button" id="meldUit" hidden>Meldingen uitzetten</button></div>
     <p class="err" id="meldFout" role="alert"></p>
   </div>
+    <div class="inst-deel app" id="app" hidden aria-labelledby="appTitel" data-kl="inst-app">
+      <div class="kop kl-kop"><img src="app/apple-touch-icon.png" alt=""><div><b id="appTitel">BTC Padel als app</b><p>Zet de clubsite op je beginscherm: opent met één tik, zonder adresbalk.</p></div></div>
+      <div id="appUitleg"></div>
+      <div class="knoppen"><button class="doe" type="button" id="appInstalleer" hidden>Installeren</button><button class="later" type="button" id="appLater">Niet nu</button></div>
+    </div>
     <div class="inst-deel">
       <p class="inst-titel" id="themaTitel">Kleurmodus</p>
       <div class="tegels" role="radiogroup" aria-labelledby="themaTitel" id="thema">
@@ -270,11 +276,6 @@ a.wk.thuis{background:#DCE4D2;border-color:var(--accent)}
       <button type="button" class="tegel" data-thema="donker" role="radio" aria-label="Donker"><span class="ring"><svg class="bal" viewBox="0 0 56 56" aria-hidden="true"><circle cx="28" cy="28" r="25" fill="#152B46" stroke="#C5E75A" stroke-width="2"/><path d="M8 13c6 5 6 25 0 30M48 13c-6 5-6 25 0 30" fill="none" stroke="#C5E75A" stroke-width="2.6" stroke-linecap="round"/></svg></span><span class="tl">Donker</span></button>
       <button type="button" class="tegel" data-thema="auto" role="radio" aria-label="Systeem"><span class="ring"><svg class="bal" viewBox="0 0 56 56" aria-hidden="true"><defs><clipPath id="balLinks"><rect x="0" y="0" width="28" height="56"/></clipPath><clipPath id="balRechts"><rect x="28" y="0" width="28" height="56"/></clipPath></defs><g clip-path="url(#balLinks)"><circle cx="28" cy="28" r="25" fill="#F3F1E9"/><path d="M8 13c6 5 6 25 0 30M48 13c-6 5-6 25 0 30" fill="none" stroke="#435B28" stroke-width="2.6" stroke-linecap="round"/></g><g clip-path="url(#balRechts)"><circle cx="28" cy="28" r="25" fill="#152B46"/><path d="M8 13c6 5 6 25 0 30M48 13c-6 5-6 25 0 30" fill="none" stroke="#C5E75A" stroke-width="2.6" stroke-linecap="round"/></g><circle cx="28" cy="28" r="25" fill="none" stroke="#7D8A6A" stroke-width="2"/></svg></span><span class="tl">Systeem</span></button>
     </div>
-    </div>
-    <div class="inst-deel app" id="app" hidden aria-labelledby="appTitel">
-      <div class="kop"><img src="app/apple-touch-icon.png" alt=""><div><b id="appTitel">BTC Padel als app</b><p>Zet de clubsite op je beginscherm: opent met één tik, zonder adresbalk.</p></div></div>
-      <div id="appUitleg"></div>
-      <div class="knoppen"><button class="doe" type="button" id="appInstalleer" hidden>Installeren</button><button class="later" type="button" id="appLater">Niet nu</button></div>
     </div>
   </section>
   </div>
@@ -341,7 +342,7 @@ async function toonMenu(){
 // Inklapbare kaarten op pc (Mijn padel, Clubkalender, Instellingen, app, Beheer, Bekijk als). Toestand per toestel.
 (function(){
   // Standaard dicht: Beheer, Bekijk als en de drie onderdelen binnen Instellingen. Daarna onthoudt elk toestel de keuze per kaart.
-  const STANDAARD_DICHT=["beheer","voorbeeld","inst-dagen","inst-agenda","inst-meld"];
+  const STANDAARD_DICHT=["beheer","voorbeeld","inst-dagen","inst-agenda","inst-meld","inst-app"];
   let staat={}; try{ staat=JSON.parse(localStorage.getItem("btc-kl")||"null")||{}; }catch(e){ staat={}; }
   try{ const oud=JSON.parse(localStorage.getItem("btc-dicht")||"null"); if(Array.isArray(oud)&&!Object.keys(staat).length) ["week","kalender","instellingen","app","beheer","voorbeeld"].forEach(x=>staat[x]=oud.includes(x)); }catch(e){}
   const isDicht=id=>(id in staat)?!!staat[id]:STANDAARD_DICHT.includes(id);
